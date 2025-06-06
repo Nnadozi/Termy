@@ -1,5 +1,7 @@
 import CustomText from "@/components/CustomText";
+import Constants from 'expo-constants';
 import { View } from "react-native";
+
 export default function Index() {
   return (
     <View className="flex-1 justify-center items-center">
@@ -7,6 +9,7 @@ export default function Index() {
       <CustomText fontSize="large">Hi this is text</CustomText>
       <CustomText fontSize="normal">Hi this is text</CustomText>
       <CustomText fontSize="small">Hi this is text</CustomText>
+      <CustomText fontSize="small" color="gray">Version {Constants.expoConfig?.version}</CustomText>
     </View>
   );
 }
