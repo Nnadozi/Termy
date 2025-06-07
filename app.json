@@ -14,9 +14,10 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FF6A00"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.nnadozi.Termy"
     },
     "web": {
       "bundler": "metro",
@@ -29,23 +30,36 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "imageWidth": 1000,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#FF6A00"
         }
       ],
       [
         "expo-font",
         {
           "fonts": [
-            "./assets/fonts/Lato-Regular.ttf",
-            "./assets/fonts/Lato-Bold.ttf"
+            "./assets/fonts/DMSans-Regular.ttf",
+            "./assets/fonts/DMSans-Bold.ttf"
           ]
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Allow Termy to access your Face ID biometric data."
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3f69e2d6-5620-4b05-a7c5-c9771c732a84"
+      }
     }
   }
 }

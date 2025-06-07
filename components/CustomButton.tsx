@@ -1,19 +1,29 @@
+import { Button } from '@rneui/base';
 import React from 'react';
-import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
-import CustomText from './CustomText';
+import { StyleSheet, ViewStyle } from 'react-native';
 
 interface CustomButtonProps {
     title: string;
     onPress: () => void;
     style?: ViewStyle;
     disabled?: boolean;
+    width?:any
+    marginVertical?:any
 }
 
-const CustomButton = ({title, onPress, style, disabled}:CustomButtonProps) => {
+const CustomButton = ({title, onPress, style, disabled, width, marginVertical}:CustomButtonProps) => {
   return (
-    <TouchableOpacity disabled={disabled} onPress={onPress} style = {[styles.con, style]}>
-      <CustomText>{title}</CustomText>
-    </TouchableOpacity> 
+    <Button
+    title={title}
+    onPress={onPress}
+    disabled={disabled}
+    buttonStyle={[styles.con, style, 
+      {width: width ? width : '100%', alignSelf:'center'},
+      {marginVertical: marginVertical ? marginVertical : 0}
+    ]}
+    titleStyle={{fontFamily:'DMSans-Bold', fontSize:16, color:'white'}}
+    containerStyle={{width: width ? width : '100%'}}
+    />
   )
 }
 
@@ -23,6 +33,8 @@ const styles = StyleSheet.create({
     con:{
         justifyContent:"center",
         alignItems:"center",
-        paddingVertical:"3%",
+        padding:"3.5%",
+        borderRadius:100,
+        backgroundColor:"black",
     }
 })

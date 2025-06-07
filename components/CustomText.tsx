@@ -13,7 +13,7 @@ interface CustomTextProps {
     onPress?: () => void;
 }
 
-const fontSizes = {small: 16, normal: 20, large: 24, XL: 32};
+const fontSizes = {small: 12, normal: 17, large: 25, XL: 30};
 
 const CustomText = ({children, style, onPress, color, fontSize = 'normal', bold, opacity, textAlign, numberOfLines}:CustomTextProps) => {
   return (
@@ -25,7 +25,7 @@ const CustomText = ({children, style, onPress, color, fontSize = 'normal', bold,
         opacity,
         textAlign,
         fontSize: fontSizes[fontSize],
-        fontFamily: bold ? 'Lato-Bold' : 'Lato-Regular'
+        fontFamily: bold ? 'DMSans-Bold' : 'DMSans-Regular'
       }
     ]}>
       {children}
