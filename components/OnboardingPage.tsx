@@ -1,3 +1,4 @@
+import { useTheme } from '@react-navigation/native'
 import { router } from 'expo-router'
 import React from 'react'
 import { Dimensions, StyleSheet, View, ViewStyle } from 'react-native'
@@ -16,16 +17,18 @@ interface OnboardingPageProps {
     nextPage: any
     style?: ViewStyle
     disableNext?: boolean
+    customOnPress?: () => void
 }
 
-const OnboardingPage = ({children, progress, title, subTitle, nextPage, style, disableNext}:OnboardingPageProps) => {
+const OnboardingPage = ({children, progress, title, subTitle, nextPage, style, disableNext, customOnPress}:OnboardingPageProps) => {
+   const {colors} = useTheme();
   return (
     <Page >
         <View style={styles.topPortion}>
             <View style = {styles.topRow}>
                 <CustomIcon name='chevron-left' onPress={() => router.back()} />
                 <Progress.Bar 
-                color='black' progress={progress} 
+                color={colors.primary} progress={progress} 
                 width={Dimensions.get('window').width - 70} 
                 height={Dimensions.get('window').height * 0.015}
                 borderRadius={100}
@@ -38,7 +41,7 @@ const OnboardingPage = ({children, progress, title, subTitle, nextPage, style, d
             {children}
         </View>
         <View style={styles.bottomPortion}>
-            <CustomButton disabled={disableNext} title={progress == 1 ? 'Lets Go' : 'Next'} onPress={() => router.navigate(nextPage)} />
+            <CustomButton disabled={disableNext} title={progress == 1 ? 'Lets Go' : 'Next'} onPress={() => customOnPress ? customOnPress() : router.navigate(nextPage)} />
         </View>
         {progress == 1 && (
         <ConfettiCannon

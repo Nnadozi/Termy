@@ -2,29 +2,33 @@ import ColorPickerModal from '@/components/ColorPickerModal'
 import CustomInput from '@/components/CustomInput'
 import CustomText from '@/components/CustomText'
 import OnboardingPage from '@/components/OnboardingPage'
+import useUserStore from '@/stores/userStore'
 import { Avatar } from '@rneui/base'
+import { router } from 'expo-router'
 import leoProfanity from 'leo-profanity'
 import React, { useState } from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const ProfileSetup = () => {
   const [username, setUsername] = useState("")
-  const [avatarColor, setAvatarColor] = useState("#FF0000")
-  const [firstLetter, setFirstLetter] = useState("A")
+  const [avatarColor, setAvatarColor] = useState("#FF6A00")
   const [showColorPicker, setShowColorPicker] = useState(false)
-
-  const handleColorSelect = (color: string) => {
-    setAvatarColor(color)
-  }
+  const { setUserName, setAvatarColor: setAvatarColorStore, completeOnboarding } = useUserStore()
 
   const isValidUsername = (str: string) => {
-    const allowedCharsRegex = /^[a-zA-Z0-9 ]*$/; 
-    const hasOnlyAllowedChars = allowedCharsRegex.test(str);
-    const hasNoEmoji = !/\p{Emoji}/u.test(str); 
-    const hasNoProfanity = !leoProfanity.check(str);
-    return str.length > 0 && hasOnlyAllowedChars && hasNoEmoji && hasNoProfanity;
-  };
+    return str.length > 0 && 
+           /^[a-zA-Z0-9 ]*$/.test(str) && 
+           !/\p{Emoji}/u.test(str) && 
+           !leoProfanity.check(str)
+  }
 
+  const setUpProfile = () => {
+    setUserName(username)
+    setAvatarColorStore(avatarColor)
+    completeOnboarding()
+    console.log("Profile setup complete")
+    router.navigate("/(onboarding)/Finish")
+  }
 
   return (
     <OnboardingPage
@@ -32,51 +36,46 @@ const ProfileSetup = () => {
       title="Create a Profile"
       subTitle="Set your username and avatar"
       nextPage="/(onboarding)/Finish"
-      style={styles.mainCon}
+      style={styles.container}
       disableNext={!isValidUsername(username)}
+      customOnPress={setUpProfile}
     >
       <View style={styles.avatarContainer}>
         <TouchableOpacity onPress={() => setShowColorPicker(true)}>
           <Avatar 
             size={150} 
             rounded 
-            title={firstLetter}
-            containerStyle={{alignSelf:"center", backgroundColor: avatarColor}} 
+            title={username.charAt(0).toUpperCase() || "A"}
+            containerStyle={{ alignSelf: "center", backgroundColor: avatarColor }} 
           />
         </TouchableOpacity>
-        <CustomText style={{marginTop:"3%"}}>Tap to change color</CustomText>
+        <CustomText style={styles.tapText}>Tap to change color</CustomText>
       </View>
       
       <CustomText textAlign='center' bold>What should we call you?</CustomText>
       <CustomInput
         placeholder="Enter your username"
-        onChangeText={(text) => {
-          setUsername(text)
-          setFirstLetter(text.charAt(0).toUpperCase())
-        }}
+        onChangeText={setUsername}
         value={username}
-        maxLength={15}
+        maxLength={20}
       />
-      <View style = {{gap:10, marginTop:"1%"}}>
-        <CustomText> • No special characters </CustomText>
-        <CustomText> • No emojus </CustomText>
-        <CustomText> • No profanity </CustomText>
+      <View style={styles.rulesContainer}>
+        <CustomText>• No special characters</CustomText>
+        <CustomText>• No emojis</CustomText>
+        <CustomText>• No profanity</CustomText>
       </View>
-      
       <ColorPickerModal
         visible={showColorPicker}
         onClose={() => setShowColorPicker(false)}
-        onColorSelect={handleColorSelect}
+        onColorSelect={setAvatarColor}
         initialColor={avatarColor}
       />
     </OnboardingPage>
   )
 }
 
-export default ProfileSetup
-
 const styles = StyleSheet.create({
-  mainCon: {
+  container: {
     justifyContent: "flex-start",
     alignItems: "flex-start",
     marginTop: "10%",
@@ -86,5 +85,14 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: "5%",
   },
-
+  tapText: {
+    marginTop: "3%"
+  },
+  rulesContainer: {
+    gap: 10,
+    marginTop: "1%"
+  }
 })
+
+export default ProfileSetup
+

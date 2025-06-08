@@ -1,3 +1,4 @@
+import { useTheme } from '@react-navigation/native';
 import { Button } from '@rneui/base';
 import React from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
@@ -12,6 +13,7 @@ interface CustomButtonProps {
 }
 
 const CustomButton = ({title, onPress, style, disabled, width, marginVertical}:CustomButtonProps) => {
+  const {colors} = useTheme();
   return (
     <Button
     title={title}
@@ -19,9 +21,10 @@ const CustomButton = ({title, onPress, style, disabled, width, marginVertical}:C
     disabled={disabled}
     buttonStyle={[styles.con, style, 
       {width: width ? width : '100%', alignSelf:'center'},
-      {marginVertical: marginVertical ? marginVertical : 0}
+      {marginVertical: marginVertical ? marginVertical : 0},
+      {backgroundColor: colors.primary}
     ]}
-    titleStyle={{fontFamily:'DMSans-Bold', fontSize:16, color:'white'}}
+    titleStyle={{fontFamily:'DMSans-Bold', fontSize:16, color: colors.background}}
     containerStyle={{width: width ? width : '100%'}}
     />
   )

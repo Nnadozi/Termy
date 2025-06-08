@@ -1,3 +1,4 @@
+import { useTheme } from '@react-navigation/native';
 import React from 'react';
 import { Text, TextStyle } from 'react-native';
 
@@ -11,17 +12,20 @@ interface CustomTextProps {
     textAlign?: 'auto' | 'left' | 'right' | 'center' | 'justify';
     numberOfLines?: number;
     onPress?: () => void;
+    primary?: boolean;
 }
 
 const fontSizes = {small: 12, normal: 17, large: 25, XL: 30};
 
-const CustomText = ({children, style, onPress, color, fontSize = 'normal', bold, opacity, textAlign, numberOfLines}:CustomTextProps) => {
+const CustomText = ({children, style, onPress, color, fontSize = 'normal', bold, opacity, textAlign,primary, numberOfLines}:CustomTextProps) => {
+  const {colors} = useTheme();
   return (
     <Text 
+    numberOfLines={numberOfLines}
     onPress={onPress} 
     style={[style, 
       {
-        color,
+        color: color ? color : primary ? colors.primary : colors.text,
         opacity,
         textAlign,
         fontSize: fontSizes[fontSize],

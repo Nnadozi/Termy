@@ -1,3 +1,5 @@
+import { useThemeStore } from "@/stores/themeStore";
+import { ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
@@ -7,6 +9,7 @@ import Toast from 'react-native-toast-message';
 import "../global.css";
 
 export default function RootLayout() {
+  const { isDark, colors } = useThemeStore(); 
   const [loaded, error] = useFonts({
     'DMSans-Regular': require('../assets/fonts/DMSans-Regular.ttf'),
     'DMSans-Bold': require('../assets/fonts/DMSans-Bold.ttf'),
@@ -24,10 +27,13 @@ export default function RootLayout() {
 
   return (
     <>
-      <StatusBar style="auto"/>
-      <Stack screenOptions={{headerShown: false}}>
-        <Stack.Screen name="(onboarding)" />
-      </Stack>
+      <StatusBar style={isDark ? 'light' : 'dark'}/>
+      <ThemeProvider value={colors}> 
+        <Stack screenOptions={{headerShown: false, gestureEnabled: false}}>
+          <Stack.Screen name="(onboarding)" />
+          <Stack.Screen name="(main)" />
+        </Stack>  
+      </ThemeProvider>
       <Toast />
     </>
   );

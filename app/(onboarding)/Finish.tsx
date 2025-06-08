@@ -5,11 +5,11 @@ const Finish = () => {
   return (
     <OnboardingPage
       progress={1}
-      title="Finish"
+      title="Onboarding Finished"
       subTitle="You're all set up -  enjoy Termy!"
-      nextPage="/(main)/Home"
+      nextPage="/(main)/Daily"
     >
-      <CustomIcon name='celebration' type='material' size={200} color='black' />
+      <CustomIcon name='celebration' type='material' size={200}  />
     </OnboardingPage>
   )
 }

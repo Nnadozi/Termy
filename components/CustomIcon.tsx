@@ -1,3 +1,4 @@
+import { useTheme } from '@react-navigation/native';
 import { Icon } from '@rneui/base';
 import React from 'react';
 import { StyleSheet, TextStyle } from 'react-native';
@@ -9,12 +10,14 @@ interface CustomIconProps {
   color?: string;
   style?: TextStyle;
   onPress?: () => void;
+  primary?: boolean;
 }
 
-const CustomIcon = ({ color = "black", size = 30, name, type, onPress, style }: CustomIconProps) => {
+const CustomIcon = ({ color, size = 30, name, type, onPress, style, primary }: CustomIconProps) => {
+  const {colors} = useTheme();
   return (
     <Icon
-      color={color}
+      color={color ? color : primary ? colors.primary : colors.text}
       name={name}
       type={type}
       size={size} 

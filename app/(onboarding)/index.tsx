@@ -1,11 +1,16 @@
 import CustomButton from "@/components/CustomButton";
 import CustomText from "@/components/CustomText";
 import Page from "@/components/Page";
-import { router } from "expo-router";
+import useUserStore from "@/stores/userStore";
+import { Redirect, router } from "expo-router";
 import React from "react";
 import { Image, StyleSheet } from "react-native";
 
 const Welcome = () => {
+  const { isOnboardingComplete } = useUserStore()
+  if (isOnboardingComplete) {
+    return <Redirect href="/(main)/Daily" />
+  }
   return (
     <Page>
       <Image resizeMode="contain" source={require("../../assets/images/icon.png")} style={styles.image} />

@@ -1,6 +1,7 @@
 import CustomText from '@/components/CustomText'
 import OnboardingPage from '@/components/OnboardingPage'
 import React from 'react'
+
 const Intro = () => {
   return (
     <OnboardingPage
