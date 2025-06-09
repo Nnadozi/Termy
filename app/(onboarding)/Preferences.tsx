@@ -1,39 +1,32 @@
 import CustomText from '@/components/CustomText'
 import OnboardingPage from '@/components/OnboardingPage'
 import React from 'react'
+import { StyleSheet } from 'react-native'
 
 const Preferences = () => {
   return (
     <OnboardingPage
       progress={0.5}
-      title="Setup Preferences"
+      title="Set Preferences"
       subTitle="Personalize your experience"
       nextPage="/(onboarding)/ProfileSetup"
+      style={styles.container}
     >
-      <CustomText>
-        Preferences
-      </CustomText>
+      <CustomText bold>Daily Word Goal:</CustomText>
+      <CustomText bold>Enable Notifications</CustomText>
+      <CustomText bold>Take Vocabulary Placement Test (CEFR levels?)</CustomText>
+      <CustomText bold>Theme</CustomText>
     </OnboardingPage>
   )
 }
 
 export default Preferences
 
-/**
- * 
- * Keep it simple. 2–3 steps max.
+const styles = StyleSheet.create({
+  container: {
+  justifyContent: "flex-start",
+  alignItems: "flex-start",
+  marginTop: "5%",
+  }
+})
 
-Step 1: Daily Goal
-
-Default to 3 words/day
-
-Allow selection: 3, 5, 10 (if premium, restrict upper limit with upsell prompt)
-
-Step 2: Quiz Difficulty
-
-Option to choose: Easy / Normal / Hard (or skip)
-
-Step 3: Notification Opt-in
-
-Friendly prompt: “Want a gentle nudge to learn every day?”
- */

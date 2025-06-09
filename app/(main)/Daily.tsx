@@ -8,7 +8,7 @@ const Daily = () => {
   const {userName} = useUserStore()
   return (
     <Page style={{justifyContent:"flex-start", alignItems:"flex-start"}}>
-      <View style={{width:"100%", marginBottom:"5%"}}>
+      <View style={{width:"100%", marginBottom:"3%"}}>
         <CustomText fontSize='XL' bold>Hi, {userName}</CustomText>
         <CustomText primary bold>Here's your daily vocabulary</CustomText>
       </View>

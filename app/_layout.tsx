@@ -8,6 +8,11 @@ import React, { useEffect } from "react";
 import Toast from 'react-native-toast-message';
 import "../global.css";
 
+SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({
+  fade: true,
+});
+
 export default function RootLayout() {
   const { isDark, colors } = useThemeStore(); 
   const [loaded, error] = useFonts({
@@ -32,6 +37,8 @@ export default function RootLayout() {
         <Stack screenOptions={{headerShown: false, gestureEnabled: false}}>
           <Stack.Screen name="(onboarding)" />
           <Stack.Screen name="(main)" />
+          <Stack.Screen name="Quiz" />
+          <Stack.Screen name="PlacementTest" />
         </Stack>  
       </ThemeProvider>
       <Toast />

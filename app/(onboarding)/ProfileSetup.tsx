@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: "flex-start",
     alignItems: "flex-start",
-    marginTop: "10%",
+    marginTop: "5%",
   },
   avatarContainer: {
     alignItems: "center",

@@ -24,8 +24,8 @@ const CustomButton = ({title, onPress, style, disabled, width, marginVertical}:C
       {marginVertical: marginVertical ? marginVertical : 0},
       {backgroundColor: colors.primary}
     ]}
-    titleStyle={{fontFamily:'DMSans-Bold', fontSize:16, color: colors.background}}
-    containerStyle={{width: width ? width : '100%'}}
+    titleStyle={{fontFamily:'DMSans-Bold', fontSize:16, color: colors.background, textAlign:"center",width:"100%"}}
+    containerStyle={{width: width ? width : '100%', alignSelf:'center'}}
     />
   )
 }

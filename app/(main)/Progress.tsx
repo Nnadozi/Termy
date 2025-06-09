@@ -6,7 +6,7 @@ import { View } from 'react-native'
 const Progress = () => {
   return (
     <Page style={{justifyContent:"flex-start", alignItems:"flex-start"}}>
-      <View style={{width:"100%", marginBottom:"5%"}}>
+      <View style={{width:"100%", marginBottom:"3%"}}>
         <CustomText fontSize='XL' bold>Progress</CustomText>
       </View>
       <CustomText>Words learned, quizzes taken, streaks, etc.</CustomText>
