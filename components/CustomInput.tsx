@@ -1,6 +1,6 @@
 import { useTheme } from '@react-navigation/native';
 import React from 'react';
-import { DimensionValue, StyleSheet, TextInput, TextStyle } from 'react-native';
+import { DimensionValue, KeyboardTypeOptions, StyleSheet, TextInput, TextStyle } from 'react-native';
 
 interface CustomInputProps {
     placeholder: string;
@@ -9,9 +9,10 @@ interface CustomInputProps {
     style?: TextStyle;
     width?: DimensionValue;
     maxLength?: number;
+    keyboardType?: KeyboardTypeOptions;
 }
 
-const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength}:CustomInputProps) => {
+const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength, keyboardType}:CustomInputProps) => {
   const {colors} = useTheme();
   return (
     <TextInput
@@ -23,9 +24,10 @@ const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength}
       {color: colors.text},
       {borderColor: colors.border}
     ]}
-    placeholderTextColor={colors.text}
+    placeholderTextColor={"darkgray"}
     maxLength={maxLength}
     cursorColor={colors.text}
+    keyboardType={keyboardType}
     />
   )
 }

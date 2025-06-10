@@ -8,7 +8,7 @@ import { Image, StyleSheet } from "react-native";
 
 const Welcome = () => {
   const { isOnboardingComplete } = useUserStore()
-  if (isOnboardingComplete) {
+  if (!isOnboardingComplete) {
     return <Redirect href="/(main)/Daily" />
   }
   return (
@@ -31,15 +31,3 @@ const styles = StyleSheet.create({
   }
 })
 
-/**
- * 
- * Purpose: Quick intro and brand hook.
-
-Content:
-
-App name/logo
-
-1-sentence hook: “Master real vocabulary. Daily.”
-
-“Get Started” button
- */
