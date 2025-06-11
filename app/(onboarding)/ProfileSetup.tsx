@@ -17,9 +17,8 @@ const ProfileSetup = () => {
 
   const isValidUsername = (str: string) => {
     return str.length > 0 && 
-           /^[a-zA-Z0-9 ]*$/.test(str) && 
-           !/\p{Emoji}/u.test(str) && 
-           !leoProfanity.check(str)
+         /^[a-zA-Z0-9]*$/.test(str) && 
+         !leoProfanity.check(str);
   }
 
   const setUpProfile = () => {
@@ -54,10 +53,11 @@ const ProfileSetup = () => {
       
       <CustomText textAlign='center' bold>What should we call you?</CustomText>
       <CustomInput
-        placeholder="Enter your username"
+        placeholder="Enter your username (ex: Zixon77)"
         onChangeText={setUsername}
         value={username}
         maxLength={20}
+        keyboardType="default"
       />
       <View style={styles.rulesContainer}>
         <CustomText>• No special characters</CustomText>

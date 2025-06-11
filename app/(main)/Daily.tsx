@@ -1,6 +1,8 @@
+import CustomButton from '@/components/CustomButton'
 import CustomText from '@/components/CustomText'
 import Page from '@/components/Page'
 import useUserStore from '@/stores/userStore'
+import { router } from 'expo-router'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 
@@ -13,6 +15,7 @@ const Daily = () => {
         <CustomText primary bold>Here's your daily vocabulary</CustomText>
       </View>
       <CustomText>Test</CustomText>
+      <CustomButton title="Onboarding" onPress={() => router.navigate("/(onboarding)/Intro")} />
     </Page>
   )
 }

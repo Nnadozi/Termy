@@ -8,7 +8,7 @@ import { Image, StyleSheet } from "react-native";
 
 const Welcome = () => {
   const { isOnboardingComplete } = useUserStore()
-  if (!isOnboardingComplete) {
+  if (isOnboardingComplete) {
     return <Redirect href="/(main)/Daily" />
   }
   return (

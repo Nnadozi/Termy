@@ -50,6 +50,13 @@
           "configureAndroidBackup": true,
           "faceIDPermission": "Allow Termy to access your Face ID biometric data."
         }
+      ],
+      [
+        "expo-sqlite",
+        {
+          "enableFTS": true,
+          "useSQLCipher": true
+        }
       ]
     ],
     "experiments": {

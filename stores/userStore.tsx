@@ -2,12 +2,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
+export const allWordTopics = [
+  "SAT", "ACT","Science", "Mathematics", "History", "Literature", 
+  "Psychology", "Philosophy", "Economics","Business", "Technology",
+  "Medicine", "Law","Art", "Music", "Sports","Travel", 
+  "Health & Fitness","General"
+]
+
 interface UserState {
   userName: string
   avatarColor: string
   isOnboardingComplete: boolean
   dailyWordGoal: number
   notificationsEnabled: boolean
+  wordTopics: string[]
 }
 
 interface UserActions {
@@ -16,6 +24,7 @@ interface UserActions {
   setDailyWordGoal: (goal: number) => void
   setNotificationsEnabled: (enabled: boolean) => void
   completeOnboarding: () => void
+  setWordTopics: (topics: string[]) => void
 }
 
 type UserStore = UserState & UserActions
@@ -28,6 +37,7 @@ const useUserStore = create<UserStore>()(
       isOnboardingComplete: false,
       dailyWordGoal: 3,
       notificationsEnabled: false,
+      wordTopics: [],
       setUserName: (name: string) => {
         console.log('UserStore: Setting userName to:', name)
         set({ userName: name })
@@ -47,6 +57,10 @@ const useUserStore = create<UserStore>()(
       completeOnboarding: () => {
         console.log('UserStore: Completing onboarding')
         set({ isOnboardingComplete: true })
+      },
+      setWordTopics: (topics: string[]) => {
+        console.log('UserStore: Setting wordTopics to:', topics)
+        set({ wordTopics: topics })
       },
     }),
     {
