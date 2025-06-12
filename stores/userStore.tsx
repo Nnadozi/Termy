@@ -6,7 +6,7 @@ export const allWordTopics = [
   "SAT", "ACT","Science", "Mathematics", "History", "Literature", 
   "Psychology", "Philosophy", "Economics","Business", "Technology",
   "Medicine", "Law","Art", "Music", "Sports","Travel", 
-  "Health & Fitness","General"
+  "Health", "Geography", "General"
 ]
 
 interface UserState {
@@ -37,7 +37,7 @@ const useUserStore = create<UserStore>()(
       isOnboardingComplete: false,
       dailyWordGoal: 3,
       notificationsEnabled: false,
-      wordTopics: [],
+      wordTopics: ["General"],
       setUserName: (name: string) => {
         console.log('UserStore: Setting userName to:', name)
         set({ userName: name })

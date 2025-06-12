@@ -1,4 +1,4 @@
 Next time:
-- Find words for each word topic
-- Create cloud database
 - Structure dataabase: Supabase cloud DB, cache into SQLite
+- hide supabase key and api
+- swipe mode

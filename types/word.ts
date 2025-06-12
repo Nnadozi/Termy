@@ -1,7 +1,8 @@
 export interface Word {
-    id: string
+    id: number
     word: string
     definition: string
-    example: string
-    partOfSpeech: string
-}
+    example_usage: string
+    part_of_speech: string
+    category: string
+  }

@@ -40,7 +40,8 @@
         {
           "fonts": [
             "./assets/fonts/DMSans-Regular.ttf",
-            "./assets/fonts/DMSans-Bold.ttf"
+            "./assets/fonts/DMSans-Bold.ttf",
+            "./assets/fonts/DMSans-Italic.ttf"
           ]
         }
       ],

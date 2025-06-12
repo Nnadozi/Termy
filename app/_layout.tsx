@@ -18,6 +18,7 @@ export default function RootLayout() {
   const [loaded, error] = useFonts({
     'DMSans-Regular': require('../assets/fonts/DMSans-Regular.ttf'),
     'DMSans-Bold': require('../assets/fonts/DMSans-Bold.ttf'),
+    'DMSans-Italic': require('../assets/fonts/DMSans-Italic.ttf'),
   });
 
   useEffect(() => {

@@ -13,11 +13,12 @@ interface CustomTextProps {
     numberOfLines?: number;
     onPress?: () => void;
     primary?: boolean;
+    italic?: boolean;
 }
 
 const fontSizes = {small: 13, normal: 17, large: 25, XL: 30};
 
-const CustomText = ({children, style, onPress, color, fontSize = 'normal', bold, opacity, textAlign,primary, numberOfLines}:CustomTextProps) => {
+const CustomText = ({children, style, onPress, color, fontSize = 'normal', bold, opacity, textAlign,primary, numberOfLines, italic}:CustomTextProps) => {
   const {colors} = useTheme();
   return (
     <Text 
@@ -29,7 +30,7 @@ const CustomText = ({children, style, onPress, color, fontSize = 'normal', bold,
         opacity,
         textAlign,
         fontSize: fontSizes[fontSize],
-        fontFamily: bold ? 'DMSans-Bold' : 'DMSans-Regular'
+        fontFamily: bold ? 'DMSans-Bold' : italic ? 'DMSans-Italic' : 'DMSans-Regular'
       }
     ]}>
       {children}

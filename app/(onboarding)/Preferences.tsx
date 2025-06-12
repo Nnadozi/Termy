@@ -13,13 +13,18 @@ const Preferences = () => {
     setDailyWordGoal, 
     notificationsEnabled, 
     setNotificationsEnabled,
+    wordTopics,
     setWordTopics
   } = useUserStore()
   
   const [goalValue, setGoalValue] = useState((dailyWordGoal ?? 3).toString())
   const { mode, setThemeMode, colors } = useThemeStore();
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>(wordTopics || ["General"]);
   
+  useEffect(() => {
+    setSelectedTopics(wordTopics || ["General"]);
+  }, [wordTopics]);
+
   useEffect(() => {
     setWordTopics(selectedTopics);
   }, [selectedTopics, setWordTopics]);
@@ -151,6 +156,6 @@ const styles = StyleSheet.create({
   chipsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 12, // Use numeric value instead of percentage
+    marginTop: 12,
   },
 })

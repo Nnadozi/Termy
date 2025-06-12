@@ -1,11 +1,19 @@
+import CustomText from '@/components/CustomText'
+import Page from '@/components/Page'
+import { useLocalSearchParams } from 'expo-router'
 import React from 'react'
-import { Text, View } from 'react-native'
 
 const Quiz = () => {
+  const {words} = useLocalSearchParams()
+  const wordsArray = JSON.parse(words as string)
   return (
-    <View>
-      <Text>Quiz</Text>
-    </View>
+    <Page>
+      <CustomText>Quiz</CustomText>
+      <CustomText>Words:</CustomText>
+      {wordsArray.map((word:any) => (
+        <CustomText key={word.id}>{word.word}</CustomText>
+      ))}
+    </Page>
   )
 }
 
