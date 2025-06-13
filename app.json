@@ -52,13 +52,7 @@
           "faceIDPermission": "Allow Termy to access your Face ID biometric data."
         }
       ],
-      [
-        "expo-sqlite",
-        {
-          "enableFTS": true,
-          "useSQLCipher": true
-        }
-      ]
+      ["expo-sqlite"]
     ],
     "experiments": {
       "typedRoutes": true

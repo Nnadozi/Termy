@@ -2,6 +2,7 @@ import CustomButton from '@/components/CustomButton'
 import CustomText from '@/components/CustomText'
 import DailyWordCard from '@/components/DailyWordCard'
 import Page from '@/components/Page'
+import { cacheDailyWords, getCachedDailyWords, hasCachedWordsForToday } from '@/database/wordCache'
 import { getDailyWords } from '@/database/wordService'
 import useUserStore from '@/stores/userStore'
 import { Word } from '@/types/word'
@@ -21,10 +22,17 @@ const Daily = () => {
   useEffect(() => {
     const loadWords = async () => {
       try {
-        setLoading(true)
-        const words = await getDailyWords(wordTopics, dailyWordGoal)
-        console.log(words)
-        setDailyVocab(words)
+        setLoading(true) 
+        const hasCachedWords = await hasCachedWordsForToday()
+        if (hasCachedWords) {
+          const cachedWords = await getCachedDailyWords()
+          setDailyVocab(cachedWords)
+        } else {
+          const words = await getDailyWords(wordTopics, dailyWordGoal)
+          console.log(words)
+          setDailyVocab(words)
+          await cacheDailyWords(words)
+        }
       } catch (error) {
         console.error('Error loading words:', error) 
       } finally {
@@ -34,7 +42,7 @@ const Daily = () => {
     if (wordTopics && wordTopics.length > 0) {
       loadWords()
     }
-  }, [wordTopics]) 
+  }, [wordTopics, dailyWordGoal])
 
   return (
     <Page style={{ justifyContent: "flex-start", alignItems: "flex-start" }}>
