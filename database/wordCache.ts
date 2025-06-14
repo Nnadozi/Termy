@@ -106,11 +106,34 @@ const clearCachedWords = async () => {
   }
 };
 
+const createList = async (listName: string) => {
+ 
+}
+
+const getList = async (listName: string) => {
+
+}
+
+const deleteList = async (listName: string) => {
+
+}
+
+const addWordToList = async (listName: string, word: Word) => {
+
+}
+
+const removeWordFromList = async (listName: string, word: Word) => {
+
+}
+
+const getAllLists = async () => {
+  
+}
+
+
 export {
-    cacheDailyWords,
-    clearCachedWords,
-    getCachedDailyWords,
-    hasCachedWordsForToday,
-    initializeDatabase
+  addWordToList, cacheDailyWords,
+  clearCachedWords, createList, deleteList, getAllLists, getCachedDailyWords, getList, hasCachedWordsForToday,
+  initializeDatabase, removeWordFromList
 };
 

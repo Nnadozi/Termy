@@ -2,7 +2,7 @@ import { Word } from '@/types/word'
 import { useTheme } from '@react-navigation/native'
 import * as Speech from 'expo-speech'
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { Share, StyleSheet, View } from 'react-native'
 import CustomIcon from './CustomIcon'
 import CustomText from './CustomText'
 
@@ -17,6 +17,11 @@ const DailyWordCard = ({ word, index, total, scrollToNext }: DailyWordCardProps)
     const { colors } = useTheme();
     const pronounceWord = () => {
       Speech.speak(word.word)
+    }
+    const shareWord = () => {
+      Share.share({
+        message: `${word.word} - ${word.definition} - ${word.example_usage}`,
+      })
     }
   
     return (
@@ -35,7 +40,7 @@ const DailyWordCard = ({ word, index, total, scrollToNext }: DailyWordCardProps)
            "{word.example_usage}"
           </CustomText>
           <View style={styles.buttonRow}>
-            <CustomIcon size={20} name='share' type='feather' color={colors.border} />
+            <CustomIcon onPress={shareWord} size={20} name='share' type='feather' color={colors.border} />
             <CustomIcon onPress={pronounceWord} size={20} name='volume-up' type='font-awesome' color={colors.border} />
             <CustomIcon size={20} name='favorite' type='material' color={colors.border} />
             <CustomIcon size={20} name='bookmarks' type='entypo' color={colors.border} />
@@ -62,7 +67,7 @@ const styles = StyleSheet.create({
       padding:'5%',
       borderWidth: 1,
       borderRadius:15,
-      elevation:10,
+      elevation:5,
       shadowColor: "gray",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,

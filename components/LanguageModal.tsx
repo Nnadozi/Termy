@@ -1,4 +1,3 @@
-import { useThemeStore } from '@/stores/themeStore';
 import { useTheme } from '@react-navigation/native';
 import React from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
@@ -10,7 +9,6 @@ interface LanguageModalProps {
 }
 
 const LanguageModal = ({ visible, onRequestClose }: LanguageModalProps) => {
-  const { mode, setThemeMode, isDark } = useThemeStore();
   const { colors } = useTheme();
   return (
     <Modal animationType='fade' transparent visible={visible} onRequestClose={onRequestClose}>

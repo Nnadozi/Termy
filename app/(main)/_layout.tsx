@@ -11,10 +11,10 @@ export default function MainLayout() {
             }
             }}>
             <Tabs.Screen 
-            name="Library" 
+            name="Lists" 
             options={{
                 tabBarIcon: ({color}) => (
-                    <CustomIcon size={25} name="book"  type="entypo" color={color} />
+                    <CustomIcon size={25} name="list"  type="entypo" color={color} />
                 )
             }}
             />
