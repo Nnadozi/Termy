@@ -1,5 +1,6 @@
 import { Word } from '@/types/word'
 import { useTheme } from '@react-navigation/native'
+import * as Speech from 'expo-speech'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import CustomIcon from './CustomIcon'
@@ -14,6 +15,9 @@ interface DailyWordCardProps {
 
 const DailyWordCard = ({ word, index, total, scrollToNext }: DailyWordCardProps) => {
     const { colors } = useTheme();
+    const pronounceWord = () => {
+      Speech.speak(word.word)
+    }
   
     return (
       <View style={[styles.pageContainer, { backgroundColor: colors.background }]}>
@@ -21,12 +25,9 @@ const DailyWordCard = ({ word, index, total, scrollToNext }: DailyWordCardProps)
           <CustomText bold fontSize="XL">
             {word.word}
           </CustomText>
-          <View style={{flexDirection:"row", alignItems:"center", justifyContent:"space-between",gap:"3%"}}>
-            <CustomText fontSize='small' textAlign='center'>
-              {word.part_of_speech} · {word.category} 
-            </CustomText>
-            <CustomIcon size={15} name='volume-up' type='font-awesome' color={colors.border} />
-          </View>
+          <CustomText fontSize='small' textAlign='center'>
+            {word.part_of_speech} · {word.category} 
+          </CustomText>
           <CustomText textAlign='center'>
             {word.definition}
           </CustomText>
@@ -35,6 +36,7 @@ const DailyWordCard = ({ word, index, total, scrollToNext }: DailyWordCardProps)
           </CustomText>
           <View style={styles.buttonRow}>
             <CustomIcon size={20} name='share' type='feather' color={colors.border} />
+            <CustomIcon onPress={pronounceWord} size={20} name='volume-up' type='font-awesome' color={colors.border} />
             <CustomIcon size={20} name='favorite' type='material' color={colors.border} />
             <CustomIcon size={20} name='bookmarks' type='entypo' color={colors.border} />
           </View>
