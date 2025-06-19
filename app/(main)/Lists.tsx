@@ -2,15 +2,20 @@
 import CustomText from '@/components/CustomText'
 import ListPreview from '@/components/ListPreview'
 import Page from '@/components/Page'
+import { getAllLists } from '@/database/wordCache'
 import { List } from '@/types/list'
 import { router } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 
 const Lists = () => {
   const [lists, setLists] = useState<List[]>([])
   useEffect(() => {
-   
+   const fetchLists = async () => {
+      const lists = await getAllLists()
+      setLists(lists)
+   }
+   fetchLists()
   }, [])
   return (
     <Page style={{justifyContent:"flex-start", alignItems:"flex-start"}}>
@@ -25,7 +30,17 @@ const Lists = () => {
         <CustomText bold>Custom Lists</CustomText>
       </View>
       <View style={{width:"100%", marginBottom:"3%"}}>
-        <CustomText opacity={0.5}>No custom lists yet - Press + to create one.</CustomText>
+        {
+          lists.length > 0 ? (
+            lists.map((list) => (
+              <ScrollView key={list.id} style={{width:"100%"}}>
+                <ListPreview title={list.name} description={list.description} count={list.words.length} />
+              </ScrollView>
+            ))  
+          ) : (
+            <CustomText opacity={0.5}>No custom lists yet</CustomText>
+          )
+        }
       </View>
     </Page>
   )

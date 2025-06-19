@@ -10,9 +10,10 @@ interface CustomButtonProps {
     disabled?: boolean;
     width?:any
     marginVertical?:any
+    isLoading?: boolean;
 }
 
-const CustomButton = ({title, onPress, style, disabled, width, marginVertical}:CustomButtonProps) => {
+const CustomButton = ({title, onPress, style, disabled, width, marginVertical, isLoading}:CustomButtonProps) => {
   const {colors} = useTheme();
   return (
     <Button
@@ -26,6 +27,7 @@ const CustomButton = ({title, onPress, style, disabled, width, marginVertical}:C
     ]}
     titleStyle={{fontFamily:'DMSans-Bold', fontSize:16, color: colors.background, textAlign:"center",width:"100%"}}
     containerStyle={{width: width ? width : '100%', alignSelf:'center'}}
+    loading={isLoading}
     />
   )
 }

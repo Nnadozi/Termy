@@ -13,13 +13,13 @@ interface ListPreviewProps {
 const ListPreview = ({title, description, count}: ListPreviewProps) => {
     const { colors } = useTheme();
     return (
-        <TouchableOpacity onPress={() => router.navigate(`/(list)/${title}`)} activeOpacity={0.8} style={[styles.container, {backgroundColor: colors.primary}]} >
-            <CustomText fontSize="large" opposite bold>{title}</CustomText>
+        <TouchableOpacity onPress={() => router.navigate(`/(list)/${title}`)} activeOpacity={0.8} style={[styles.container, {backgroundColor: colors.card, borderColor: colors.border   }]} >
+            <CustomText  fontSize="large" bold>{title}</CustomText>
             <View style={styles.wordRow}>
-              <CustomIcon name="book" opposite size={12} />
-              <CustomText fontSize="small" bold opposite>Words: {count}</CustomText>
+              <CustomIcon primary name="book"  size={12} />
+              <CustomText primary fontSize="small" bold >Words: {count}</CustomText>
             </View>
-            <CustomText  opposite>{description}</CustomText>
+            <CustomText >{description}</CustomText>
         </TouchableOpacity>
     )
 }
@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 5,
+        borderWidth: 1,
     },
     wordRow:{
         flexDirection:"row",

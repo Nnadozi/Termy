@@ -10,9 +10,10 @@ interface CustomInputProps {
     width?: DimensionValue;
     maxLength?: number;
     keyboardType?: KeyboardTypeOptions;
+    multiline?: boolean;
 }
 
-const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength, keyboardType}:CustomInputProps) => {
+const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength, keyboardType, multiline}:CustomInputProps) => {
   const {colors} = useTheme();
   return (
     <TextInput
@@ -28,6 +29,8 @@ const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength,
     maxLength={maxLength}
     cursorColor={colors.text}
     keyboardType={keyboardType}
+    multiline={multiline}
+    textAlignVertical={multiline ? "top" : "center"}
     />
   )
 }

@@ -38,8 +38,8 @@ export default function RootLayout() {
         <Stack screenOptions={{headerShown: false, gestureEnabled: false}}>
           <Stack.Screen name="(onboarding)" />
           <Stack.Screen name="(main)" />
+          <Stack.Screen name="(list)" />
           <Stack.Screen name="Quiz" />
-          <Stack.Screen name="PlacementTest" />
         </Stack>  
       </ThemeProvider>
       <Toast />

@@ -1,10 +1,10 @@
 import { Word } from "./word"
 
 export interface List {
-    id: string
+    id: number | string
     name: string
-    description?: string
+    description: string
     words: Word[]
-    created_at: Date
-    updated_at: Date
+    created_at: string
+    updated_at: string
 } 
