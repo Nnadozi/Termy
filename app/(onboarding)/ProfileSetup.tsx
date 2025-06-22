@@ -6,7 +6,7 @@ import useUserStore from '@/stores/userStore'
 import { Avatar } from '@rneui/base'
 import { router } from 'expo-router'
 import leoProfanity from 'leo-profanity'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const ProfileSetup = () => {
@@ -21,10 +21,20 @@ const ProfileSetup = () => {
          !leoProfanity.check(str);
   }
 
-  const setUpProfile = () => {
+  const setUpProfile = async () => {
     setUserName(username)
     setAvatarColorStore(avatarColor)
     completeOnboarding()
+    
+    // Clear any cached words to ensure fresh words are fetched with new preferences
+    try {
+      const { clearCachedWords } = await import('@/database/wordCache')
+      await clearCachedWords()
+      console.log("Cleared cached words for fresh start")
+    } catch (error) {
+      console.error("Error clearing cache:", error)
+    }
+    
     console.log("Profile setup complete")
     router.navigate("/(onboarding)/Finish")
   }

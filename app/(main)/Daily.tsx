@@ -19,6 +19,7 @@ const Daily = () => {
   const [timeUntilNextDay, setTimeUntilNextDay] = useState('')
   const {colors} = useTheme()
   const pagerRef = useRef<PagerView>(null)
+  const lastPreferences = useRef<{topics: string[], goal: number}>({topics: [], goal: 0})
   
   // Calculate time until next day
   useEffect(() => {
@@ -46,13 +47,32 @@ const Daily = () => {
     const loadWords = async () => {
       try {
         setLoading(true) 
+        console.log('Daily: Loading words with preferences:', { wordTopics, dailyWordGoal })
+        
+        // Check if preferences have changed since last load
+        const preferencesChanged = 
+          JSON.stringify(lastPreferences.current.topics) !== JSON.stringify(wordTopics) ||
+          lastPreferences.current.goal !== dailyWordGoal
+        
+        // Also check if this is the first time loading after onboarding
+        const isFirstLoad = lastPreferences.current.topics.length === 0
+        
+        if (preferencesChanged || isFirstLoad) {
+          console.log('Daily: Preferences changed or first load, clearing cache')
+          const { clearCachedWords } = await import('@/database/wordCache')
+          await clearCachedWords()
+          lastPreferences.current = { topics: [...wordTopics], goal: dailyWordGoal }
+        }
+        
         const hasCachedWords = await hasCachedWordsForToday()
         if (hasCachedWords) {
           const cachedWords = await getCachedDailyWords()
+          console.log('Daily: Using cached words:', cachedWords.length)
           setDailyVocab(cachedWords)
         } else {
           const words = await getDailyWords(wordTopics, dailyWordGoal)
-          console.log(words)
+          console.log('Daily: Fetched new words:', words.length, 'words')
+          console.log('Daily: Word categories:', words.map(w => w.category))
           setDailyVocab(words)
           await cacheDailyWords(words)
         }
@@ -64,8 +84,28 @@ const Daily = () => {
     }
     if (wordTopics && wordTopics.length > 0) {
       loadWords()
+    } else {
+      console.log('Daily: No word topics selected')
     }
   }, [wordTopics, dailyWordGoal])
+
+  const refreshWords = async () => {
+    try {
+      setLoading(true)
+      console.log('Daily: Manually refreshing words')
+      const { clearCachedWords } = await import('@/database/wordCache')
+      await clearCachedWords()
+      const words = await getDailyWords(wordTopics, dailyWordGoal)
+      console.log('Daily: Refreshed words:', words.length, 'words')
+      console.log('Daily: Word categories:', words.map(w => w.category))
+      setDailyVocab(words)
+      await cacheDailyWords(words)
+    } catch (error) {
+      console.error('Error refreshing words:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <Page style={{ justifyContent: "flex-start", alignItems: "flex-start" }}>

@@ -1,10 +1,12 @@
+import AddWordButton from "@/components/AddWordButton"
 import CustomIcon from "@/components/CustomIcon"
 import CustomInput from "@/components/CustomInput"
 import CustomText from "@/components/CustomText"
 import DailyWordCard from "@/components/DailyWordCard"
 import Page from "@/components/Page"
-import { getList } from "@/database/wordCache"
+import { addWordsToList, getList } from "@/database/wordCache"
 import { List } from "@/types/list"
+import { Word } from "@/types/word"
 import { router, useLocalSearchParams } from "expo-router"
 import { useEffect, useRef, useState } from "react"
 import { StyleSheet, View } from "react-native"
@@ -27,6 +29,25 @@ const ListScreen = () => {
     useEffect(() => {
         fetchList()
     }, [id])
+
+    const handleWordsAdded = async (words: Word[]) => {
+        try {
+            await addWordsToList(id as string, words)
+            // Refresh the list to show new words
+            await fetchList()
+        } catch (error) {
+            console.error('Error adding words to list:', error)
+        }
+    }
+
+    const handleWordDeleted = async (wordId: number) => {
+        try {
+            // Refresh the list to show updated words
+            await fetchList()
+        } catch (error) {
+            console.error('Error refreshing list after deletion:', error)
+        }
+    }
 
     const filteredWords = list?.words.filter((word) => word.word.toLowerCase().includes(search.toLowerCase()))
     
@@ -51,7 +72,16 @@ const ListScreen = () => {
                     {list?.description && <CustomText fontSize="small" textAlign="center">{list?.description}</CustomText>}
                 </View>
                 {list?.name !== "Learned" && (
-                    <CustomIcon name="add-to-list" type="entypo" size={24} />
+                    <AddWordButton
+                        onWordsSelected={handleWordsAdded}
+                        excludeListName={list?.name}
+                        targetListName={list?.name}
+                        title={`Add to ${list?.name}`}
+                        allowCustomWords={true}
+                        iconName="add-to-list"
+                        iconType="entypo"
+                        iconSize={24}
+                    />
                 )}
                 {list?.name === "Learned" && <View/>}
             </View>
@@ -74,6 +104,8 @@ const ListScreen = () => {
                         scrollToNext={scrollToNext}
                         scrollToPrevious={scrollToPrevious}
                         showScrollButtons={true}
+                        listName={list?.name}
+                        onWordDeleted={handleWordDeleted}
                     />
                 ))}
             </PagerView>

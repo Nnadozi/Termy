@@ -1,21 +1,21 @@
 - new words to db (that are correct)
 - app tutorial
-- add custom words (not just learned ones)
 - loading GIFs
 - word list filter (date, type, etc)
 - notifications
 - make ui better
+- clean up onboarding
 - languages
-
-premium:
-- More than 3 lists
-- Swipe mode
-- No ads
-
-Add word interfaces:
-1 - Create lists
-2- ATL button on word card
-3- In list screen
+- Get rid of SAT + ACT
+- build notate
+- percentage based styles
+- premium:
+    - More than 3 lists
+    - Swipe mode
+    - No ads
+- make new dev accounts
+- make store art
+- get testers
 
 Launch v1.0.0: 7/1/25
 
