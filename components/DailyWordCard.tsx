@@ -56,8 +56,8 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
            "{word.example_usage}"
           </CustomText>
           <View style={styles.buttonRow}>
-            <CustomIcon onPress={shareWord} size={20} name='share' type='feather' color={colors.border} />
             <CustomIcon onPress={pronounceWord} size={20} name='volume-up' type='font-awesome' color={colors.border} />
+            <CustomIcon onPress={shareWord} size={20} name='share' type='feather' color={colors.border} />
             <CustomIcon size={20} name='add-to-list' type='entypo' color={colors.border} />
           </View>
           <CustomText style={{marginTop:"5%"}} bold primary onPress={scrollToNext}>{`${ noText ? "" : customText || "Got it!"} ${noCounter ? "" : `(${index + 1} / ${total})`}`}</CustomText>

@@ -1,5 +1,4 @@
 import AppearanceModal from '@/components/AppearanceModal';
-import CustomButton from '@/components/CustomButton';
 import CustomIcon from '@/components/CustomIcon';
 import CustomText from '@/components/CustomText';
 import LanguageModal from '@/components/LanguageModal';
@@ -8,7 +7,7 @@ import Page from '@/components/Page';
 import { useTheme } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Linking, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const Settings = () => {
@@ -17,7 +16,7 @@ const Settings = () => {
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
   const { colors } = useTheme();
   const options = [
-    { key: "user", value: "Profile", type: "antdesign", onPress: () => {} },
+    { key: "user", value: "Profile", type: "antdesign", onPress: () => {router.push("/(settings)/Profile")} },
     { key: "notifications", value: "Notifications", type: "ionicon", onPress: () => setNotificationsModalVisible(true) },
     { key: "palette", value: "Appearance", type: "ionicons", onPress: () => setAppearanceModalVisible(true) },
     { key: "language", value: "Language", type: "ionicon", onPress: () => setLanguageModalVisible(true) },
@@ -59,7 +58,6 @@ const Settings = () => {
       <AppearanceModal visible={appearanceModalVisible} onRequestClose={() => setAppearanceModalVisible(false)} />
       <LanguageModal visible={languageModalVisible} onRequestClose={() => setLanguageModalVisible(false)} />
       <NotificationsModal visible={notificationsModalVisible} onRequestClose={() => setNotificationsModalVisible(false)} />
-      <CustomButton title="Onboarding" onPress={() => router.navigate("/(onboarding)/Intro")} />
     </Page>
   );
 };

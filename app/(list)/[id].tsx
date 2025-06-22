@@ -45,7 +45,7 @@ const ListScreen = () => {
     return (
         <Page>
             <View style={styles.topRow}>
-                <CustomIcon name="chevron-left"  color="black" onPress={() => router.back()}     />
+                <CustomIcon name="chevron-left"  onPress={() => router.back()}     />
                 <View style={styles.topRowText}>
                     <CustomText fontSize="large" bold>{list?.name}</CustomText>
                     {list?.description && <CustomText fontSize="small" textAlign="center">{list?.description}</CustomText>}

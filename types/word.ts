@@ -6,3 +6,4 @@ export interface Word {
     part_of_speech: string
     category: string
   }
+

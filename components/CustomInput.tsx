@@ -1,5 +1,4 @@
 import { useTheme } from '@react-navigation/native';
-import React from 'react';
 import { DimensionValue, KeyboardTypeOptions, StyleSheet, TextInput, TextStyle } from 'react-native';
 
 interface CustomInputProps {
@@ -11,9 +10,12 @@ interface CustomInputProps {
     maxLength?: number;
     keyboardType?: KeyboardTypeOptions;
     multiline?: boolean;
+    onSubmitEditing?: () => void;
+    returnKeyType?: 'done' | 'go' | 'next' | 'search' | 'send';
+    editable?: boolean;
 }
 
-const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength, keyboardType, multiline}:CustomInputProps) => {
+const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength, keyboardType, multiline, onSubmitEditing, returnKeyType, editable}:CustomInputProps) => {
   const {colors} = useTheme();
   return (
     <TextInput
@@ -31,6 +33,9 @@ const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength,
     keyboardType={keyboardType}
     multiline={multiline}
     textAlignVertical={multiline ? "top" : "center"}
+    onSubmitEditing={onSubmitEditing}
+    returnKeyType={returnKeyType}
+    editable={editable}
     />
   )
 }

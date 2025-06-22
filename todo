@@ -1,8 +1,21 @@
 - new words to db (that are correct)
 - app tutorial
 - add custom words (not just learned ones)
+- loading GIFs
+- word list filter (date, type, etc)
+- notifications
+- make ui better
+- languages
 
 premium:
 - More than 3 lists
 - Swipe mode
 - No ads
+
+Add word interfaces:
+1 - Create lists
+2- ATL button on word card
+3- In list screen
+
+Launch v1.0.0: 7/1/25
+

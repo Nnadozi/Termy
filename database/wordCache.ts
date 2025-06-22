@@ -151,6 +151,18 @@ const clearCachedWords = async () => {
   }
 };
 
+const clearAllData = async () => {
+  try {
+    await initializeDatabase();
+    await db.execAsync('DELETE FROM dailyWords');
+    await db.execAsync('DELETE FROM lists');
+    console.log('All data cleared from database');
+  } catch (error) {
+    console.error('Error clearing all data:', error);
+    throw error;
+  }
+};
+
 const createList = async (listName: string, listDescription: string, words?: Word[]) => {
     try{
       await initializeDatabase();
@@ -234,6 +246,31 @@ const addWordToList = async (listName: string, word: Word) => {
   }
 }
 
+const addWordsToList = async (listName: string, words: Word[]) => {
+  try {
+    await initializeDatabase();
+    const list = await getList(listName);
+    if (!list) throw new Error('List not found');
+    
+    const existingWords: Word[] = list.words || [];
+    const newWords = words.filter(word => !existingWords.some((w: Word) => w.id === word.id));
+    
+    if (newWords.length > 0) {
+      const updatedWords = [...existingWords, ...newWords];
+      await db.runAsync(
+        'UPDATE lists SET words = ? WHERE name = ?',
+        [JSON.stringify(updatedWords), listName]
+      );
+      showToast(`${newWords.length} words added to ${listName}`)
+    } else {
+      showToast(`All words are already in ${listName}`, "info")
+    }
+  } catch(error){
+    console.error('Error adding words to list:', error);
+    throw error;
+  }
+}
+
 const removeWordFromList = async (listName: string, word: Word) => {
   try {
     await initializeDatabase();
@@ -279,8 +316,7 @@ const getAllLists = async () => {
 
 
 export {
-  addWordToList, cacheDailyWords,
-  clearCachedWords, createList, deleteList, getAllLists, getCachedDailyWords, getList, hasCachedWordsForToday,
+  addWordsToList, addWordToList, cacheDailyWords, clearAllData, clearCachedWords, createList, deleteList, getAllLists, getCachedDailyWords, getList, hasCachedWordsForToday,
   initializeDatabase, removeWordFromList
 };
 
