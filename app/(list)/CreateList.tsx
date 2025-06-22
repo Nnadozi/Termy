@@ -47,7 +47,7 @@ const CreateList = () => {
                 maxLength={500}
             />
             <CustomText style={{marginTop: "3%"}} fontSize="small" bold primary>+ Add words</CustomText>
-            <CustomText style={{marginBottom: "3%"}} fontSize="small" primary>You can add words you already learned or liked</CustomText>
+            <CustomText style={{marginBottom: "3%"}} fontSize="small" primary>Add words you already learned - or your own</CustomText>
             <CustomButton
                 title="Create List" 
                 onPress={handleCreateList} 
