@@ -33,11 +33,43 @@ const initializeDatabase = async () => {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Create default lists if they don't exist (direct database calls to avoid circular dependency)
+    await createDefaultListsDirect();
     
     console.log('Database initialized successfully');
   } catch (error) {
     console.error('Error initializing database:', error);
     throw error;
+  }
+};
+
+const createDefaultListsDirect = async () => {
+  try {
+    const defaultLists = [
+      { name: 'Learned', description: 'Successfully completed vocabulary' },
+    ];
+
+    // Remove any existing favorites list (migration)
+    await db.runAsync('DELETE FROM lists WHERE name = ?', ['Favorites']);
+
+    for (const defaultList of defaultLists) {
+      // Check if list exists using direct database query
+      const existingList = await db.getFirstAsync(
+        'SELECT id FROM lists WHERE name = ?',
+        [defaultList.name]
+      );
+      
+      if (!existingList) {
+        await db.runAsync(
+          'INSERT INTO lists (name, description, words) VALUES (?, ?, ?)',
+          [defaultList.name, defaultList.description, null]
+        );
+        console.log(`Created default list: ${defaultList.name}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error creating default lists:', error);
   }
 };
 
@@ -192,6 +224,9 @@ const addWordToList = async (listName: string, word: Word) => {
         'UPDATE lists SET words = ? WHERE name = ?',
         [JSON.stringify(words), listName]
       );
+      showToast(`Word added to ${listName}`)
+    } else {
+      showToast(`Word is already in ${listName}`, "info")
     }
   } catch(error){
     console.error('Error adding word to list:', error);
@@ -210,6 +245,7 @@ const removeWordFromList = async (listName: string, word: Word) => {
       'UPDATE lists SET words = ? WHERE name = ?',
       [JSON.stringify(words), listName]
     );
+    showToast(`Word removed from ${listName}`)
   } catch(error){
     console.error('Error removing word from list:', error);
     throw error;

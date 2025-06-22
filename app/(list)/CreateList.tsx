@@ -5,7 +5,7 @@ import CustomText from "@/components/CustomText"
 import Page from "@/components/Page"
 import { createList } from "@/database/wordCache"
 import { router } from "expo-router"
-import React, { useState } from "react"
+import { useState } from "react"
 import { StyleSheet, View } from "react-native"
 
 const CreateList = () => {
@@ -46,7 +46,8 @@ const CreateList = () => {
                 style={{height: "20%"}}
                 maxLength={500}
             />
-            <CustomText style={{marginVertical: "3%"}} fontSize="small" bold primary>+ Add words</CustomText>
+            <CustomText style={{marginTop: "3%"}} fontSize="small" bold primary>+ Add words</CustomText>
+            <CustomText style={{marginBottom: "3%"}} fontSize="small" primary>You can add words you already learned or liked</CustomText>
             <CustomButton
                 title="Create List" 
                 onPress={handleCreateList} 

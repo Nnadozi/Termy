@@ -8,7 +8,7 @@ import useUserStore from '@/stores/userStore'
 import { Word } from '@/types/word'
 import { useTheme } from '@react-navigation/native'
 import { router } from 'expo-router'
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import PagerView from 'react-native-pager-view'
 

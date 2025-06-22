@@ -1,12 +1,18 @@
-import { supabase } from '@/database/supabase'
+import { supabase } from '@/database/supabase';
 
-export const getAllWords = async (options?: { random: boolean }) => {
-  const { data, error } = await supabase
-    .from('words')
-    .select('*')
+export const getAllWords = async (options?: { random?: boolean; number?: number }) => {
+  let query = supabase.from('words').select('*')
+  
+  if (options?.number) {
+    query = query.limit(options.number)
+  }
+  
+  const { data, error } = await query
+  
   if (options?.random && data) {
     data.sort(() => Math.random() - 0.5)
   }
+  
   if (error) {
     console.error('Error fetching all words:', error)
     return []

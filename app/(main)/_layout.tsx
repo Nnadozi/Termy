@@ -19,14 +19,6 @@ export default function MainLayout() {
             }}
             />
             <Tabs.Screen 
-            name="Swipe" 
-            options={{
-                tabBarIcon: ({color}) => (
-                    <CustomIcon size={25} name="swipe" color={color} />
-                )
-            }}
-            />
-            <Tabs.Screen 
             name="Daily" 
             options={{
                 tabBarIcon: ({color}) => (
