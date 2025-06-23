@@ -3,7 +3,7 @@ import { Word } from '@/types/word';
 import { useTheme } from '@react-navigation/native';
 import { CheckBox } from '@rneui/base';
 import React, { useEffect, useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import CustomButton from './CustomButton';
 import CustomInput from './CustomInput';
 import CustomText from './CustomText';
@@ -16,6 +16,8 @@ interface WordSelectorModalProps {
   targetListName?: string; // Name of list we're adding to (to exclude existing words)
   title?: string;
   allowCustomWords?: boolean;
+  allowMultiList?: boolean; // New prop to enable multi-list selection
+  onListsSelected?: (listNames: string[]) => void; // New callback for multi-list selection
 }
 
 const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
@@ -25,7 +27,9 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
   excludeListName,
   targetListName,
   title = "Add Words",
-  allowCustomWords = true
+  allowCustomWords = true,
+  allowMultiList = false,
+  onListsSelected
 }) => {
   const { colors } = useTheme();
   const [selectedWords, setSelectedWords] = useState<Word[]>([]);
@@ -131,14 +135,14 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
 
   const renderLearnedTab = () => (
     <ScrollView style={styles.tabContent}>
-      <CustomText fontSize="small" style={{ marginBottom: 10, opacity: 0.7 }}>
+      <CustomText fontSize="small" style={{ marginBottom:"2%"}}>
         Select words from your learned vocabulary
       </CustomText>
       
       {/* Show selected words first */}
       {selectedWords.length > 0 && (
         <View style={styles.selectedWordsSection}>
-          <CustomText fontSize="small" bold style={{ marginBottom: 10 }}>
+          <CustomText fontSize="small" bold style={{ marginBottom: "2%" }}>
             Selected Words ({selectedWords.length}):
           </CustomText>
           {selectedWords.map((word) => (
@@ -157,10 +161,10 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
                 <CustomText bold style={{ color: colors.background }}>
                   {word.word}
                 </CustomText>
-                <CustomText fontSize="small" style={{ opacity: 0.8, color: colors.background }}>
+                <CustomText fontSize="small" style={{ color: colors.background }}>
                   {word.definition}
                 </CustomText>
-                <CustomText fontSize="small" style={{ opacity: 0.6, color: colors.background }}>
+                <CustomText fontSize="small" style={{ color: colors.background }}>
                   {word.category}
                 </CustomText>
               </View>
@@ -175,81 +179,98 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
         </View>
       )}
       
-      {/* Show available words */}
-      {availableWords
-        .filter(word => word.category !== 'Custom' && !selectedWords.some(w => w.id === word.id))
-        .map(word => (
-          <TouchableOpacity
-            key={word.id}
-            style={[
-              styles.wordItem,
-              { 
-                backgroundColor: selectedWords.some(w => w.id === word.id) 
-                  ? colors.primary 
-                  : colors.card,
-                borderColor: colors.border 
-              }
-            ]}
-            onPress={() => toggleWordSelection(word)}
-          >
-            <View style={styles.wordItemContent}>
-              <CustomText bold>{word.word}</CustomText>
-              <CustomText fontSize="small" style={{ opacity: 0.7 }}>
-                {word.definition}
-              </CustomText>
-              <CustomText fontSize="small" style={{ opacity: 0.5 }}>
-                {word.category}
-              </CustomText>
-            </View>
-            <CheckBox
-              checked={selectedWords.some(w => w.id === word.id)}
+      {/* Show loading state */}
+      {loading ? (
+        <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+          <CustomText fontSize="small" opacity={0.7}>Loading words...</CustomText>
+        </View>
+      ) : availableWords.length === 0 ? (
+        <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+          <CustomText fontSize="small" opacity={0.7}>No learned words available</CustomText>
+          <CustomText fontSize="small" opacity={0.5} style={{ marginTop: 5 }}>
+            Complete your daily words to add them here
+          </CustomText>
+        </View>
+      ) : (
+        /* Show available words */
+        availableWords
+          .filter(word => word.category !== 'Custom' && !selectedWords.some(w => w.id === word.id))
+          .map(word => (
+            <TouchableOpacity
+              key={word.id}
+              style={[
+                styles.wordItem,
+                { 
+                  backgroundColor: selectedWords.some(w => w.id === word.id) 
+                    ? colors.primary 
+                    : colors.card,
+                  borderColor: colors.border 
+                }
+              ]}
               onPress={() => toggleWordSelection(word)}
-              containerStyle={styles.checkbox}
-            />
-          </TouchableOpacity>
-        ))}
+            >
+              <View style={styles.wordItemContent}>
+                <CustomText bold color = {selectedWords.some(w => w.id === word.id) ? colors.background : colors.text }>
+                  {word.word}
+                </CustomText>
+                <CustomText fontSize="small" color = {selectedWords.some(w => w.id === word.id) ? colors.background : colors.text }>
+                  {word.definition}
+                </CustomText>
+                <CustomText fontSize="small" color = {selectedWords.some(w => w.id === word.id) ? colors.background : colors.primary }>
+                   {word.category}
+                </CustomText>
+              </View>
+              <CheckBox
+                checked={selectedWords.some(w => w.id === word.id)}
+                onPress={() => toggleWordSelection(word)}
+                containerStyle={styles.checkbox}
+              />
+            </TouchableOpacity>
+          ))
+      )}
     </ScrollView>
   );
 
   const renderCustomTab = () => (
     <View style={styles.tabContent}>
-      <CustomText fontSize="small" style={{ marginBottom: 10, opacity: 0.7 }}>
+      <CustomText fontSize="small" style={{ marginBottom:"2%"}}>
         Add your own custom words
       </CustomText>
       
       {/* Show success message if words were added */}
       {selectedWords.filter(w => w.category === 'Custom').length > 0 && (
         <View style={[styles.successMessage, { backgroundColor: colors.primary }]}>
-          <CustomText fontSize="small" style={{ color: colors.background }}>
+          <CustomText fontSize="small">
             ✓ {selectedWords.filter(w => w.category === 'Custom').length} custom word{selectedWords.filter(w => w.category === 'Custom').length !== 1 ? 's' : ''} added
           </CustomText>
         </View>
       )}
       
       <CustomInput
-        placeholder="Enter word"
+        placeholder="Enter word *"
         value={customWord}
         onChangeText={setCustomWord}
-        style={styles.input}
+        style={{marginBottom:"2%"}}
       />
       <CustomInput
-        placeholder="Enter definition"
+        placeholder="Enter definition *"
         value={customDefinition}
         onChangeText={setCustomDefinition}
         multiline
-        style={{ marginBottom: 15, height: 80 }}
+        style={{marginBottom:"2%"}}
       />
       <CustomInput
-        placeholder="Enter example usage (optional)"
+        placeholder="Enter example usage *"
         value={customExample}
         onChangeText={setCustomExample}
         multiline
-        style={{ marginBottom: 15, height: 80 }}
+        style={{marginBottom:"2%"}}
       />
       <CustomButton
         title="Add Custom Word"
         onPress={addCustomWord}
         style={styles.addButton}
+        disabled={!customWord.trim() || !customDefinition.trim() || !customExample.trim()}
       />
     </View>
   );
@@ -258,107 +279,92 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle="pageSheet"
+      presentationStyle="formSheet"
       onRequestClose={handleCancel}
     >
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        {/* Header */}
-        <View style={styles.header}>
-          <CustomText fontSize="large" bold>{title}</CustomText>
-          <CustomText fontSize="small" style={{ opacity: 0.7 }}>
-            {selectedWords.length} word{selectedWords.length !== 1 ? 's' : ''} selected
-          </CustomText>
-        </View>
-
-        {/* Tabs */}
-        <View style={styles.tabs}>
-          <TouchableOpacity
-            style={[
-              styles.tab,
-              activeTab === 'learned' && { backgroundColor: colors.primary }
-            ]}
-            onPress={() => setActiveTab('learned')}
-          >
-            <CustomText 
-              style={{
-                fontSize: 16,
-                fontFamily: 'DMSans-Bold',
-                color: activeTab === 'learned' ? colors.background : colors.text
-              }}
-            >
-              Learned
-            </CustomText>
-          </TouchableOpacity>
-          {allowCustomWords && (
-            <TouchableOpacity
-              style={[
-                styles.tab,
-                activeTab === 'custom' && { backgroundColor: colors.primary }
-              ]}
-              onPress={() => setActiveTab('custom')}
-            >
-              <CustomText 
-                style={{
-                  fontSize: 16,
-                  fontFamily: 'DMSans-Bold',
-                  color: activeTab === 'custom' ? colors.background : colors.text
-                }}
-              >
-                Custom
+      <KeyboardAvoidingView 
+        style={{ flex: 1, backgroundColor: colors.background }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView 
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={{ flex: 1, padding:"5%", backgroundColor: colors.background }}>
+            {/* Header */}
+            <View style={{alignItems: 'center', marginBottom: "5%"}}>
+              <CustomText fontSize="large" bold>{title}</CustomText>
+              <CustomText fontSize="small" opacity={0.7}>
+                {selectedWords.length} word{selectedWords.length !== 1 ? 's' : ''} selected
               </CustomText>
-            </TouchableOpacity>
-          )}
-        </View>
+            </View>
 
-        {/* Content */}
-        {activeTab === 'learned' && renderLearnedTab()}
-        {activeTab === 'custom' && renderCustomTab()}
+            {/* Tabs */}
+            <View style={[styles.tabs,{borderColor:colors.primary,borderWidth:1}]}>
+              <TouchableOpacity
+                style={[
+                  styles.tab,
+                  activeTab === 'learned' && { backgroundColor: colors.primary }
+                ]}
+                onPress={() => setActiveTab('learned')}
+              >
+                <CustomText color={activeTab === 'learned' ? colors.background : colors.text}>
+                  Learned
+                </CustomText>
+              </TouchableOpacity>
+              {allowCustomWords && (
+                <TouchableOpacity
+                  style={[
+                    styles.tab,
+                    activeTab === 'custom' && { backgroundColor: colors.primary }
+                  ]}
+                  onPress={() => setActiveTab('custom')}
+                >
+                  <CustomText color={activeTab === 'custom' ? colors.background : colors.text}>
+                    Custom
+                  </CustomText>
+                </TouchableOpacity>
+              )}
+            </View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <CustomButton
-            title="Cancel"
-            onPress={handleCancel}
-            style={styles.footerButton}
-          />
-          <CustomButton
-            title={`Add ${selectedWords.length} Word${selectedWords.length !== 1 ? 's' : ''}`}
-            onPress={handleConfirm}
-            disabled={selectedWords.length === 0}
-            style={styles.footerButton}
-          />
-        </View>
-      </View>
+            {/* Content */}
+            {activeTab === 'learned' && renderLearnedTab()}
+            {activeTab === 'custom' && renderCustomTab()}
+
+            {/* Footer */}
+            <View style={{ marginTop: 'auto', paddingTop: 20 }}>
+              <CustomButton
+                title={`Add ${selectedWords.length} Word${selectedWords.length !== 1 ? 's' : ''}`}
+                onPress={handleConfirm}
+                disabled={selectedWords.length === 0}
+              />
+              <CustomButton
+                title="Cancel"
+                onPress={handleCancel}
+                style={{marginTop:"3%"}}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
   tabs: {
     flexDirection: 'row',
-    marginBottom: 20,
-    borderRadius: 8,
+    marginBottom:"3%",
+    borderRadius: 10,
     overflow: 'hidden',
   },
   tab: {
     flex: 1,
-    paddingVertical: 12,
+    padding:"3%",
     alignItems: 'center',
-  },
-  tabText: {
-    fontSize: 16,
-    fontFamily: 'DMSans-Bold',
-  },
-  tabContent: {
-    flex: 1,
   },
   wordItem: {
     flexDirection: 'row',
@@ -377,18 +383,8 @@ const styles = StyleSheet.create({
     padding: 0,
     margin: 0,
   },
-  input: {
-    marginBottom: 15,
-  },
   addButton: {
     marginTop: 10,
-  },
-  footer: {
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  footerButton: {
-    width: '48%',
   },
   selectedWordsSection: {
     marginBottom: 20,
@@ -397,6 +393,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginBottom: 10,
+  },
+  tabContent: {
+    flex: 1,
   },
 });
 

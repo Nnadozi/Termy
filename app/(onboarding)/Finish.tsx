@@ -1,7 +1,30 @@
 import CustomIcon from '@/components/CustomIcon';
 import OnboardingPage from '@/components/OnboardingPage';
-import React from 'react';
+import { clearCachedWords } from '@/database/wordCache';
+import useUserStore from '@/stores/userStore';
+import { useEffect } from 'react';
+
 const Finish = () => {
+  const { completeOnboarding } = useUserStore();
+
+  useEffect(() => {
+    // Ensure onboarding is marked as complete
+    completeOnboarding();
+    
+    // Clear any cached words when onboarding completes
+    // This ensures the Daily screen will fetch new words with the user's preferences
+    const clearCache = async () => {
+      try {
+        await clearCachedWords();
+        console.log('Cleared cached words after onboarding completion');
+      } catch (error) {
+        console.log('Error clearing cache after onboarding:', error);
+      }
+    };
+    
+    clearCache();
+  }, [completeOnboarding]);
+
   return (
     <OnboardingPage
       progress={1}
@@ -19,9 +42,9 @@ export default Finish
 
 /**
  * 
- * First day’s 3 words are unlocked.
+ * First day's 3 words are unlocked.
 
 Encourage them to learn the words first, then take a quiz.
 
-Add subtle guidance text: “Tap each word to view definition and examples before you quiz!”
+Add subtle guidance text: "Tap each word to view definition and examples before you quiz!"
  */

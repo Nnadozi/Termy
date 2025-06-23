@@ -57,7 +57,7 @@ const Lists = () => {
         <CustomText fontSize='XL' bold>Lists</CustomText>
         <CustomIcon name="plus" type="entypo" size={30} onPress={() => router.navigate("/(list)/CreateList")} />
       </View>
-      <CustomText style={{marginBottom:"1%"}} bold>Default Lists</CustomText>
+      <CustomText style={{marginBottom:"2%"}} bold>Default Lists</CustomText>
       <ListPreview customList={false} title="Learned" description="Successfully completed vocabulary" count={lists.find(l => l.name === "Learned")?.words.length || 0} />
       <View style={{width:"100%", marginVertical:"2%"}}>
         <CustomText bold>Custom Lists ({lists.filter(list => list.name !== "Learned").length})</CustomText>
@@ -78,7 +78,7 @@ const Lists = () => {
             ))}
                </ScrollView>
           ) : (
-            <CustomText opacity={0.5}>No custom lists yet</CustomText>
+            <CustomText opacity={0.5}>No custom lists yet - press "+" to create</CustomText>
           )
         }
       </View>

@@ -3,42 +3,55 @@ import { showToast } from '@/utils/ShowToast';
 import * as SQLite from 'expo-sqlite';
 
 let db: SQLite.SQLiteDatabase;
+let isInitializing = false;
 
 const initializeDatabase = async () => {
   try {
-    if (!db) {
-      db = await SQLite.openDatabaseAsync('wordCache.db');
+    // Prevent multiple simultaneous initializations
+    if (isInitializing) {
+      // Wait for the current initialization to complete
+      while (isInitializing) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      return;
     }
-    
-    await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS dailyWords (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        word TEXT NOT NULL UNIQUE,
-        definition TEXT NOT NULL,
-        example_usage TEXT,
-        part_of_speech TEXT,
-        category TEXT,
-        date_cached TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
 
-    await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS lists (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE,
-        description TEXT NOT NULL,
-        words TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+    if (!db) {
+      isInitializing = true;
+      db = await SQLite.openDatabaseAsync('wordCache.db');
+      
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS dailyWords (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          word TEXT NOT NULL UNIQUE,
+          definition TEXT NOT NULL,
+          example_usage TEXT,
+          part_of_speech TEXT,
+          category TEXT,
+          date_cached TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
 
-    // Create default lists if they don't exist (direct database calls to avoid circular dependency)
-    await createDefaultListsDirect();
-    
-    console.log('Database initialized successfully');
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS lists (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL UNIQUE,
+          description TEXT NOT NULL,
+          words TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+
+      // Create default lists if they don't exist (direct database calls to avoid circular dependency)
+      await createDefaultListsDirect();
+      
+      console.log('Database initialized successfully');
+      isInitializing = false;
+    }
   } catch (error) {
+    isInitializing = false;
     console.error('Error initializing database:', error);
     throw error;
   }
@@ -51,25 +64,35 @@ const createDefaultListsDirect = async () => {
     ];
 
     // Remove any existing favorites list (migration)
-    await db.runAsync('DELETE FROM lists WHERE name = ?', ['Favorites']);
+    try {
+      await db.runAsync('DELETE FROM lists WHERE name = ?', ['Favorites']);
+    } catch (error) {
+      console.log('No Favorites list to remove (migration)');
+    }
 
     for (const defaultList of defaultLists) {
-      // Check if list exists using direct database query
-      const existingList = await db.getFirstAsync(
-        'SELECT id FROM lists WHERE name = ?',
-        [defaultList.name]
-      );
-      
-      if (!existingList) {
-        await db.runAsync(
-          'INSERT INTO lists (name, description, words) VALUES (?, ?, ?)',
-          [defaultList.name, defaultList.description, null]
+      try {
+        // Check if list exists using direct database query
+        const existingList = await db.getFirstAsync(
+          'SELECT id FROM lists WHERE name = ?',
+          [defaultList.name]
         );
-        console.log(`Created default list: ${defaultList.name}`);
+        
+        if (!existingList) {
+          await db.runAsync(
+            'INSERT INTO lists (name, description, words) VALUES (?, ?, ?)',
+            [defaultList.name, defaultList.description, null]
+          );
+          console.log(`Created default list: ${defaultList.name}`);
+        }
+      } catch (error) {
+        console.error(`Error creating default list ${defaultList.name}:`, error);
+        // Continue with other lists even if one fails
       }
     }
   } catch (error) {
     console.error('Error creating default lists:', error);
+    // Don't throw here to prevent database initialization from failing
   }
 };
 
@@ -77,26 +100,29 @@ const cacheDailyWords = async (words: Word[]) => {
   try {
     await initializeDatabase();
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-    await db.withTransactionAsync(async () => {
-      // Clear old cached words
-      await db.runAsync('DELETE FROM dailyWords WHERE date_cached != ?', [today]);
-      for (const word of words) {
-        await db.runAsync(
-          `INSERT OR REPLACE INTO dailyWords (word, definition, example_usage, part_of_speech, category, date_cached) 
-           VALUES (?, ?, ?, ?, ?, ?)`,
-          [
-            word.word,
-            word.definition,
-            word.example_usage || null,
-            word.part_of_speech || null,
-            word.category || null,
-            today
-          ]
-        );
-      }
-    });
+    console.log('Caching words for date:', today, 'count:', words.length);
     
-    console.log(`Successfully cached ${words.length} daily words`);
+    // Clear words from different dates (not today)
+    await db.runAsync('DELETE FROM dailyWords WHERE date_cached != ?', [today]);
+    console.log('Cleared words from different dates (keeping today\'s words)');
+    
+    // Insert new words
+    for (const word of words) {
+      await db.runAsync(
+        `INSERT OR REPLACE INTO dailyWords (word, definition, example_usage, part_of_speech, category, date_cached) 
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          word.word,
+          word.definition,
+          word.example_usage || null,
+          word.part_of_speech || null,
+          word.category || null,
+          today
+        ]
+      );
+    }
+    
+    console.log(`Successfully cached ${words.length} daily words for ${today}`);
   } catch (error) {
     console.error('Error caching daily words:', error);
     throw error;
@@ -107,10 +133,14 @@ const getCachedDailyWords = async (): Promise<Word[]> => {
   try {
     await initializeDatabase();
     const today = new Date().toISOString().split('T')[0];
+    console.log('Retrieving cached words for date:', today);
+    
     const result = await db.getAllAsync(
       'SELECT * FROM dailyWords WHERE date_cached = ? ORDER BY created_at ASC',
       [today]
     );
+    
+    console.log('Retrieved cached words:', result.length);
     return result.map((row: any) => ({
       id: row.id,
       word: row.word,
@@ -129,11 +159,16 @@ const hasCachedWordsForToday = async (): Promise<boolean> => {
   try {
     await initializeDatabase();
     const today = new Date().toISOString().split('T')[0];
+    console.log('Checking for cached words on date:', today);
+    
     const result = await db.getFirstAsync(
       'SELECT COUNT(*) as count FROM dailyWords WHERE date_cached = ?',
       [today]
     );
-    return (result as any)?.count > 0;
+    
+    const hasWords = (result as any)?.count > 0;
+    console.log('Has cached words for today:', hasWords, 'count:', (result as any)?.count);
+    return hasWords;
   } catch (error) {
     console.error('Error checking cached words:', error);
     return false;
@@ -143,7 +178,7 @@ const hasCachedWordsForToday = async (): Promise<boolean> => {
 const clearCachedWords = async () => {
   try {
     await initializeDatabase();
-    await db.execAsync('DELETE FROM dailyWords');
+    await db.runAsync('DELETE FROM dailyWords');
     console.log('All cached words cleared');
   } catch (error) {
     console.error('Error clearing cached words:', error);
@@ -154,12 +189,18 @@ const clearCachedWords = async () => {
 const clearAllData = async () => {
   try {
     await initializeDatabase();
-    await db.execAsync('DELETE FROM dailyWords');
-    await db.execAsync('DELETE FROM lists');
+    
+    // Use a transaction to ensure atomicity and prevent locking
+    await db.withTransactionAsync(async () => {
+      await db.execAsync('DELETE FROM dailyWords');
+      await db.execAsync('DELETE FROM lists');
+    });
+    
     console.log('All data cleared from database');
   } catch (error) {
     console.error('Error clearing all data:', error);
-    throw error;
+    // Don't throw the error to prevent the profile deletion from failing
+    // The AsyncStorage clear and userStore reset will still work
   }
 };
 
@@ -217,6 +258,7 @@ const deleteList = async (listName: string) => {
       'DELETE FROM lists WHERE name = ?',
       [listName]
     );
+    showToast(`List ${listName} deleted`)
   } catch(error){
     console.error('Error deleting list:', error);
     throw error;

@@ -2,6 +2,7 @@ import { addWordsToList, getAllLists, removeWordFromList } from '@/database/word
 import { List } from '@/types/list'
 import { Word } from '@/types/word'
 import { useTheme } from '@react-navigation/native'
+import { CheckBox } from '@rneui/base'
 import * as Speech from 'expo-speech'
 import { useState } from 'react'
 import { Alert, Modal, ScrollView, Share, StyleSheet, TouchableOpacity, View } from 'react-native'
@@ -28,6 +29,8 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
     const { colors } = useTheme();
     const [showListSelector, setShowListSelector] = useState(false);
     const [availableLists, setAvailableLists] = useState<List[]>([]);
+    const [selectedLists, setSelectedLists] = useState<string[]>([]);
+    const [loadingLists, setLoadingLists] = useState(false);
     
     const pronounceWord = () => {
       Speech.speak(word.word)
@@ -39,6 +42,9 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
     }
 
     const loadAvailableLists = async () => {
+      if (loadingLists) return; // Prevent multiple simultaneous loads
+      
+      setLoadingLists(true);
       try {
         const allLists = await getAllLists();
         // Only show custom lists (not Learned) that don't already contain this word
@@ -47,25 +53,56 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
           !list.words.some((w: Word) => w.word.toLowerCase() === word.word.toLowerCase())
         );
         setAvailableLists(customLists);
+        setSelectedLists([]); // Reset selections when opening modal
       } catch (error) {
         console.error('Error loading available lists:', error);
+        setAvailableLists([]); // Set empty array on error to prevent undefined state
+      } finally {
+        setLoadingLists(false);
       }
     };
 
-    const handleAddToList = async (listName: string) => {
+    const toggleListSelection = (listName: string) => {
+      setSelectedLists(prev => {
+        if (prev.includes(listName)) {
+          return prev.filter(name => name !== listName);
+        } else {
+          return [...prev, listName];
+        }
+      });
+    };
+
+    const handleAddToSelectedLists = async () => {
+      if (selectedLists.length === 0) {
+        Alert.alert('No Lists Selected', 'Please select at least one list to add the word to.');
+        return;
+      }
+
       try {
-        await addWordsToList(listName, [word]);
+        // Add word to all selected lists
+        for (const listName of selectedLists) {
+          await addWordsToList(listName, [word]);
+        }
+        
         setShowListSelector(false);
-        // Could show a success toast here
+        setSelectedLists([]);
+        
+        // Show success message
+        const listNames = selectedLists.join(', ');
+        Alert.alert(
+          'Success', 
+          `"${word.word}" has been added to ${selectedLists.length} list${selectedLists.length > 1 ? 's' : ''}: ${listNames}`,
+          [{ text: 'OK' }]
+        );
       } catch (error) {
-        console.error('Error adding word to list:', error);
-        Alert.alert('Error', 'Failed to add word to list');
+        console.error('Error adding word to lists:', error);
+        Alert.alert('Error', 'Failed to add word to some lists');
       }
     };
 
     const handleAddToListPress = () => {
-      loadAvailableLists();
       setShowListSelector(true);
+      loadAvailableLists();
     };
 
     const handleDeleteWord = async () => {
@@ -97,6 +134,12 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
         ]
       );
     };
+
+    const handleCloseModal = () => {
+      setShowListSelector(false);
+      setSelectedLists([]);
+      setLoadingLists(false);
+    };
   
     return (
       <View style={[styles.pageContainer, { backgroundColor: colors.background }]}>
@@ -115,7 +158,7 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
             {word.word}
           </CustomText>
           <CustomText fontSize='small' textAlign='center'>
-            {word.part_of_speech} · {word.category} 
+            {word.part_of_speech ? `${word.part_of_speech} · ${word.category}` : word.category}
           </CustomText>
           <CustomText textAlign='center'>
             {word.definition}
@@ -157,39 +200,71 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
           </View>
         )}
 
-        {/* List Selector Modal */}
+        {/* Multi-List Selector Modal */}
         <Modal
           visible={showListSelector}
           animationType="slide"
           presentationStyle="pageSheet"
-          onRequestClose={() => setShowListSelector(false)}
+          onRequestClose={handleCloseModal}
         >
           <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-            <View style={styles.modalHeader}>
-              <CustomText fontSize="large" bold>Add to List</CustomText>
-              <CustomText fontSize="small" style={{ opacity: 0.7 }}>
-                Select a list to add "{word.word}"
-              </CustomText>
-            </View>
+            <CustomText fontSize="large" bold>Add to Lists</CustomText>
+            <CustomText style={{marginBottom:"2%"}}>
+              Select lists to add "{word.word}"
+            </CustomText>
+            <CustomText fontSize="small" style={{marginBottom:"5%", opacity: 0.7}}>
+              {selectedLists.length} list{selectedLists.length !== 1 ? 's' : ''} selected
+            </CustomText>
 
             <ScrollView style={styles.modalContent}>
-              {availableLists.length > 0 ? (
+              {loadingLists ? (
+                <View style={styles.emptyState}>
+                  <CustomText textAlign="center" opacity={0.7}>
+                    Loading lists...
+                  </CustomText>
+                </View>
+              ) : availableLists.length > 0 ? (
                 availableLists.map((list) => (
                   <TouchableOpacity
                     key={list.name}
-                    style={[styles.listItem, { backgroundColor: colors.card, borderColor: colors.border }]}
-                    onPress={() => handleAddToList(list.name)}
+                    style={[
+                      styles.listItem, 
+                      { 
+                        backgroundColor: selectedLists.includes(list.name) ? colors.primary : colors.card, 
+                        borderColor: colors.border 
+                      }
+                    ]}
+                    onPress={() => toggleListSelection(list.name)}
                   >
-                    <View>
-                      <CustomText bold>{list.name}</CustomText>
-                      <CustomText fontSize="small" style={{ opacity: 0.7 }}>
+                    <View style={styles.listItemContent}> 
+                      <CustomText 
+                        bold 
+                        color={selectedLists.includes(list.name) ? colors.background : colors.text}
+                      >
+                        {list.name}
+                      </CustomText>
+                      <CustomText 
+                        fontSize="small" 
+                        style={{ opacity: 0.7 }}
+                        color={selectedLists.includes(list.name) ? colors.background : colors.text}
+                      >
                         {list.description}
                       </CustomText>
-                      <CustomText fontSize="small" style={{ opacity: 0.5 }}>
+                      <CustomText 
+                        fontSize="small" 
+                        style={{ opacity: 0.5 }}
+                        color={selectedLists.includes(list.name) ? colors.background : colors.text}
+                      >
                         {list.words.length} words
                       </CustomText>
                     </View>
-                    <CustomIcon name="chevron-right" size={20} color={colors.border} />
+                    <CheckBox
+                      checked={selectedLists.includes(list.name)}
+                      onPress={() => toggleListSelection(list.name)}
+                      containerStyle={styles.checkbox}
+                      checkedColor={colors.background}
+                      uncheckedColor={colors.border}
+                    />
                   </TouchableOpacity>
                 ))
               ) : (
@@ -206,8 +281,14 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
 
             <View style={styles.modalFooter}>
               <CustomButton
+                title={`Add to ${selectedLists.length} List${selectedLists.length !== 1 ? 's' : ''}`}
+                onPress={handleAddToSelectedLists}
+                disabled={selectedLists.length === 0}
+                style={{ marginBottom: "3%" }}
+              />
+              <CustomButton
                 title="Cancel"
-                onPress={() => setShowListSelector(false)}
+                onPress={handleCloseModal}
                 style={{ width: '100%' }}
               />
             </View>
@@ -250,21 +331,29 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
       flex: 1,
-      padding: 20,
-    },
-    modalHeader: {
-      marginBottom: 20,
+      padding: "5%",
     },
     modalContent: {
       flex: 1,
     },
     listItem: {
-      padding: 10,
+      padding: "3%",
       borderWidth: 1,
       borderColor: 'gray',
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
+      marginBottom:"3%",
+      borderRadius: 8,
+    },
+    listItemContent: {
+      flex: 1,
+    },
+    checkbox: {
+      backgroundColor: 'transparent',
+      borderWidth: 0,
+      padding: 0,
+      margin: 0,
     },
     emptyState: {
       flex: 1,
@@ -272,7 +361,6 @@ const styles = StyleSheet.create({
       alignItems: 'center',
     },
     modalFooter: {
-      marginTop: 20,
-      padding: 10,
+      marginTop: "5%",
     },
   })

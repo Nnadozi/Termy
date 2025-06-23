@@ -41,7 +41,21 @@ const OnboardingPage = ({children, progress, title, subTitle, nextPage, style, d
             {children}
         </View>
         <View style={styles.bottomPortion}>
-            <CustomButton disabled={disableNext} title={progress == 1 ? 'Lets Go' : 'Next'} onPress={() => customOnPress ? customOnPress() : router.navigate(nextPage)} />
+            <CustomButton 
+              disabled={disableNext} 
+              title={progress == 1 ? 'Lets Go' : 'Next'} 
+              onPress={async () => {
+                if (customOnPress) {
+                  customOnPress();
+                } else if (progress == 1) {
+                  // Add a small delay on the final page to ensure state updates are processed
+                  await new Promise(resolve => setTimeout(resolve, 100));
+                  router.navigate(nextPage);
+                } else {
+                  router.navigate(nextPage);
+                }
+              }} 
+            />
         </View>
         {progress == 1 && (
         <ConfettiCannon

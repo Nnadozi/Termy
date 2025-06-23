@@ -13,9 +13,10 @@ interface CustomInputProps {
     onSubmitEditing?: () => void;
     returnKeyType?: 'done' | 'go' | 'next' | 'search' | 'send';
     editable?: boolean;
+    textAlign?: 'left' | 'right' | 'center';
 }
 
-const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength, keyboardType, multiline, onSubmitEditing, returnKeyType, editable}:CustomInputProps) => {
+const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength, keyboardType, multiline, onSubmitEditing, returnKeyType, editable, textAlign}:CustomInputProps) => {
   const {colors} = useTheme();
   return (
     <TextInput
@@ -32,7 +33,7 @@ const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength,
     cursorColor={colors.text}
     keyboardType={keyboardType}
     multiline={multiline}
-    textAlignVertical={multiline ? "top" : "center"}
+    textAlignVertical={multiline ? "top" : textAlign as "auto" | "center" | "top" | "bottom"}
     onSubmitEditing={onSubmitEditing}
     returnKeyType={returnKeyType}
     editable={editable}

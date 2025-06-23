@@ -1,4 +1,5 @@
 import CustomButton from '@/components/CustomButton'
+import CustomIcon from '@/components/CustomIcon'
 import CustomText from '@/components/CustomText'
 import Page from '@/components/Page'
 import QuizQuestion from '@/components/QuizQuestion'
@@ -10,6 +11,7 @@ import { useTheme } from '@react-navigation/native'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, ScrollView, View } from 'react-native'
+import ConfettiCannon from 'react-native-confetti-cannon'
 
 const Quiz = () => {
   const {words} = useLocalSearchParams()
@@ -38,7 +40,7 @@ Requirements:
 5. Make distractors plausible but clearly wrong
 6. Use the provided definition and example usage
 7. Questions should test understanding, not just memorization
-8. The questions should be in random order. Mix it up!
+8. The questions should be in random order - shuffle the questions array so that the questions are in a random order
 9. DO NOT create part of speech questions
 
 IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
@@ -168,21 +170,13 @@ IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
         // Update user stats
         updateQuizStats(percentage, wordsArray.length)
         
-        showToast(`🎉 Congratulations ${userName}! All daily words have been learned!`, 'success')
-        
-        // Navigate back to Daily screen
-        setTimeout(() => {
-          router.replace('/(main)/Daily')
-        }, 2000)
+        showToast(`🎉 All daily words have been learned!`)
       } catch (error) {
         console.error('Error adding words to Learned list:', error)
         showToast('Error saving learned words', 'error')
       }
     } else if (passed && dailyWordsCompletedToday) {
-      showToast('You\'ve already completed today\'s words!', 'info')
-      setTimeout(() => {
-        router.replace('/(main)/Daily')
-      }, 2000)
+      showToast('Daily words already completed', 'info')
     }
   }
 
@@ -209,9 +203,9 @@ IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
     return (
       <Page>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator style={{marginVertical:"3%"}} size="large" color={colors.primary} />
-          <CustomText fontSize='large' bold>Creating questions...</CustomText>
-          <CustomText fontSize='normal'>It's time to test your knowledge!</CustomText>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <CustomText style={{marginTop:"2%"}} fontSize='large' bold>Creating questions...</CustomText>
+          <CustomText  fontSize='normal'>It's time to test your knowledge!</CustomText>
         </View>
       </Page>
     )
@@ -228,34 +222,37 @@ IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
           contentContainerStyle={{ paddingBottom: 20, justifyContent: 'center', alignItems: 'center', flex: 1 }}
           showsVerticalScrollIndicator={false}
         >
-          <CustomText fontSize="XL" bold>Quiz Complete!</CustomText>
-          <CustomText fontSize="large" style={{ marginVertical: 20 }}>
-            Score: {score}/{questions.length} ({percentage}%)
+          {passed && (
+            <ConfettiCannon
+              count={150}
+              origin={{x: 0, y: 0}}
+              fadeOut={true}
+              fallSpeed={3000}
+            />
+          )}
+          <CustomIcon type='entypo' name={passed ? 'emoji-happy' : 'emoji-sad'} size={100} style={{marginBottom:"2%"}} />
+          <CustomText fontSize="XL" bold>Quiz Complete</CustomText>
+          <CustomText color={passed ? '#4CAF50' : '#F44336'} style={{marginVertical:"1%"}}>
+            Score: {score}/{questions.length} <CustomText color={passed ? '#4CAF50' : '#F44336'} bold>({percentage}%)</CustomText> 
           </CustomText>
-          <CustomText fontSize="large" bold style={{ color: passed ? '#4CAF50' : '#F44336', marginBottom: 20 }}>
-            {passed ? '🎉 You Passed!' : '❌ Try Again'}
-          </CustomText>
-          <CustomText fontSize="normal" style={{ textAlign: 'center', marginBottom: 30 }}>
+          <CustomText fontSize="normal"  textAlign="center" style={{ marginBottom:"3%" }}>
             {passed 
               ? dailyWordsCompletedToday 
-                ? 'You\'ve already completed today\'s words! Returning to Daily screen...'
-                : 'Great job! You\'ve successfully learned these words. Returning to Daily screen...'
+                ? 'You\'ve completed today\'s words!'
+                : 'Great job! You\'ve successfully learned these words.'
               : 'You need 80% to pass. Keep practicing!'
             }
           </CustomText>
-          {!passed && (
-            <View style={{ gap:10}}>
-              <CustomButton
-                title="Retake Quiz"
-                onPress={retakeQuiz}
-                style={{ width: '60%' }}
-              />
+          {passed ? (
+            <CustomButton
+              title="Sweet!"
+              onPress={() => router.replace('/(main)/Daily')}
+            />
+          ) : (
               <CustomButton
                 title="Keep practicing"
                 onPress={() => router.replace('/(main)/Daily')}
-                style={{ width: '60%' }}
               />
-            </View>
           )}
         </ScrollView>
       </Page>

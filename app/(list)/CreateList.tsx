@@ -6,9 +6,10 @@ import Page from "@/components/Page"
 import WordSelectorModal from "@/components/WordSelectorModal"
 import { addWordsToList, createList } from "@/database/wordCache"
 import { Word } from "@/types/word"
+import { useTheme } from "@react-navigation/native"
 import { router } from "expo-router"
 import { useState } from "react"
-import { StyleSheet, View } from "react-native"
+import { StyleSheet, TouchableOpacity, View } from "react-native"
 
 const CreateList = () => {
     const [listName, setListName] = useState("")
@@ -16,7 +17,7 @@ const CreateList = () => {
     const [selectedWords, setSelectedWords] = useState<Word[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [showWordSelector, setShowWordSelector] = useState(false)
-
+    const { colors } = useTheme()
     const handleWordsSelected = (words: Word[]) => {
         setSelectedWords(prev => [...prev, ...words])
     }
@@ -66,26 +67,23 @@ const CreateList = () => {
             />
             
             <View style={styles.addWordsSection}>
-                <CustomText style={{marginTop: "3%"}} fontSize="small" bold primary>+ Add words</CustomText>
-                <CustomText style={{marginBottom: "3%"}} fontSize="small" primary>
-                    Add words you already learned - or your own ({selectedWords.length} selected)
-                </CustomText>
-                <CustomButton
-                    title="Select Words"
-                    onPress={() => setShowWordSelector(true)}
-                    style={{marginBottom: "3%"}}
-                />
-                
+                <TouchableOpacity onPress={() => setShowWordSelector(true)}>
+                    <CustomText style={{marginTop: "3%"}} fontSize="small" bold primary>+ Add words ({selectedWords.length} selected)</CustomText>
+                    <CustomText style={{marginBottom: "2%"}} fontSize="small" primary>
+                        Add words you already learned - or create your own!
+                    </CustomText>
+                </TouchableOpacity>
+          
                 {/* Show selected words */}
                 {selectedWords.length > 0 && (
-                    <View style={styles.selectedWordsContainer}>
+                    <View style={[styles.selectedWordsContainer,{borderColor: colors.border}]}>
                         <CustomText fontSize="small" bold style={{marginBottom: 10}}>
                             Selected Words:
                         </CustomText>
                         {selectedWords.map((word, index) => (
-                            <View key={word.id} style={styles.selectedWordItem}>
+                            <View key={word.id} style={[styles.selectedWordItem,{backgroundColor: colors.primary}]}>
                                 <CustomText fontSize="small" style={{flex: 1}}>
-                                    {word.word} - {word.definition}
+                                    {word.word}
                                 </CustomText>
                                 <CustomIcon
                                     name="close"
@@ -136,19 +134,17 @@ const styles = StyleSheet.create({
         marginBottom: "3%"
     },
     selectedWordsContainer: {
-        marginTop: 10,
-        padding: 10,
-        borderRadius: 8,
+        marginTop: "2%",
+        padding: "3%",
+        borderRadius: 10,
         borderWidth: 1,
-        borderColor: "#ddd"
     },
     selectedWordItem: {
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        marginBottom: 5,
-        backgroundColor: "#f5f5f5",
+        justifyContent: "space-between",
+        padding:"3%",
+        marginBottom: "2%",
         borderRadius: 5
     }
 })

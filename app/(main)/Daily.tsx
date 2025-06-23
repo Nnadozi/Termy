@@ -2,7 +2,7 @@ import CustomButton from '@/components/CustomButton'
 import CustomText from '@/components/CustomText'
 import DailyWordCard from '@/components/DailyWordCard'
 import Page from '@/components/Page'
-import { cacheDailyWords, getCachedDailyWords, hasCachedWordsForToday } from '@/database/wordCache'
+import { cacheDailyWords, clearCachedWords, getCachedDailyWords, hasCachedWordsForToday } from '@/database/wordCache'
 import { getDailyWords } from '@/database/wordService'
 import useUserStore from '@/stores/userStore'
 import { Word } from '@/types/word'
@@ -51,25 +51,28 @@ const Daily = () => {
         
         // Check if preferences have changed since last load
         const preferencesChanged = 
-          JSON.stringify(lastPreferences.current.topics) !== JSON.stringify(wordTopics) ||
-          lastPreferences.current.goal !== dailyWordGoal
+          lastPreferences.current.topics.length > 0 && // Only check if we have previous preferences
+          (JSON.stringify(lastPreferences.current.topics) !== JSON.stringify(wordTopics) ||
+          lastPreferences.current.goal !== dailyWordGoal)
         
-        // Also check if this is the first time loading after onboarding
-        const isFirstLoad = lastPreferences.current.topics.length === 0
-        
-        if (preferencesChanged || isFirstLoad) {
-          console.log('Daily: Preferences changed or first load, clearing cache')
-          const { clearCachedWords } = await import('@/database/wordCache')
+        // If preferences changed, clear cache to force fresh fetch
+        if (preferencesChanged) {
+          console.log('Daily: Preferences changed, clearing cache')
           await clearCachedWords()
-          lastPreferences.current = { topics: [...wordTopics], goal: dailyWordGoal }
         }
         
+        // Update last preferences
+        lastPreferences.current = { topics: [...wordTopics], goal: dailyWordGoal }
+        
         const hasCachedWords = await hasCachedWordsForToday()
+        console.log('Daily: Has cached words for today:', hasCachedWords)
+        
         if (hasCachedWords) {
           const cachedWords = await getCachedDailyWords()
           console.log('Daily: Using cached words:', cachedWords.length)
           setDailyVocab(cachedWords)
         } else {
+          console.log('Daily: No cached words, fetching new ones')
           const words = await getDailyWords(wordTopics, dailyWordGoal)
           console.log('Daily: Fetched new words:', words.length, 'words')
           console.log('Daily: Word categories:', words.map(w => w.category))
@@ -82,10 +85,12 @@ const Daily = () => {
         setLoading(false)
       }
     }
-    if (wordTopics && wordTopics.length > 0) {
+    
+    if (wordTopics && wordTopics.length > 0 && dailyWordGoal > 0) {
       loadWords()
     } else {
-      console.log('Daily: No word topics selected')
+      console.log('Daily: No word topics selected or invalid goal')
+      setLoading(false)
     }
   }, [wordTopics, dailyWordGoal])
 
@@ -93,13 +98,13 @@ const Daily = () => {
     try {
       setLoading(true)
       console.log('Daily: Manually refreshing words')
-      const { clearCachedWords } = await import('@/database/wordCache')
       await clearCachedWords()
       const words = await getDailyWords(wordTopics, dailyWordGoal)
       console.log('Daily: Refreshed words:', words.length, 'words')
       console.log('Daily: Word categories:', words.map(w => w.category))
       setDailyVocab(words)
       await cacheDailyWords(words)
+      lastPreferences.current = { topics: [...wordTopics], goal: dailyWordGoal }
     } catch (error) {
       console.error('Error refreshing words:', error)
     } finally {
@@ -121,7 +126,7 @@ const Daily = () => {
         {loading ? (
           <View style={{ flex: 1, justifyContent: "center", alignItems: "center",width:"100%" }}>
             <ActivityIndicator size="large" color={colors.primary} />
-            <CustomText textAlign='center'>Loading your words...</CustomText>
+            <CustomText style={{marginVertical:"2%"}} textAlign='center'>Loading your words...</CustomText>
           </View>
         ) : dailyWordsCompletedToday ? (
           <View style={{ flex: 1, justifyContent: "center", alignItems: "center", width: "100%" }}>
@@ -137,11 +142,7 @@ const Daily = () => {
                 {timeUntilNextDay}
               </CustomText>
             </View>
-            <CustomButton
-              title="View Learned Words"
-              onPress={() => router.push('/(list)/Learned')}
-              style={{marginTop:"5%"}}
-            />
+            <CustomText bold primary style={{marginTop:"5%"}} onPress={() => router.push('/(list)/Learned')}>View Learned Words →  </CustomText>
           </View>
         ) : dailyVocab.length > 0 ? (
           <PagerView ref={pagerRef} initialPage={0} orientation='vertical' style={{ flex: 1, width:"100%" }}>

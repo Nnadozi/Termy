@@ -4,7 +4,7 @@ import OnboardingPage from '@/components/OnboardingPage'
 import { useThemeStore } from '@/stores/themeStore'
 import useUserStore, { allWordTopics } from '@/stores/userStore'
 import { ButtonGroup, Chip } from '@rneui/base'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Switch, View } from 'react-native'
 
 const Preferences = () => {
@@ -53,7 +53,7 @@ const Preferences = () => {
         <View style={{gap:20}}>
           <View style={styles.row}> 
             <View>
-              <CustomText bold>Daily Word Goal</CustomText>
+              <CustomText bold>Daily Word Goal (9 max)</CustomText>
               <CustomText fontSize="small">We recommend learning 3 words daily</CustomText>
             </View>
             <CustomInput
@@ -66,6 +66,10 @@ const Preferences = () => {
                const parsedValue = parseInt(filteredText)
                if (!isNaN(parsedValue) && parsedValue > 0) {
                  setDailyWordGoal(parsedValue)
+               } else if (parsedValue === 0) {
+                 // Reset to minimum value if user tries to set 0
+                 setGoalValue("1")
+                 setDailyWordGoal(1)
                }
              }} 
              keyboardType="number-pad"

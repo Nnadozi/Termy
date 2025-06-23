@@ -4,7 +4,7 @@ import CustomIcon from "@/components/CustomIcon";
 import CustomInput from "@/components/CustomInput";
 import CustomText from "@/components/CustomText";
 import Page from "@/components/Page";
-import useUserStore, { allWordTopics } from "@/stores/userStore";
+import useUserStore, { allWordTopics, resetUserStore } from "@/stores/userStore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '@react-navigation/native';
 import { Avatar, Chip } from '@rneui/base';
@@ -237,12 +237,15 @@ const Profile = () => {
                         // Clear AsyncStorage completely
                         await AsyncStorage.clear()
                         
-                        // Clear wordCache
-                        const { clearAllData } = await import('@/database/wordCache')
-                        await clearAllData()
+                        // Try to clear wordCache (but don't fail if it doesn't work)
+                        try {
+                          const { clearAllData } = await import('@/database/wordCache')
+                          await clearAllData()
+                        } catch (dbError) {
+                          console.log('Database clear failed, but continuing with profile deletion:', dbError)
+                        }
                         
                         // Reset userStore to initial state
-                        const { resetUserStore } = await import('@/stores/userStore')
                         resetUserStore()
                         
                         // Navigate to onboarding

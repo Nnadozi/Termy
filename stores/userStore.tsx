@@ -3,7 +3,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 export const allWordTopics = [
-  "SAT", "ACT","Science", "Mathematics", "History", "Literature", 
+  "Science", "Mathematics", "History", "Literature", 
   "Psychology", "Philosophy", "Economics","Business", "Technology",
   "Medicine", "Law","Art", "Music", "Sports","Travel", 
   "Health", "Geography", "General"
