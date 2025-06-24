@@ -116,7 +116,7 @@ const Daily = () => {
     <Page style={{ justifyContent: "flex-start", alignItems: "flex-start" }}>
       <View style={{ width: "100%", marginBottom: "3%" }}>
         <CustomText textAlign='center' fontSize='XL' bold>Hi, {userName}</CustomText>
-        <CustomText textAlign='center' primary bold>Here's your daily vocabulary</CustomText>
+        <CustomText textAlign='center' primary >Here's your daily vocabulary</CustomText>
         {currentStreak > 0 && (
           <CustomText textAlign='center' fontSize='small' style={{ marginTop: "1%" }}>
             🔥 {currentStreak} day streak 

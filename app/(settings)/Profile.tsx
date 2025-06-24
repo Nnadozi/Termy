@@ -33,6 +33,19 @@ const Profile = () => {
   const [tempAvatarColor, setTempAvatarColor] = useState(avatarColor)
   const [tempDailyWordGoal, setTempDailyWordGoal] = useState(dailyWordGoal.toString())
   const [tempWordTopics, setTempWordTopics] = useState(wordTopics)
+  
+  // Secure deletion states
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState('')
+  const [usernameConfirmation, setUsernameConfirmation] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  
+  // Track if there are unsaved changes
+  const hasUnsavedChanges = 
+    tempUserName !== userName ||
+    tempAvatarColor !== avatarColor ||
+    tempDailyWordGoal !== dailyWordGoal.toString() ||
+    JSON.stringify(tempWordTopics) !== JSON.stringify(wordTopics)
 
   const handleSave = () => {
     if (tempUserName.trim().length === 0) {
@@ -61,6 +74,81 @@ const Profile = () => {
     setIsEditing(false)
   }
 
+  // Secure deletion functions
+  const initiateDeleteProfile = () => {
+    Alert.alert(
+      'Delete Profile',
+      'Are you sure you want to delete your profile? This will permanently erase all your data and learning progress. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Continue', 
+          style: 'destructive',
+          onPress: () => setShowDeleteConfirmation(true)
+        }
+      ]
+    )
+  }
+
+  const confirmDeleteProfile = () => {
+    if (deleteConfirmationText !== 'DELETE') {
+      Alert.alert('Error', 'Please type "DELETE" exactly to confirm')
+      return
+    }
+    
+    if (usernameConfirmation !== userName) {
+      Alert.alert('Error', 'Username does not match. Please enter your exact username.')
+      return
+    }
+
+    // Final confirmation with different wording
+    Alert.alert(
+      'Final Confirmation',
+      'This is your last chance to cancel. Your profile and all data will be permanently deleted and cannot be recovered. Are you absolutely sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Yes, Delete Everything', 
+          style: 'destructive',
+          onPress: performDeleteProfile
+        }
+      ]
+    )
+  }
+
+  const performDeleteProfile = async () => {
+    setIsDeleting(true)
+    try {
+      // Clear AsyncStorage completely
+      await AsyncStorage.clear()
+      
+      // Try to clear wordCache (but don't fail if it doesn't work)
+      try {
+        const { clearAllData } = await import('@/database/wordCache')
+        await clearAllData()
+      } catch (dbError) {
+        console.log('Database clear failed, but continuing with profile deletion:', dbError)
+      }
+      
+      // Reset userStore to initial state
+      resetUserStore()
+      
+      // Navigate to onboarding
+      router.replace('/(onboarding)')
+    } catch (error) {
+      console.error('Error deleting profile:', error)
+      Alert.alert('Error', 'Failed to delete profile. Please try again.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const cancelDeleteProfile = () => {
+    setShowDeleteConfirmation(false)
+    setDeleteConfirmationText('')
+    setUsernameConfirmation('')
+  }
+
   const toggleTopic = (topic: string) => {
     if (isEditing) {
       setTempWordTopics(prev =>
@@ -83,7 +171,7 @@ const Profile = () => {
 
   return (
     <Page style={{ justifyContent: "flex-start", alignItems: "flex-start" }}>
-      <ScrollView 
+      <ScrollView
         style={{ flex: 1, width: '100%' }}
         contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
@@ -223,42 +311,7 @@ const Profile = () => {
           </CustomText>
           <CustomButton
             title="Delete Profile"
-            onPress={() => {
-              Alert.alert(
-                'Delete Profile',
-                'Are you sure you want to delete your profile? This will permanently erase all your data and learning progress. This action cannot be undone.',
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  { 
-                    text: 'Delete', 
-                    style: 'destructive',
-                    onPress: async () => {
-                      try {
-                        // Clear AsyncStorage completely
-                        await AsyncStorage.clear()
-                        
-                        // Try to clear wordCache (but don't fail if it doesn't work)
-                        try {
-                          const { clearAllData } = await import('@/database/wordCache')
-                          await clearAllData()
-                        } catch (dbError) {
-                          console.log('Database clear failed, but continuing with profile deletion:', dbError)
-                        }
-                        
-                        // Reset userStore to initial state
-                        resetUserStore()
-                        
-                        // Navigate to onboarding
-                        router.replace('/(onboarding)')
-                      } catch (error) {
-                        console.error('Error deleting profile:', error)
-                        Alert.alert('Error', 'Failed to delete profile. Please try again.')
-                      }
-                    }
-                  }
-                ]
-              )
-            }}
+            onPress={initiateDeleteProfile}
             style={{ 
               width: '100%', 
               padding: 15, 
@@ -293,6 +346,22 @@ const Profile = () => {
           )}
         </View>
 
+        {/* Save Changes Button - Shows when there are unsaved changes */}
+        {!isEditing && hasUnsavedChanges && (
+          <View style={styles.buttonContainer}>
+            <CustomButton
+              title="Save Changes"
+              onPress={handleSave}
+              style={{ 
+                width: '100%', 
+                padding: 15, 
+                borderRadius: 8, 
+                backgroundColor: colors.primary 
+              }}
+            />
+          </View>
+        )}
+
         {/* Color Picker Modal */}
         <ColorPickerModal
           visible={showColorPicker}
@@ -301,6 +370,90 @@ const Profile = () => {
           initialColor={tempAvatarColor}
         />
       </ScrollView>
+
+      {/* Secure Deletion Confirmation Modal - Outside ScrollView */}
+      {showDeleteConfirmation && (
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <CustomText fontSize='XL' bold style={{ marginBottom: 15, color: '#FF4444', textAlign: 'center' }}>
+              Confirm Deletion
+            </CustomText>
+            
+            <CustomText fontSize='normal' style={{ marginBottom: 20, textAlign: 'center' }}>
+              To confirm deletion, please complete the following steps:
+            </CustomText>
+
+            <View style={styles.confirmationStep}>
+              <CustomText fontSize='normal' bold style={{ marginBottom: 10 }}>
+                Step 1: Type "DELETE" to confirm
+              </CustomText>
+              <CustomInput
+                value={deleteConfirmationText}
+                onChangeText={setDeleteConfirmationText}
+                placeholder="Type DELETE"
+                style={{ marginBottom: 15 }}
+              />
+            </View>
+
+            <View style={styles.confirmationStep}>
+              <CustomText fontSize='normal' bold style={{ marginBottom: 10 }}>
+                Step 2: Enter your username
+              </CustomText>
+              <CustomText fontSize='small' style={{ marginBottom: 5, opacity: 0.7 }}>
+                Username: {userName}
+              </CustomText>
+              <CustomInput
+                value={usernameConfirmation}
+                onChangeText={setUsernameConfirmation}
+                placeholder="Enter your username"
+                style={{ marginBottom: 15 }}
+              />
+            </View>
+
+            {/* Help text to guide the user */}
+            {(deleteConfirmationText !== 'DELETE' || usernameConfirmation !== userName) && (
+              <View style={styles.helpText}>
+                <CustomText fontSize='small' style={{ textAlign: 'center', opacity: 0.7 }}>
+                  {deleteConfirmationText !== 'DELETE' && 'Please type "DELETE" exactly'}
+                  {deleteConfirmationText === 'DELETE' && usernameConfirmation !== userName && 'Please enter your username correctly'}
+                </CustomText>
+              </View>
+            )}
+
+            {/* Buttons always visible at bottom */}
+            <View style={styles.modalButtons}>
+              <CustomButton
+                title="Cancel"
+                onPress={cancelDeleteProfile}
+                style={{ ...styles.modalButton, backgroundColor: colors.border, marginBottom: 10 }}
+              />
+              <CustomButton
+                title={isDeleting ? "Deleting..." : "Confirm Deletion"}
+                onPress={confirmDeleteProfile}
+                disabled={isDeleting || deleteConfirmationText.trim() !== 'DELETE' || usernameConfirmation.trim() !== userName}
+                style={{ 
+                  ...styles.modalButton, 
+                  backgroundColor: (deleteConfirmationText.trim() === 'DELETE' && usernameConfirmation.trim() === userName) ? '#FF4444' : '#CCCCCC',
+                  opacity: (deleteConfirmationText.trim() === 'DELETE' && usernameConfirmation.trim() === userName) ? 1 : 0.6
+                }}
+              />
+            </View>
+            
+            {/* Debug info - remove this after testing */}
+            <View style={{ padding: 10, backgroundColor: '#f0f0f0', marginTop: 10, borderRadius: 5 }}>
+              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
+                Debug: DELETE="{deleteConfirmationText}" | Username="{usernameConfirmation}" | Expected="{userName}"
+              </CustomText>
+              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
+                DELETE match: {deleteConfirmationText.trim() === 'DELETE' ? 'YES' : 'NO'}
+              </CustomText>
+              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
+                Username match: {usernameConfirmation.trim() === userName ? 'YES' : 'NO'}
+              </CustomText>
+            </View>
+          </View>
+        </View>
+      )}
     </Page>
   )
 }
@@ -348,6 +501,43 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     marginBottom: 10,
+  },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+    elevation: 10,
+  },
+  modalContent: {
+    width: '85%',
+    maxWidth: 400,
+    padding: 25,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  confirmationStep: {
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    gap: 15,
+  },
+  modalButton: {
+    width: '100%',
+    padding: 15,
+    borderRadius: 8,
+  },
+  helpText: {
+    marginTop: 10,
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
   },
 })
 

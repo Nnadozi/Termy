@@ -5,7 +5,6 @@ import { Dimensions, StyleSheet, View, ViewStyle } from 'react-native'
 import ConfettiCannon from 'react-native-confetti-cannon'
 import * as Progress from 'react-native-progress'
 import CustomButton from './CustomButton'
-import CustomIcon from './CustomIcon'
 import CustomText from './CustomText'
 import Page from './Page'
 
@@ -26,7 +25,6 @@ const OnboardingPage = ({children, progress, title, subTitle, nextPage, style, d
     <Page >
         <View style={styles.topPortion}>
             <View style = {styles.topRow}>
-                <CustomIcon name='chevron-left' onPress={() => router.back()} />
                 <Progress.Bar 
                 color={colors.primary} progress={progress} 
                 width={Dimensions.get('window').width - 70} 
@@ -77,6 +75,7 @@ const styles = StyleSheet.create({
         justifyContent:"center",
         alignItems:"center",
         width:"100%",
+        marginVertical:"2%",
        // borderWidth:1,
     },
     topPortion:{

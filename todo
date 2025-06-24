@@ -1,27 +1,24 @@
 Work on:
 - add Scrollviews where needed
+- make new db of words
 - handle overflowing text (ex: welcome message)
-- notifications
-- gamification
-- delete profile protection
 - load when needed (ex: account deletion)
-- new words to db (that are correct)
+- testing
 - word list filter (date, type, etc)
 - make ui better
 - percentage based styles
 - fade animations (esp for quiz complete)
-- clean up onboarding
-- disable swipe gestures
+- hide keys
+- test on different devices
 - error handling (esp for quiz generation)
 - premium:
     - More than 3 lists
     - Swipe moderr
     - No ads
     - Change when new words available (default: Until tmrw)
-
 Bugs
 - odd cache bug after onboarding (words change just once)
-- weird flashing when adding words with no learned vocab
+
 
 Launch v1.0.0: 7/1/25
 During testing:
@@ -33,8 +30,12 @@ During testing:
   - unique daily words
 - suggestions
 - loading GIFs
+- set times for new words (daily, 24h, custom, etc) notifications
 Future:
 - inline words
 - app tutorial
 - languages
+- gamification
+- different voices
+- new word categories (tech)
 

@@ -5,7 +5,7 @@ import { useThemeStore } from '@/stores/themeStore'
 import useUserStore, { allWordTopics } from '@/stores/userStore'
 import { ButtonGroup, Chip } from '@rneui/base'
 import { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, Switch, View } from 'react-native'
+import { ScrollView, StyleSheet, View } from 'react-native'
 
 const Preferences = () => {
   const { 
@@ -50,7 +50,23 @@ const Preferences = () => {
         contentContainerStyle={{flexGrow:1, paddingBottom:200}}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{gap:20}}>
+        <View style={{gap:"3%"}}>
+        <View style={styles.row}>
+            <View>
+              <CustomText bold>Theme</CustomText>
+              <CustomText fontSize="small">Choose your preferred theme</CustomText>
+            </View>
+            <ButtonGroup
+              buttons={["Light", "Dark"]}
+              buttonStyle={{backgroundColor: colors.colors.card}}
+              textStyle={{color: colors.colors.text, fontFamily: "DMSans-Regular"}}
+              selectedButtonStyle={{backgroundColor: colors.colors.primary}}
+              selectedTextStyle={{color: colors.colors.background}}
+              selectedIndex={mode === "dark" ? 1 : 0}
+              onPress={(index) => setThemeMode(index === 0 ? "light" : "dark")}
+              containerStyle={{width: "40%", borderWidth: 1, borderColor: colors.colors.border, marginRight:"0%"}}
+            />
+          </View>
           <View style={styles.row}> 
             <View>
               <CustomText bold>Daily Word Goal (9 max)</CustomText>
@@ -75,38 +91,7 @@ const Preferences = () => {
              keyboardType="number-pad"
              maxLength={1}
              />
-          </View>
-          
-          <View style={styles.row}>
-            <View>
-              <CustomText bold>Enable Notifications</CustomText>
-              <CustomText fontSize="small">Know when your daily words are ready</CustomText>
-            </View>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
-              trackColor={{false: "gray", true: colors.colors.primary}}
-              thumbColor={"white"}
-            />
-          </View>
-          
-          <View style={styles.row}>
-            <View>
-              <CustomText bold>Theme</CustomText>
-              <CustomText fontSize="small">Choose your preferred theme</CustomText>
-            </View>
-            <ButtonGroup
-              buttons={["Light", "Dark"]}
-              buttonStyle={{backgroundColor: colors.colors.card}}
-              textStyle={{color: colors.colors.text, fontFamily: "DMSans-Regular"}}
-              selectedButtonStyle={{backgroundColor: colors.colors.primary}}
-              selectedTextStyle={{color: colors.colors.background}}
-              selectedIndex={mode === "dark" ? 1 : 0}
-              onPress={(index) => setThemeMode(index === 0 ? "light" : "dark")}
-              containerStyle={{width: "40%", borderWidth: 1, borderColor: colors.colors.border, marginRight:"0%"}}
-            />
-          </View>
-          
+          </View>             
           <View>
             <View>
               <CustomText bold>What Topics Interest You?</CustomText>
@@ -163,3 +148,19 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
 })
+
+/**
+ * 
+ *           <View style={styles.row}>
+            <View>
+              <CustomText bold>Enable Notifications</CustomText>
+              <CustomText fontSize="small">Know when your daily words are ready</CustomText>
+            </View>
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={setNotificationsEnabled}
+              trackColor={{false: "gray", true: colors.colors.primary}}
+              thumbColor={"white"}
+            />
+          </View>
+ */

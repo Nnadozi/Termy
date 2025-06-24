@@ -3,10 +3,9 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 export const allWordTopics = [
-  "Science", "Mathematics", "History", "Literature", 
-  "Psychology", "Philosophy", "Economics","Business", "Technology",
-  "Medicine", "Law","Art", "Music", "Sports","Travel", 
-  "Health", "Geography", "General"
+  "Science", "Business", "Health", "Arts", "History", 
+  "Education", "Sports", "Travel", "Food", "Nature",
+  "Psychology", "Literature", "Entertainment", "Social", "General"
 ]
 
 interface UserState {
