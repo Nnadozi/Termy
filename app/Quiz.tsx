@@ -37,107 +37,38 @@ const Quiz = () => {
       setError(null)
       setLoading(true)
       
-      const prompt = `Generate quiz questions for vocabulary learning. For each word, create EXACTLY 3 questions (mix of multiple choice and fill-in-the-blank).
-
-Words to create questions for:
-${words.map(word => `- ${word.word} (${word.part_of_speech}): ${word.definition}. Example: "${word.example_usage}"`).join('\n')}
-
-Requirements:
-1. Create EXACTLY 3 questions per word (total: ${words.length * 3} questions)
-2. Mix question types: multiple choice and fill-in-the-blank
-3. Multiple choice should have 4 options (A, B, C, D) with one correct answer
-4. Fill-in-the-blank should use the word in context
-5. Make distractors plausible but clearly wrong
-6. Use the provided definition and example usage
-7. Questions should test understanding, not just memorization
-8. The questions should be in random order - shuffle the questions array so that the questions are in a random order
-9. DO NOT create part of speech questions
-
-IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
-{
-  "questions": [
-    {
-      "word": "word_here",
-      "question": "What does [word] mean?",
-      "type": "multiple_choice",
-      "correctAnswer": "correct_definition",
-      "options": ["option_a", "option_b", "option_c", "option_d"]
-    },
-    {
-      "word": "word_here", 
-      "question": "Complete the sentence: The [blank] of the situation was clear to everyone.",
-      "type": "fill_blank",
-      "correctAnswer": "word_here",
-      "context": "The [blank] of the situation was clear to everyone."
-    },
-    {
-      "word": "word_here",
-      "question": "Which sentence uses [word] correctly?",
-      "type": "multiple_choice",
-      "correctAnswer": "The correct sentence using the word",
-      "options": ["correct_sentence", "wrong_sentence_1", "wrong_sentence_2", "wrong_sentence_3"]
-    }
-  ]
-}`
-
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      // Call the Supabase edge function instead of OpenAI directly
+      const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/generate-quiz`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.EXPO_PUBLIC_OPENAI_KEY}`
+          'Authorization': `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`
         },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a vocabulary quiz generator. Generate engaging and educational quiz questions that test understanding of word meanings and usage. ALWAYS return valid JSON only.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          max_tokens: 3000
-        })
+        body: JSON.stringify({ words })
       })
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status} ${response.statusText}`)
+        const errorText = await response.text()
+        console.error('Edge function error:', errorText)
+        throw new Error(`Quiz generation failed: ${response.status}`)
       }
 
       const data = await response.json()
-      const content = data.choices[0].message.content
       
-      // Try to parse the content directly first
-      let parsedQuestions
-      try {
-        parsedQuestions = JSON.parse(content)
-      } catch (parseError) {
-        // If direct parsing fails, try to extract JSON
-        const jsonMatch = content.match(/\{[\s\S]*\}/)
-        if (jsonMatch) {
-          try {
-            parsedQuestions = JSON.parse(jsonMatch[0])
-          } catch (extractError) {
-            console.error('Failed to parse extracted JSON:', extractError)
-            throw new Error('Invalid response format from AI service')
-          }
-        } else {
-          throw new Error('No valid response received from AI service')
-        }
+      if (data.error) {
+        throw new Error(data.error)
       }
       
-      if (parsedQuestions && parsedQuestions.questions) {
-        setQuestions(parsedQuestions.questions)
+      if (data.questions && Array.isArray(data.questions)) {
+        setQuestions(data.questions)
       } else {
-        throw new Error('Invalid question format received')
+        throw new Error('Invalid response format from quiz service')
       }
     } catch (error) {
       console.error('Error generating questions:', error)
       setError(error instanceof Error ? error.message : 'Failed to generate quiz questions')
       
-      // Fallback: create basic questions if AI fails
+      // Fallback: create basic questions if edge function fails
       try {
         const fallbackQuestions: QuizQuestionType[] = words.flatMap(word => [
           {

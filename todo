@@ -3,7 +3,6 @@ Work on:
 - handle overflowing text (ex: welcome message)
 - make ui better (onboarding profile loading thing)
 - percentage based styles
-- hide keys + supabase url
 - test on different devices
 - set times for new words (daily, 24h, custom, etc) notifications
 - premium:
