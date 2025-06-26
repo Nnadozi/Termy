@@ -1,19 +1,34 @@
 import CustomIcon from '@/components/CustomIcon'
+import CustomInput from '@/components/CustomInput'
 import CustomText from '@/components/CustomText'
+import ErrorDisplay from '@/components/ErrorDisplay'
 import ListPreview from '@/components/ListPreview'
 import Page from '@/components/Page'
 import { deleteList, getAllLists } from '@/database/wordCache'
 import { List } from '@/types/list'
 import { router, useFocusEffect } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, ScrollView, View } from 'react-native'
+import { ActivityIndicator, Alert, ScrollView, View } from 'react-native'
 
 const Lists = () => {
   const [lists, setLists] = useState<List[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [deletingList, setDeletingList] = useState<string | null>(null)
+  const [search, setSearch] = useState("")
 
   const fetchLists = async () => {
-    const lists = await getAllLists()
-    setLists(lists)
+    setLoading(true)
+    setError(null)
+    try {
+      const lists = await getAllLists()
+      setLists(lists)
+    } catch (error) {
+      console.error('Error fetching lists:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load lists')
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -39,11 +54,15 @@ const Lists = () => {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
+            setDeletingList(listName)
             try {
               await deleteList(listName)
               setLists(lists.filter(l => l.name !== listName))
             } catch (error) {
               console.error('Error deleting list:', error)
+              Alert.alert('Error', 'Failed to delete list. Please try again.')
+            } finally {
+              setDeletingList(null)
             }
           }
         }
@@ -51,37 +70,82 @@ const Lists = () => {
     )
   }
 
+  // Filter lists based on search query
+  const filteredLists = lists.filter(list => 
+    list.name.toLowerCase().includes(search.toLowerCase()) ||
+    list.description.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const customLists = filteredLists.filter(list => list.name !== "Learned")
+  const learnedList = filteredLists.find(list => list.name === "Learned")
+
   return (
     <Page style={{flex: 1, justifyContent:"flex-start", alignItems:"flex-start"}}>
        <View style={{width:"100%", marginBottom:"3%", flexDirection:"row", alignItems:"center", justifyContent:"space-between"}}>
         <CustomText fontSize='XL' bold>Lists</CustomText>
         <CustomIcon name="plus" type="entypo" size={30} onPress={() => router.navigate("/(list)/CreateList")} />
       </View>
-      <CustomText style={{marginBottom:"2%"}} bold>Default Lists</CustomText>
-      <ListPreview customList={false} title="Learned" description="Successfully completed vocabulary" count={lists.find(l => l.name === "Learned")?.words.length || 0} />
-      <View style={{width:"100%", marginVertical:"2%"}}>
-        <CustomText bold>Custom Lists ({lists.filter(list => list.name !== "Learned").length})</CustomText>
-      </View>
-      <View style={{width:"100%", marginBottom:"3%", flex: 1}}>
-        {
-          lists.filter(list => list.name !== "Learned").length > 0 ? (
-            <ScrollView style={{width:"100%", flex: 1}}>
-            {lists.filter(list => list.name !== "Learned").map((list) => (
-              <ListPreview
-                key={list.id}
-                title={list.name}
-                description={list.description}
-                count={list.words.length}
-                customList
-                onDelete={() => handleDeleteList(list.name)}
-              />
-            ))}
-               </ScrollView>
-          ) : (
-            <CustomText opacity={0.5}>No custom lists yet - press "+" to create</CustomText>
-          )
-        }
-      </View>
+      
+      {/* Search Bar - Only show if there are at least 5 lists */}
+      {lists.length >= 5 && (
+        <CustomInput 
+          placeholder="Search lists..." 
+          value={search} 
+          onChangeText={setSearch} 
+          style={{marginBottom:"3%", width:"100%"}} 
+        />
+      )}
+      
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", width: "100%" }}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <CustomText style={{marginTop:"2%"}} textAlign='center'>Loading lists...</CustomText>
+        </View>
+      ) : error ? (
+        <ErrorDisplay
+          title="Failed to Load Lists"
+          message={error}
+          onRetry={fetchLists}
+        />
+      ) : (
+        <>
+          <CustomText style={{marginBottom:"2%"}} bold>Default Lists</CustomText>
+          {learnedList && (
+            <ListPreview 
+              customList={false} 
+              title="Learned" 
+              description="Successfully completed vocabulary" 
+              count={learnedList.words.length} 
+            />
+          )}
+          <View style={{width:"100%", marginVertical:"2%"}}>
+            <CustomText bold>Custom Lists ({customLists.length})</CustomText>
+          </View>
+          <View style={{width:"100%", marginBottom:"0%", flex: 1}}>
+            {
+              customLists.length > 0 ? (
+                <ScrollView style={{width:"100%", flex: 1}}>
+                {customLists.map((list) => (
+                  <ListPreview
+                    key={list.id}
+                    title={list.name}
+                    description={list.description}
+                    count={list.words.length}
+                    customList
+                    onDelete={() => handleDeleteList(list.name)}
+                    isDeleting={deletingList === list.name}
+                  />
+                ))}
+                   </ScrollView>
+              ) : (
+                <CustomText opacity={0.5}>
+                  {search ? `No lists found matching "${search}"` : "No custom lists yet - press \"+\" to create"}
+                </CustomText>
+              )
+            }
+          </View>
+        </>
+      )}
     </Page>
   )
 }

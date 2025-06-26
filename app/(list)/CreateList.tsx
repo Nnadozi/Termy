@@ -2,6 +2,7 @@ import CustomButton from "@/components/CustomButton"
 import CustomIcon from "@/components/CustomIcon"
 import CustomInput from "@/components/CustomInput"
 import CustomText from "@/components/CustomText"
+import ErrorDisplay from "@/components/ErrorDisplay"
 import Page from "@/components/Page"
 import WordSelectorModal from "@/components/WordSelectorModal"
 import { addWordsToList, createList } from "@/database/wordCache"
@@ -16,6 +17,7 @@ const CreateList = () => {
     const [listDescription, setListDescription] = useState("")
     const [selectedWords, setSelectedWords] = useState<Word[]>([])
     const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
     const [showWordSelector, setShowWordSelector] = useState(false)
     const { colors } = useTheme()
     const handleWordsSelected = (words: Word[]) => {
@@ -25,6 +27,7 @@ const CreateList = () => {
     const handleCreateList = async () => {
         try{
             setIsLoading(true)
+            setError(null)
             await createList(listName, listDescription)
             
             // Add selected words to the new list
@@ -34,7 +37,8 @@ const CreateList = () => {
             
             router.replace(`/(list)/${listName}`)
         }catch(error){
-            console.error(error)
+            console.error('Error creating list:', error)
+            setError(error instanceof Error ? error.message : 'Failed to create list')
         }finally{
             setIsLoading(false)
         }
@@ -55,7 +59,7 @@ const CreateList = () => {
                 placeholder="List Name"
                 value={listName}
                 onChangeText={setListName}
-                maxLength={50}
+                maxLength={30}
             />
             <CustomInput
                 placeholder="List Description"
@@ -63,7 +67,7 @@ const CreateList = () => {
                 onChangeText={setListDescription}
                 multiline={true}
                 style={{height: "20%"}}
-                maxLength={500}
+                maxLength={85}
             />
             
             <View style={styles.addWordsSection}>
@@ -102,6 +106,15 @@ const CreateList = () => {
                 isLoading={isLoading}
                 disabled={!listName.trim()}
              />
+             
+             {error && (
+                 <ErrorDisplay
+                     title="Failed to Create List"
+                     message={error}
+                     onRetry={handleCreateList}
+                     style={{ marginTop: 20 }}
+                 />
+             )}
              
              <WordSelectorModal
                 visible={showWordSelector}

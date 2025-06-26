@@ -1,6 +1,6 @@
 import { useTheme } from "@react-navigation/native";
 import { router } from "expo-router";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from "react-native";
 import CustomIcon from "./CustomIcon";
 import CustomText from "./CustomText";
 
@@ -10,17 +10,22 @@ interface ListPreviewProps {
     count: number
     customList: boolean
     onDelete?: () => void
+    isDeleting?: boolean
 }
 
-const ListPreview = ({title, description, count, customList, onDelete}: ListPreviewProps) => {
+const ListPreview = ({title, description, count, customList, onDelete, isDeleting}: ListPreviewProps) => {
     const { colors } = useTheme();
     return (
         <TouchableOpacity onPress={() => router.navigate(`/(list)/${title}`)} activeOpacity={0.8} style={[styles.container, {backgroundColor: colors.primary,shadowColor: colors.border }]} >
             <View style={{padding:"4%"}}>
             {customList ? (
                 <View style={{flexDirection:"row", alignItems:"center", justifyContent:"space-between",gap:"2%"}}>
-                    <CustomText opposite  fontSize="large" bold>{title}</CustomText>
-                    <CustomIcon opposite name="delete" size={25} onPress={onDelete} />
+                    <CustomText style={{width:"90%"}} numberOfLines={2} opposite  fontSize="large" bold>{title}</CustomText>
+                    {isDeleting ? (
+                        <ActivityIndicator size="small" color={colors.background} />
+                    ) : (
+                        <CustomIcon opposite name="delete" size={25} onPress={onDelete} />
+                    )}
                 </View>
             ) : (
                 <CustomText opposite fontSize="large" bold>{title}</CustomText>

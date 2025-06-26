@@ -1,16 +1,11 @@
 Work on:
-- add Scrollviews where needed
 - make new db of words
 - handle overflowing text (ex: welcome message)
-- load when needed (ex: account deletion)
-- testing
-- word list filter (date, type, etc)
-- make ui better
+- make ui better (onboarding profile loading thing)
 - percentage based styles
-- fade animations (esp for quiz complete)
-- hide keys
+- hide keys + supabase url
 - test on different devices
-- error handling (esp for quiz generation)
+- set times for new words (daily, 24h, custom, etc) notifications
 - premium:
     - More than 3 lists
     - Swipe moderr
@@ -30,7 +25,6 @@ During testing:
   - unique daily words
 - suggestions
 - loading GIFs
-- set times for new words (daily, 24h, custom, etc) notifications
 Future:
 - inline words
 - app tutorial
@@ -38,4 +32,6 @@ Future:
 - gamification
 - different voices
 - new word categories (tech)
+- word filter insde lists (pos, category, etc)
+- animations
 

@@ -10,7 +10,7 @@ import { useTheme } from '@react-navigation/native';
 import { Avatar, Chip } from '@rneui/base';
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 
 const Profile = () => {
   const { 
@@ -437,6 +437,14 @@ const Profile = () => {
                   opacity: (deleteConfirmationText.trim() === 'DELETE' && usernameConfirmation.trim() === userName) ? 1 : 0.6
                 }}
               />
+              {isDeleting && (
+                <View style={{ alignItems: 'center', marginTop: 10 }}>
+                  <ActivityIndicator size="small" color={colors.primary} />
+                  <CustomText fontSize="small" style={{ marginTop: 5, opacity: 0.7 }}>
+                    Deleting your account...
+                  </CustomText>
+                </View>
+              )}
             </View>
             
             {/* Debug info - remove this after testing */}

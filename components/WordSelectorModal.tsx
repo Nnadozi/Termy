@@ -3,7 +3,7 @@ import { Word } from '@/types/word';
 import { useTheme } from '@react-navigation/native';
 import { CheckBox } from '@rneui/base';
 import React, { useEffect, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import CustomButton from './CustomButton';
 import CustomInput from './CustomInput';
 import CustomText from './CustomText';
@@ -182,7 +182,10 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
       {/* Show loading state */}
       {loading ? (
         <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-          <CustomText fontSize="small" opacity={0.7}>Loading words...</CustomText>
+          <ActivityIndicator size="small" color={colors.primary} />
+          <CustomText fontSize="small" opacity={0.7} style={{ marginTop: 10 }}>
+            Loading words...
+          </CustomText>
         </View>
       ) : availableWords.length === 0 ? (
         <View style={{ alignItems: 'center', paddingVertical: 20 }}>

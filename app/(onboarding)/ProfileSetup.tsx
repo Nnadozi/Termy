@@ -7,12 +7,13 @@ import { Avatar } from '@rneui/base'
 import { router } from 'expo-router'
 import leoProfanity from 'leo-profanity'
 import { useState } from 'react'
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const ProfileSetup = () => {
   const [username, setUsername] = useState("")
   const [avatarColor, setAvatarColor] = useState("#FF6A00")
   const [showColorPicker, setShowColorPicker] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const { setUserName, setAvatarColor: setAvatarColorStore, completeOnboarding } = useUserStore()
 
   const isValidUsername = (str: string) => {
@@ -22,21 +23,28 @@ const ProfileSetup = () => {
   }
 
   const setUpProfile = async () => {
-    setUserName(username)
-    setAvatarColorStore(avatarColor)
-    completeOnboarding()
-    
-    // Clear any cached words to ensure fresh words are fetched with new preferences
+    setIsLoading(true)
     try {
-      const { clearCachedWords } = await import('@/database/wordCache')
-      await clearCachedWords()
-      console.log("Cleared cached words for fresh start")
+      setUserName(username)
+      setAvatarColorStore(avatarColor)
+      completeOnboarding()
+      
+      // Clear any cached words to ensure fresh words are fetched with new preferences
+      try {
+        const { clearCachedWords } = await import('@/database/wordCache')
+        await clearCachedWords()
+        console.log("Cleared cached words for fresh start")
+      } catch (error) {
+        console.error("Error clearing cache:", error)
+      }
+      
+      console.log("Profile setup complete")
+      router.navigate("/(onboarding)/Finish")
     } catch (error) {
-      console.error("Error clearing cache:", error)
+      console.error("Error setting up profile:", error)
+    } finally {
+      setIsLoading(false)
     }
-    
-    console.log("Profile setup complete")
-    router.navigate("/(onboarding)/Finish")
   }
 
   return (
@@ -46,11 +54,20 @@ const ProfileSetup = () => {
       subTitle="Set your username and avatar"
       nextPage="/(onboarding)/Finish"
       style={styles.container}
-      disableNext={!isValidUsername(username)}
+      disableNext={!isValidUsername(username) || isLoading}
       customOnPress={setUpProfile}
     >
+      {isLoading && (
+        <View style={{ alignItems: 'center', marginBottom: 20 }}>
+          <ActivityIndicator size="large" color="#FF6A00" />
+          <CustomText style={{ marginTop: 10, opacity: 0.7 }}>
+            Setting up your profile...
+          </CustomText>
+        </View>
+      )}
+      
       <View style={styles.avatarContainer}>
-        <TouchableOpacity onPress={() => setShowColorPicker(true)}>
+        <TouchableOpacity onPress={() => setShowColorPicker(true)} disabled={isLoading}>
           <Avatar 
             size={150} 
             rounded 
@@ -68,6 +85,7 @@ const ProfileSetup = () => {
         value={username}
         maxLength={20}
         keyboardType="default"
+        editable={!isLoading}
       />
       <View style={styles.rulesContainer}>
         <CustomText>• No special characters</CustomText>

@@ -5,7 +5,7 @@ import { useTheme } from '@react-navigation/native'
 import { CheckBox } from '@rneui/base'
 import * as Speech from 'expo-speech'
 import { useState } from 'react'
-import { Alert, Modal, ScrollView, Share, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Modal, ScrollView, Share, StyleSheet, TouchableOpacity, View } from 'react-native'
 import CustomButton from './CustomButton'
 import CustomIcon from './CustomIcon'
 import CustomText from './CustomText'
@@ -219,7 +219,8 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
             <ScrollView style={styles.modalContent}>
               {loadingLists ? (
                 <View style={styles.emptyState}>
-                  <CustomText textAlign="center" opacity={0.7}>
+                  <ActivityIndicator size="small" color={colors.primary} />
+                  <CustomText textAlign="center" opacity={0.7} style={{ marginTop: 10 }}>
                     Loading lists...
                   </CustomText>
                 </View>

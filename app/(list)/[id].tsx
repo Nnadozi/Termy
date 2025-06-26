@@ -3,26 +3,41 @@ import CustomIcon from "@/components/CustomIcon"
 import CustomInput from "@/components/CustomInput"
 import CustomText from "@/components/CustomText"
 import DailyWordCard from "@/components/DailyWordCard"
+import ErrorDisplay from "@/components/ErrorDisplay"
 import Page from "@/components/Page"
 import { addWordsToList, getList } from "@/database/wordCache"
 import { List } from "@/types/list"
 import { Word } from "@/types/word"
 import { router, useLocalSearchParams } from "expo-router"
 import { useEffect, useRef, useState } from "react"
-import { StyleSheet, View } from "react-native"
+import { ActivityIndicator, StyleSheet, View } from "react-native"
 import PagerView from "react-native-pager-view"
 
 const ListScreen = () => {
     const {id} = useLocalSearchParams()
     const [list, setList] = useState<List | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [addingWords, setAddingWords] = useState(false)
     const pagerRef = useRef<PagerView>(null)
     const [search, setSearch] = useState("")
     const [currentPage, setCurrentPage] = useState(0)
     
     const fetchList = async () => {
-        const list = await getList(id as string)
-        if (list) {
-            setList(list)
+        setLoading(true)
+        setError(null)
+        try {
+            const list = await getList(id as string)
+            if (list) {
+                setList(list)
+            } else {
+                setError('List not found')
+            }
+        } catch (error) {
+            console.error('Error fetching list:', error)
+            setError(error instanceof Error ? error.message : 'Failed to load list')
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -31,12 +46,15 @@ const ListScreen = () => {
     }, [id])
 
     const handleWordsAdded = async (words: Word[]) => {
+        setAddingWords(true)
         try {
             await addWordsToList(id as string, words)
             // Refresh the list to show new words
             await fetchList()
         } catch (error) {
             console.error('Error adding words to list:', error)
+        } finally {
+            setAddingWords(false)
         }
     }
 
@@ -68,8 +86,8 @@ const ListScreen = () => {
             <View style={styles.topRow}>
                 <CustomIcon name="chevron-left"  onPress={() => router.back()}     />
                 <View style={styles.topRowText}>
-                    <CustomText fontSize="large" bold>{list?.name}</CustomText>
-                    {list?.description && <CustomText fontSize="small" textAlign="center">{list?.description}</CustomText>}
+                    <CustomText  textAlign="center" fontSize="large" bold>{list?.name}</CustomText>
+                    {list?.description && <CustomText numberOfLines={2} fontSize="small" textAlign="center">{list?.description}</CustomText>}
                 </View>
                 {list?.name !== "Learned" && (
                     <AddWordButton
@@ -81,12 +99,24 @@ const ListScreen = () => {
                         iconName="add-to-list"
                         iconType="entypo"
                         iconSize={24}
+                        isLoading={addingWords}
                     />
                 )}
                 {list?.name === "Learned" && <View/>}
             </View>
            
-            {filteredWords && filteredWords.length > 0 ? (
+            {loading ? (
+                <View style={{flex:1, justifyContent:"center", alignItems:"center"}}>
+                    <ActivityIndicator size="large" color="#007AFF" />
+                    <CustomText style={{marginTop:"2%"}} textAlign='center'>Loading list...</CustomText>
+                </View>
+            ) : error ? (
+                <ErrorDisplay
+                    title="Failed to Load List"
+                    message={error}
+                    onRetry={fetchList}
+                />
+            ) : filteredWords && filteredWords.length > 0 ? (
             <PagerView 
                 ref={pagerRef} 
                 initialPage={0} 
@@ -137,5 +167,6 @@ const styles = StyleSheet.create({
     topRowText: {
         alignItems: "center",
         justifyContent: "center",
+        width: "80%",
     },
 })

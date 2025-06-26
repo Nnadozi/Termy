@@ -1,6 +1,7 @@
 import CustomButton from '@/components/CustomButton'
 import CustomIcon from '@/components/CustomIcon'
 import CustomText from '@/components/CustomText'
+import ErrorDisplay from '@/components/ErrorDisplay'
 import Page from '@/components/Page'
 import QuizQuestion from '@/components/QuizQuestion'
 import { addWordsToList } from '@/database/wordCache'
@@ -10,7 +11,7 @@ import { showToast } from '@/utils/ShowToast'
 import { useTheme } from '@react-navigation/native'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, ScrollView, View } from 'react-native'
+import { ActivityIndicator, Animated, ScrollView, View } from 'react-native'
 import ConfettiCannon from 'react-native-confetti-cannon'
 
 const Quiz = () => {
@@ -18,15 +19,24 @@ const Quiz = () => {
   const wordsArray = JSON.parse(words as string)
   const [questions, setQuestions] = useState<QuizQuestionType[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [score, setScore] = useState(0)
   const [quizCompleted, setQuizCompleted] = useState(false)
   const hasGenerated = useRef(false)
   const {colors} = useTheme()
   const { userName, updateQuizStats, dailyWordsCompletedToday } = useUserStore()
+  
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const scaleAnim = useRef(new Animated.Value(0.8)).current
+  const slideAnim = useRef(new Animated.Value(50)).current
 
   const generateQuizQuestions = async (words: any[]) => {
     try {
+      setError(null)
+      setLoading(true)
+      
       const prompt = `Generate quiz questions for vocabulary learning. For each word, create EXACTLY 3 questions (mix of multiple choice and fill-in-the-blank).
 
 Words to create questions for:
@@ -88,10 +98,13 @@ IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
               content: prompt
             }
           ],
-          temperature: 0.3,
-          max_tokens: 2000
+          max_tokens: 3000
         })
       })
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`)
+      }
 
       const data = await response.json()
       const content = data.choices[0].message.content
@@ -108,38 +121,46 @@ IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
             parsedQuestions = JSON.parse(jsonMatch[0])
           } catch (extractError) {
             console.error('Failed to parse extracted JSON:', extractError)
-            throw new Error('Invalid JSON response from AI')
+            throw new Error('Invalid response format from AI service')
           }
         } else {
-          throw new Error('No JSON found in AI response')
+          throw new Error('No valid response received from AI service')
         }
       }
       
       if (parsedQuestions && parsedQuestions.questions) {
         setQuestions(parsedQuestions.questions)
       } else {
-        throw new Error('Invalid question format from AI')
+        throw new Error('Invalid question format received')
       }
     } catch (error) {
       console.error('Error generating questions:', error)
+      setError(error instanceof Error ? error.message : 'Failed to generate quiz questions')
+      
       // Fallback: create basic questions if AI fails
-      const fallbackQuestions: QuizQuestionType[] = words.flatMap(word => [
-        {
-          word: word.word,
-          question: `What does "${word.word}" mean?`,
-          type: 'multiple_choice',
-          correctAnswer: word.definition,
-          options: [word.definition, 'Something else', 'Another option', 'Wrong answer']
-        },
-        {
-          word: word.word,
-          question: `Complete: ${word.example_usage.replace(word.word, '_____')}`,
-          type: 'fill_blank',
-          correctAnswer: word.word,
-          context: word.example_usage
-        }
-      ])
-      setQuestions(fallbackQuestions)
+      try {
+        const fallbackQuestions: QuizQuestionType[] = words.flatMap(word => [
+          {
+            word: word.word,
+            question: `What does "${word.word}" mean?`,
+            type: 'multiple_choice',
+            correctAnswer: word.definition,
+            options: [word.definition, 'Something else', 'Another option', 'Wrong answer']
+          },
+          {
+            word: word.word,
+            question: `Complete: ${word.example_usage.replace(word.word, '_____')}`,
+            type: 'fill_blank',
+            correctAnswer: word.word,
+            context: word.example_usage
+          }
+        ])
+        setQuestions(fallbackQuestions)
+        setError(null) // Clear error since fallback worked
+      } catch (fallbackError) {
+        console.error('Fallback questions also failed:', fallbackError)
+        setError('Unable to create quiz questions. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
@@ -186,6 +207,11 @@ IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
     setQuizCompleted(false)
   }
 
+  const retryQuizGeneration = () => {
+    hasGenerated.current = false
+    generateQuizQuestions(wordsArray)
+  }
+
   useEffect(() => {
     if (wordsArray && wordsArray.length > 0 && !hasGenerated.current) {
       hasGenerated.current = true
@@ -196,6 +222,25 @@ IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
   useEffect(() => {
     if (quizCompleted) {
       handleQuizCompletion()
+      
+      // Trigger the fade-in animation
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+      ]).start()
     }
   }, [quizCompleted])
 
@@ -207,6 +252,18 @@ IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
           <CustomText style={{marginTop:"2%"}} fontSize='large' bold>Creating questions...</CustomText>
           <CustomText  fontSize='normal'>It's time to test your knowledge!</CustomText>
         </View>
+      </Page>
+    )
+  }
+
+  if (error) {
+    return (
+      <Page>
+        <ErrorDisplay
+          title="Quiz Generation Failed"
+          message={error}
+          onRetry={retryQuizGeneration}
+        />
       </Page>
     )
   }
@@ -230,30 +287,44 @@ IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
               fallSpeed={3000}
             />
           )}
-          <CustomIcon type='entypo' name={passed ? 'emoji-happy' : 'emoji-sad'} size={100} style={{marginBottom:"2%"}} />
-          <CustomText fontSize="XL" bold>Quiz Complete</CustomText>
-          <CustomText color={passed ? '#4CAF50' : '#F44336'} style={{marginVertical:"1%"}}>
-            Score: {score}/{questions.length} <CustomText color={passed ? '#4CAF50' : '#F44336'} bold>({percentage}%)</CustomText> 
-          </CustomText>
-          <CustomText fontSize="normal"  textAlign="center" style={{ marginBottom:"3%" }}>
-            {passed 
-              ? dailyWordsCompletedToday 
-                ? 'You\'ve completed today\'s words!'
-                : 'Great job! You\'ve successfully learned these words.'
-              : 'You need 80% to pass. Keep practicing!'
-            }
-          </CustomText>
-          {passed ? (
-            <CustomButton
-              title="Sweet!"
-              onPress={() => router.replace('/(main)/Daily')}
-            />
-          ) : (
+          
+          <Animated.View
+            style={{
+              opacity: fadeAnim,
+              transform: [
+                { scale: scaleAnim },
+                { translateY: slideAnim }
+              ],
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+            }}
+          >
+            <CustomIcon type='entypo' name={passed ? 'emoji-happy' : 'emoji-sad'} size={100} style={{marginBottom:"2%"}} />
+            <CustomText fontSize="XL" bold>Quiz Complete</CustomText>
+            <CustomText color={passed ? '#4CAF50' : '#F44336'} style={{marginVertical:"1%"}}>
+              Score: {score}/{questions.length} <CustomText color={passed ? '#4CAF50' : '#F44336'} bold>({percentage}%)</CustomText> 
+            </CustomText>
+            <CustomText fontSize="normal"  textAlign="center" style={{ marginBottom:"3%" }}>
+              {passed 
+                ? dailyWordsCompletedToday 
+                  ? 'You\'ve completed today\'s words!'
+                  : 'Great job! You\'ve successfully learned these words.'
+                : 'You need 80% to pass. Keep practicing!'
+              }
+            </CustomText>
+            {passed ? (
               <CustomButton
-                title="Keep practicing"
+                title="Sweet!"
                 onPress={() => router.replace('/(main)/Daily')}
               />
-          )}
+            ) : (
+                <CustomButton
+                  title="Keep practicing"
+                  onPress={() => router.replace('/(main)/Daily')}
+                />
+            )}
+          </Animated.View>
         </ScrollView>
       </Page>
     )
