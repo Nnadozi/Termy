@@ -1,8 +1,8 @@
 # Termy
-AI vocabulary mobile app (70% Done)
+AI vocabulary mobile app (75% Done)
 
 ## Built With
-Frontend: React Native, Expo, TypeScript<br>
+Frontend: React Native, Expo, TypeScript, and SQLite<br>
 Backend: Supabase (PostgreSQL database + Edge Functions), OpenAi API
 
 ## Features

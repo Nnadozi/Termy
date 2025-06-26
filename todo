@@ -1,18 +1,14 @@
 Work on:
-- make new db of words
 - handle overflowing text (ex: welcome message)
 - make ui better (onboarding profile loading thing)
 - percentage based styles
 - test on different devices
-- set times for new words (daily, 24h, custom, etc) notifications
+- set times for new words with  notifications (default: tmrw, PREMIUM ONLY)
+- make new db of words (PITR?)
 - premium:
     - More than 3 lists
-    - Swipe moderr
     - No ads
-    - Change when new words available (default: Until tmrw)
-Bugs
-- odd cache bug after onboarding (words change just once)
-
+    - set time for new words
 
 Launch v1.0.0: 7/1/25
 During testing:
@@ -24,6 +20,7 @@ During testing:
   - unique daily words
 - suggestions
 - loading GIFs
+- odd cache bug after onboarding (words change just once)
 Future:
 - inline words
 - app tutorial
