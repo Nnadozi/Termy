@@ -164,7 +164,7 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
             {word.definition}
           </CustomText>
           <CustomText fontSize='small' italic textAlign='center'>
-           "{word.example_usage}"
+           {word.example_usage}
           </CustomText>
           <View style={styles.buttonRow}>
             <CustomIcon onPress={pronounceWord} size={20} name='volume-up' type='font-awesome' color={colors.border} />

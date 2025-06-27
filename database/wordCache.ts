@@ -193,10 +193,11 @@ const clearAllData = async () => {
     // Use a transaction to ensure atomicity and prevent locking
     await db.withTransactionAsync(async () => {
       await db.execAsync('DELETE FROM dailyWords');
-      await db.execAsync('DELETE FROM lists');
+      // Preserve the "Learned" list as it's a default list
+      await db.execAsync('DELETE FROM lists WHERE name != "Learned"');
     });
     
-    console.log('All data cleared from database');
+    console.log('All data cleared from database (preserving Learned list)');
   } catch (error) {
     console.error('Error clearing all data:', error);
     // Don't throw the error to prevent the profile deletion from failing
@@ -204,9 +205,39 @@ const clearAllData = async () => {
   }
 };
 
+const clearUserData = async () => {
+  try {
+    await initializeDatabase();
+    
+    // Use a transaction to ensure atomicity and prevent locking
+    await db.withTransactionAsync(async () => {
+      await db.execAsync('DELETE FROM dailyWords');
+      // Clear all user-created lists but preserve default lists
+      await db.execAsync('DELETE FROM lists WHERE name != "Learned"');
+      // Clear words from the Learned list but keep the list structure
+      await db.runAsync('UPDATE lists SET words = ? WHERE name = "Learned"', [null]);
+    });
+    
+    // Ensure the Learned list exists after clearing
+    await createDefaultListsDirect();
+    
+    console.log('User data cleared from database (preserving default lists structure)');
+  } catch (error) {
+    console.error('Error clearing user data:', error);
+    throw error;
+  }
+};
+
 const createList = async (listName: string, listDescription: string, words?: Word[]) => {
     try{
       await initializeDatabase();
+      
+      // Prevent creating lists with default names
+      if (listName === 'Learned') {
+        showToast("Cannot create a list with the name 'Learned' as it's a default list", "error")
+        throw new Error('Cannot create list with default name');
+      }
+      
       if(await getList(listName)){
         showToast("List name already exists", "error")
         throw new Error('List already exists');
@@ -254,6 +285,13 @@ const getList = async (listName: string) => {
 const deleteList = async (listName: string) => {
   try {
     await initializeDatabase();
+    
+    // Prevent deletion of default lists
+    if (listName === 'Learned') {
+      showToast("Cannot delete the default Learned list", "error")
+      throw new Error('Cannot delete default list');
+    }
+    
     await db.runAsync(
       'DELETE FROM lists WHERE name = ?',
       [listName]
@@ -358,7 +396,7 @@ const getAllLists = async () => {
 
 
 export {
-  addWordsToList, addWordToList, cacheDailyWords, clearAllData, clearCachedWords, createList, deleteList, getAllLists, getCachedDailyWords, getList, hasCachedWordsForToday,
-  initializeDatabase, removeWordFromList
+    addWordsToList, addWordToList, cacheDailyWords, clearAllData, clearCachedWords, clearUserData, createList, deleteList, getAllLists, getCachedDailyWords, getList, hasCachedWordsForToday,
+    initializeDatabase, removeWordFromList
 };
 

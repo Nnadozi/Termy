@@ -78,7 +78,7 @@ const Profile = () => {
   const initiateDeleteProfile = () => {
     Alert.alert(
       'Delete Profile',
-      'Are you sure you want to delete your profile? This will permanently erase all your data and learning progress. This action cannot be undone.',
+      'Are you sure you want to delete your profile? This will permanently erase all your data, learning progress, and custom lists. The default "Learned" list will be preserved but emptied. This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         { 
@@ -104,7 +104,7 @@ const Profile = () => {
     // Final confirmation with different wording
     Alert.alert(
       'Final Confirmation',
-      'This is your last chance to cancel. Your profile and all data will be permanently deleted and cannot be recovered. Are you absolutely sure?',
+      'This is your last chance to cancel. Your profile and all data will be permanently deleted and cannot be recovered. The default "Learned" list will be preserved but emptied. Are you absolutely sure?',
       [
         { text: 'Cancel', style: 'cancel' },
         { 
@@ -122,10 +122,10 @@ const Profile = () => {
       // Clear AsyncStorage completely
       await AsyncStorage.clear()
       
-      // Try to clear wordCache (but don't fail if it doesn't work)
+      // Clear user data but preserve default lists (like "Learned")
       try {
-        const { clearAllData } = await import('@/database/wordCache')
-        await clearAllData()
+        const { clearUserData } = await import('@/database/wordCache')
+        await clearUserData()
       } catch (dbError) {
         console.log('Database clear failed, but continuing with profile deletion:', dbError)
       }
@@ -260,7 +260,7 @@ const Profile = () => {
             {allWordTopics.map((topic) => (
               <Chip
                 key={topic}
-                title={topic}
+                title={topic.charAt(0).toUpperCase() + topic.slice(1)}
                 type={tempWordTopics.includes(topic) ? 'solid' : 'outline'}
                 onPress={() => toggleTopic(topic)}
                 disabled={!isEditing}
@@ -307,7 +307,7 @@ const Profile = () => {
             Danger Zone
           </CustomText>
           <CustomText fontSize='normal' style={{ marginBottom: 20, opacity: 0.8 }}>
-            This action will permanently delete your profile and all learning progress. This cannot be undone.
+            This action will permanently delete your profile and all learning progress. Custom lists will be deleted, but the default "Learned" list will be preserved and emptied. This cannot be undone.
           </CustomText>
           <CustomButton
             title="Delete Profile"

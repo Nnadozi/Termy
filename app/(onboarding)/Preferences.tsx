@@ -101,7 +101,7 @@ const Preferences = () => {
             {allWordTopics.map((topic) => (
               <Chip
                 key={topic}
-                title={topic}
+                title={topic.charAt(0).toUpperCase() + topic.slice(1)}
                 type={selectedTopics.includes(topic) ? 'solid' : 'outline'}
                 onPress={() => toggleTopic(topic)}
                 containerStyle={{ marginVertical: "2%", marginRight:"3%" }}
