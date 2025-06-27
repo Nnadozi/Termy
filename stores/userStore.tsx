@@ -3,9 +3,9 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 export const allWordTopics = [
-  "Science", "Business", "Health", "Arts", "History", 
-  "Education", "Sports", "Travel", "Food", "Nature",
-  "Psychology", "Literature", "Entertainment", "Social", "General"
+  "science", "business", "health", "arts", "history", 
+  "education", "sports", "travel", "food", "nature",
+  "psychology", "literature", "entertainment", "social", "general"
 ]
 
 interface UserState {
@@ -48,7 +48,7 @@ const useUserStore = create<UserStore>()(
       isOnboardingComplete: false,
       dailyWordGoal: 3,
       notificationsEnabled: false,
-      wordTopics: ["General"],
+      wordTopics: ["general"],
       totalQuizzesTaken: 0,
       totalWordsLearned: 0,
       currentStreak: 0,
@@ -141,7 +141,7 @@ const useUserStore = create<UserStore>()(
           isOnboardingComplete: false,
           dailyWordGoal: 3,
           notificationsEnabled: false,
-          wordTopics: ['General'],
+          wordTopics: ['general'],
           totalQuizzesTaken: 0,
           totalWordsLearned: 0,
           currentStreak: 0,

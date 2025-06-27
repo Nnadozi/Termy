@@ -4,7 +4,6 @@ Work on:
 - percentage based styles
 - test on different devices
 - set times for new words with  notifications (default: tmrw, PREMIUM ONLY)
-- make new db of words (PITR?)
 - premium:
     - More than 3 lists
     - No ads
@@ -30,4 +29,5 @@ Future:
 - new word categories (tech)
 - word filter insde lists (pos, category, etc)
 - animations
+
 
