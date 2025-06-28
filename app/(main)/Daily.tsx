@@ -14,7 +14,7 @@ import { ActivityIndicator, View } from 'react-native'
 import PagerView from 'react-native-pager-view'
 
 const Daily = () => {
-  const { userName, wordTopics, dailyWordGoal, dailyWordsCompletedToday, currentStreak, totalWordsLearned } = useUserStore()
+  const { userName, wordTopics, dailyWordGoal, dailyWordsCompletedToday, currentStreak, totalWordsLearned, dailyWordNotificationTime } = useUserStore()
   const [dailyVocab, setDailyVocab] = useState<Word[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -26,24 +26,34 @@ const Daily = () => {
   // Calculate time until next day
   useEffect(() => {
     const updateTimer = () => {
-      const now = new Date()
-      const tomorrow = new Date(now)
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(0, 0, 0, 0) // Start of next day
-      
-      const diff = tomorrow.getTime() - now.getTime()
-      const hours = Math.floor(diff / (1000 * 60 * 60))
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000)
-      
-      setTimeUntilNextDay(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`)
-    }
-    
-    updateTimer() // Initial call
-    const interval = setInterval(updateTimer, 1000) // Update every second
-    
-    return () => clearInterval(interval)
-  }, [])
+      const now = new Date();
+      const [hour, minute] = dailyWordNotificationTime.split(':').map(Number);
+
+      // Next notification time
+      let nextNotification = new Date(now);
+      nextNotification.setHours(hour, minute, 0, 0);
+
+      // If the time has already passed today, set for tomorrow
+      if (nextNotification <= now) {
+        nextNotification.setDate(nextNotification.getDate() + 1);
+      }
+
+      const diff = nextNotification.getTime() - now.getTime();
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeUntilNextDay(
+        `${hours.toString().padStart(2, '0')}:` +
+        `${minutes.toString().padStart(2, '0')}:` +
+        `${seconds.toString().padStart(2, '0')}`
+      );
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [dailyWordNotificationTime]);
   
   useEffect(() => {
     const loadWords = async () => {

@@ -49,7 +49,7 @@ const ProfileSetup = () => {
 
   return (
     <OnboardingPage
-      progress={0.75}
+      progress={0.8}
       title="Create a Profile"
       subTitle="Set your username and avatar"
       nextPage="/(onboarding)/Finish"

@@ -14,6 +14,8 @@
     "**/*.ts",
     "**/*.tsx",
     "nativewind-env.d.ts",
-    "mmkv.js"
+    "mmkv.js",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
   ]
 }

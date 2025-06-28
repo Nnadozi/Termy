@@ -1,8 +1,10 @@
+import CustomButton from '@/components/CustomButton'
 import CustomText from '@/components/CustomText'
 import Page from '@/components/Page'
 import useUserStore from '@/stores/userStore'
 import { useTheme } from '@react-navigation/native'
 import { Avatar } from '@rneui/base'
+import { router } from 'expo-router'
 import { ScrollView, StyleSheet, View } from 'react-native'
 
 const Progress = () => {
@@ -161,7 +163,7 @@ const Progress = () => {
               {dailyWordGoal} words per day
             </CustomText>
           </View>
-          <CustomText fontSize='small'>ADD BUTTON TO NAVIGATE TO SETTINGS TO CHANGE</CustomText>
+          <CustomButton title='Change Preferences' onPress={() => router.push('/(settings)/Profile')} />
         </View>
 
         {/* Motivation */}

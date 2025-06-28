@@ -3,11 +3,11 @@ Work on:
 - make ui better (onboarding setting up profile loading thing)
 - percentage based styles
 - test on different devices
-- set times for new words with  notifications (default: tmrw, PREMIUM ONLY)
+- find co maintainer
 - premium:
     - More than 3 lists
     - No ads
-    - set time for new words
+    - restoration
 
 Launch v1.0.0: 7/1/25
 During testing:
@@ -21,11 +21,11 @@ During testing:
 - loading GIFs
 - odd cache bug after onboarding (words change just once) / keep practicing
 - multiple quiz pass text
+- gamification
 Future:
 - inline words
 - app tutorial
 - languages
-- gamification
 - different voices
 - new word categories (tech)
 - word filter insde lists (pos, category, etc)

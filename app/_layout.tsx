@@ -1,10 +1,11 @@
 import { useThemeStore } from "@/stores/themeStore";
+import { useNotificationNavigation } from "@/utils/useNotificationNavigation";
 import { ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import Toast from 'react-native-toast-message';
 import "../global.css";
 
@@ -20,6 +21,9 @@ export default function RootLayout() {
     'DMSans-Bold': require('../assets/fonts/DMSans-Bold.ttf'),
     'DMSans-Italic': require('../assets/fonts/DMSans-Italic.ttf'),
   });
+
+  // Setup notification navigation
+  useNotificationNavigation();
 
   useEffect(() => {
     if (loaded || error) {

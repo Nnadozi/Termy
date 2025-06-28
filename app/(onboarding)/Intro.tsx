@@ -29,7 +29,7 @@ const Intro = () => {
 
   return (
     <OnboardingPage
-      progress={0.25}
+      progress={0.2}
       title="Quick Introduction"
       subTitle="Here's how Termy works..."
       nextPage="/(onboarding)/Preferences"
@@ -42,7 +42,7 @@ const Intro = () => {
         onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
       >
         <View key="1" style={styles.page}>
-          <CustomIcon style={{marginBottom: "3%"}} name="book-reader" type='font-awesome-5' size={100} primary/>
+          <CustomIcon style={{marginBottom: "3%"}} name="book-reader" type='font-awesome-5' size={125} primary/>
           <CustomText primary fontSize="large" bold textAlign="center">Learn New Words Daily</CustomText>
           <CustomText textAlign="center" opacity={0.5}>
             Get personalized vocabulary tailored to your interests.
@@ -50,7 +50,7 @@ const Intro = () => {
         </View>
         
         <View key="2" style={styles.page}>
-          <CustomIcon style={{marginBottom: "3%"}} name="quiz" type='material' size={100} primary/>
+          <CustomIcon style={{marginBottom: "3%"}} name="quiz" type='material' size={125} primary/>
           <CustomText primary fontSize="large" bold textAlign="center">Show What You Know</CustomText>
           <CustomText textAlign="center" opacity={0.5}>
             Test your understanding with smart quizzes that adapt to your progress.
@@ -58,7 +58,7 @@ const Intro = () => {
         </View>
         
         <View key="3" style={styles.page}>
-          <CustomIcon style={{marginBottom: "3%"}} name="line-chart" type='font-awesome' size={100} primary/>
+          <CustomIcon style={{marginBottom: "3%"}} name="line-chart" type='font-awesome' size={125} primary/>
           <CustomText primary fontSize="large" bold textAlign="center">Repeat, and Improve</CustomText>
           <CustomText textAlign="center" opacity={0.5}>
             Track your progress and maintain your learning momentum with daily streaks.

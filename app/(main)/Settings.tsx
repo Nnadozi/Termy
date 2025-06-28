@@ -18,8 +18,8 @@ const Settings = () => {
   const options = [
     { key: "user", value: "Profile", type: "antdesign", onPress: () => {router.push("/(settings)/Profile")} },
     { key: "palette", value: "Appearance", type: "ionicons", onPress: () => setAppearanceModalVisible(true) },
-    { key: "notifications", value: "Notifications", type: "ionicon", onPress: () => setNotificationsModalVisible(true) },
-    { key: "email", value: "Feedback & Support", type: "fontiso", onPress: () => {Linking.openURL("mailto:chikaosro@gmail.com")} },
+      { key: "notifications", value: "Notifications", type: "ionicon", onPress: () => router.push("/(settings)/NotificationSettings") },
+      { key: "email", value: "Feedback & Support", type: "fontiso", onPress: () => {Linking.openURL("mailto:chikaosro@gmail.com")} },
     { key: "star", value: "Rate", type: "ionicons", onPress: () => { Linking.openURL("https://play.google.com/store/apps/details?id=com.vocab.app") } },
     { key: "shield", value: "Privacy Policy", type: "feather", onPress: () => { Linking.openURL("https://play.google.com/store/apps/details?id=com.vocab.app") } },
     { key: "information-circle", value: "Version", type: "ionicon", onPress: () => {} },

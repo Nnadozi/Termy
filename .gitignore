@@ -29,11 +29,15 @@ yarn-error.*
 # macOS
 .DS_Store
 *.pem
-
-# local env files
-.env*.local
-
 # typescript
 *.tsbuildinfo
 
 app-example
+
+
+# local env files
+.env*.local
+
+# local google services
+google-services-dev.json
+google-services-prod.json

@@ -6,8 +6,8 @@ import { Redirect, router } from "expo-router";
 import { Image, StyleSheet } from "react-native";
 
 const Welcome = () => {
-  const { isOnboardingComplete } = useUserStore()
-  if (isOnboardingComplete) {
+  const { isOnboardingComplete, userName } = useUserStore()
+  if (isOnboardingComplete && userName) {
     return <Redirect href="/(main)/Daily" />
   }
   return (

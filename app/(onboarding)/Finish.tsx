@@ -2,17 +2,17 @@ import CustomIcon from '@/components/CustomIcon';
 import OnboardingPage from '@/components/OnboardingPage';
 import { clearCachedWords } from '@/database/wordCache';
 import useUserStore from '@/stores/userStore';
+import notificationService from "@/utils/notificationService";
 import { useEffect } from 'react';
 
 const Finish = () => {
-  const { completeOnboarding } = useUserStore();
+  const { completeOnboarding, notificationsEnabled, dailyWordNotificationTime } = useUserStore();
 
   useEffect(() => {
     // Ensure onboarding is marked as complete
     completeOnboarding();
     
     // Clear any cached words when onboarding completes
-    // This ensures the Daily screen will fetch new words with the user's preferences
     const clearCache = async () => {
       try {
         await clearCachedWords();
@@ -21,9 +21,17 @@ const Finish = () => {
         console.log('Error clearing cache after onboarding:', error);
       }
     };
-    
     clearCache();
-  }, [completeOnboarding]);
+
+    // After onboarding is complete, schedule notifications if enabled
+    const scheduleNotifications = async () => {
+      if (notificationsEnabled) {
+        await notificationService.scheduleDailyWordNotification(dailyWordNotificationTime);
+        await notificationService.scheduleStreakReminderNotification();
+      }
+    };
+    scheduleNotifications();
+  }, [completeOnboarding, notificationsEnabled, dailyWordNotificationTime]);
 
   return (
     <OnboardingPage

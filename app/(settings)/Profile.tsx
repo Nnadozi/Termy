@@ -132,9 +132,10 @@ const Profile = () => {
       
       // Reset userStore to initial state
       resetUserStore()
-      
-      // Navigate to onboarding
-      router.replace('/(onboarding)')
+      // Add a small delay to ensure store is reset before navigating
+      setTimeout(() => {
+        router.replace('/(onboarding)')
+      }, 100)
     } catch (error) {
       console.error('Error deleting profile:', error)
       Alert.alert('Error', 'Failed to delete profile. Please try again.')

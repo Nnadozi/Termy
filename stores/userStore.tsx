@@ -1,3 +1,4 @@
+import notificationService from '@/utils/notificationService'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
@@ -22,6 +23,7 @@ interface UserState {
   averageQuizScore: number
   lastQuizDate: string
   dailyWordsCompletedToday: boolean
+  dailyWordNotificationTime: string
   joinDate: string
 }
 
@@ -35,6 +37,7 @@ interface UserActions {
   updateQuizStats: (quizScore: number, wordsLearned: number) => void
   resetDailyCompletion: () => void
   setJoinDate: (date: string) => void
+  setDailyWordNotificationTime: (time: string) => void
   resetUserStore: () => void
 }
 
@@ -56,6 +59,7 @@ const useUserStore = create<UserStore>()(
       averageQuizScore: 0,
       lastQuizDate: '',
       dailyWordsCompletedToday: false,
+      dailyWordNotificationTime: '10:00',
       joinDate: '',
       setUserName: (name: string) => {
         console.log('UserStore: Setting userName to:', name)
@@ -69,9 +73,24 @@ const useUserStore = create<UserStore>()(
         console.log('UserStore: Setting dailyWordGoal to:', goal)
         set({ dailyWordGoal: goal })
       },
-      setNotificationsEnabled: (enabled: boolean) => {
+      setNotificationsEnabled: async (enabled: boolean) => {
         console.log('UserStore: Setting notificationsEnabled to:', enabled)
         set({ notificationsEnabled: enabled })
+        
+        // Only update notification schedule if onboarding is complete
+        const state = get();
+        if (state.isOnboardingComplete) {
+          try {
+            if (enabled) {
+              await notificationService.scheduleDailyWordNotification(state.dailyWordNotificationTime)
+              await notificationService.scheduleStreakReminderNotification()
+            } else {
+              await notificationService.cancelAllNotifications()
+            }
+          } catch (error) {
+            console.error('Error updating notification schedule:', error)
+          }
+        }
       },
       completeOnboarding: () => {
         console.log('UserStore: Completing onboarding')
@@ -133,6 +152,21 @@ const useUserStore = create<UserStore>()(
         console.log('UserStore: Setting joinDate to:', date)
         set({ joinDate: date })
       },
+      setDailyWordNotificationTime: async (time: string) => {
+        console.log('UserStore: Setting dailyWordNotificationTime to:', time)
+        set({ dailyWordNotificationTime: time })
+        
+        // Only update notification schedule if onboarding is complete
+        const state = get();
+        if (state.notificationsEnabled && state.isOnboardingComplete) {
+          try {
+            await notificationService.scheduleDailyWordNotification(time)
+            await notificationService.scheduleStreakReminderNotificationOnce()
+          } catch (error) {
+            console.error('Error updating notification time:', error)
+          }
+        }
+      },
       resetUserStore: () => {
         console.log('UserStore: Resetting all user data')
         set({
@@ -149,7 +183,13 @@ const useUserStore = create<UserStore>()(
           averageQuizScore: 0,
           lastQuizDate: '',
           dailyWordsCompletedToday: false,
-          joinDate: ''
+          joinDate: '',
+          dailyWordNotificationTime: '10:00'
+        })
+        
+        // Cancel all notifications when resetting
+        notificationService.cancelAllNotifications().catch(error => {
+          console.error('Error cancelling notifications during reset:', error)
         })
       }
     }),

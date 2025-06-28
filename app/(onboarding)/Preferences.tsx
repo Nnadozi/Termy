@@ -39,10 +39,10 @@ const Preferences = () => {
 
   return (
     <OnboardingPage
-      progress={0.5}
+      progress={0.4}
       title="Set Preferences"
       subTitle="Personalize your experience"
-      nextPage="/(onboarding)/ProfileSetup"
+      nextPage="/(onboarding)/NotificationsSetup"
       style={styles.container}
     >
       <ScrollView 
@@ -50,11 +50,11 @@ const Preferences = () => {
         contentContainerStyle={{flexGrow:1, paddingBottom:200}}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{gap:"3%"}}>
+        <View style={{gap:"5%"}}>
         <View style={styles.row}>
             <View>
               <CustomText bold>Theme</CustomText>
-              <CustomText fontSize="small">Choose your preferred theme</CustomText>
+              <CustomText fontSize="small">Choose your style</CustomText>
             </View>
             <ButtonGroup
               buttons={["Light", "Dark"]}
@@ -149,18 +149,3 @@ const styles = StyleSheet.create({
   },
 })
 
-/**
- * 
- *           <View style={styles.row}>
-            <View>
-              <CustomText bold>Enable Notifications</CustomText>
-              <CustomText fontSize="small">Know when your daily words are ready</CustomText>
-            </View>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
-              trackColor={{false: "gray", true: colors.colors.primary}}
-              thumbColor={"white"}
-            />
-          </View>
- */
