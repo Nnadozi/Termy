@@ -2,6 +2,8 @@ const IS_DEV = process.env.APP_VARIANT === 'development';
 
 import appJson from './app.json';
 
+
+//packages have to be the same for now (testing paywall)
 export default {
   ...appJson,
   expo: {
@@ -10,13 +12,13 @@ export default {
     ios: {
       ...appJson.expo?.ios,
       bundleIdentifier: IS_DEV 
-        ? 'com.nnadozi.termy.dev' 
+        ? 'com.nnadozi.termy' 
         : 'com.nnadozi.termy',
     },
     android: {
       ...appJson.expo?.android,
       package: IS_DEV 
-        ? 'com.nnadozi.termy.dev' 
+        ? 'com.nnadozi.termy' 
         : 'com.nnadozi.termy',
       googleServicesFile: IS_DEV 
         ? process.env.GOOGLE_SERVICES_DEV ??  './google-services-dev.json'

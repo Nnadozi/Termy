@@ -15,15 +15,18 @@ const Settings = () => {
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
   const { colors } = useTheme();
+
   const options = [
     { key: "user", value: "Profile", type: "antdesign", onPress: () => {router.push("/(settings)/Profile")} },
+    { key: "crown", value: "Premium", type: "font-awesome-5", onPress: () => router.push("/(settings)/PremiumSettings") },
     { key: "palette", value: "Appearance", type: "ionicons", onPress: () => setAppearanceModalVisible(true) },
-      { key: "notifications", value: "Notifications", type: "ionicon", onPress: () => router.push("/(settings)/NotificationSettings") },
-      { key: "email", value: "Feedback & Support", type: "fontiso", onPress: () => {Linking.openURL("mailto:chikaosro@gmail.com")} },
+    { key: "notifications", value: "Notifications", type: "ionicon", onPress: () => router.push("/(settings)/NotificationSettings") },
+    { key: "email", value: "Feedback & Support", type: "fontiso", onPress: () => {Linking.openURL("mailto:chikaosro@gmail.com")} },
     { key: "star", value: "Rate", type: "ionicons", onPress: () => { Linking.openURL("https://play.google.com/store/apps/details?id=com.vocab.app") } },
     { key: "shield", value: "Privacy Policy", type: "feather", onPress: () => { Linking.openURL("https://play.google.com/store/apps/details?id=com.vocab.app") } },
     { key: "information-circle", value: "Version", type: "ionicon", onPress: () => {} },
   ];
+
   const showOption = (option: { key: string; value: string; type: any; onPress: () => void }, index: number) => {
     return (
       <TouchableOpacity onPress={option.onPress} key={index} style={[
@@ -31,7 +34,7 @@ const Settings = () => {
           { borderBottomColor: colors.border } 
         ]}>
         {option.value === "Version" ?( 
-          <View style={{ flexDirection: "row", justifyContent: "space-between", gap: "2%" }}> 
+          <View style={{ flexDirection: "row", justifyContent: "space-between", gap: "3%" }}> 
             <View style={{ flexDirection: "row", alignItems: "center", gap: "5%" }}>
               <CustomIcon type={option.type} size={20} name={option.key} />
               <CustomText>{option.value}</CustomText>
@@ -39,9 +42,9 @@ const Settings = () => {
             <CustomText color="gray">{Constants.expoConfig?.version}</CustomText>
           </View>
         ) : (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: "2%" }}> 
-          <CustomIcon type={option.type} size={20} name={option.key} />
-          <CustomText>{option.value}</CustomText>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: "3%" }}> 
+            <CustomIcon type={option.type} size={20} name={option.key} />
+            <CustomText>{option.value}</CustomText>
           </View>
         )}
       </TouchableOpacity>

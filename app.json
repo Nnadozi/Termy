@@ -59,6 +59,14 @@
         {
           "icon": "./assets/images/icon.png"
         }
+      ],
+      [
+        "expo-iap",
+        {
+          "android": {
+            "billingPermission": "Allow Termy to make purchases and manage subscriptions."
+          }
+        }
       ]
     ],
     "experiments": {

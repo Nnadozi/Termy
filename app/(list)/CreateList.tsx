@@ -5,12 +5,15 @@ import CustomText from "@/components/CustomText"
 import ErrorDisplay from "@/components/ErrorDisplay"
 import Page from "@/components/Page"
 import WordSelectorModal from "@/components/WordSelectorModal"
-import { addWordsToList, createList } from "@/database/wordCache"
+import { addWordsToList, createList, getAllLists } from "@/database/wordCache"
+import useUserStore from "@/stores/userStore"
 import { Word } from "@/types/word"
 import { useTheme } from "@react-navigation/native"
 import { router } from "expo-router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
+import Purchases from 'react-native-purchases'
+import RevenueCatUI, { PAYWALL_RESULT } from 'react-native-purchases-ui'
 
 const CreateList = () => {
     const [listName, setListName] = useState("")
@@ -19,12 +22,63 @@ const CreateList = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [showWordSelector, setShowWordSelector] = useState(false)
+    const [userLists, setUserLists] = useState<any[]>([])
+    const [hasActiveSubscription, setHasActiveSubscription] = useState(false)
     const { colors } = useTheme()
+    const { isPremium, setPremium } = useUserStore()
+
+     // Check user's current lists and subscription status on component mount
+    useEffect(() => {
+        const checkUserData = async () => {
+            try {
+                const lists = await getAllLists()
+                setUserLists(lists)
+                
+                // Check actual subscription status from RevenueCat
+                const customerInfo = await Purchases.getCustomerInfo()
+                const premiumEntitlement = customerInfo.entitlements.active["premium"]
+                const isActuallyPremium = typeof premiumEntitlement !== "undefined"
+                
+                setHasActiveSubscription(isActuallyPremium)
+                
+                // Update user store if there's a mismatch
+                if (isActuallyPremium !== isPremium) {
+                    setPremium(isActuallyPremium)
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error)
+            }
+        }
+        checkUserData()
+    }, [])
+
     const handleWordsSelected = (words: Word[]) => {
         setSelectedWords(prev => [...prev, ...words])
     }
 
     const handleCreateList = async () => {
+        // Check if user has reached the limit (2 custom lists for non-premium users)
+        const customListsCount = userLists.filter(list => list.name !== 'Learned').length
+        
+        // Use actual subscription status instead of user store
+        if (!hasActiveSubscription && customListsCount >= 2) {
+            const paywallResult: PAYWALL_RESULT = await RevenueCatUI.presentPaywall();
+            switch (paywallResult) {
+                case PAYWALL_RESULT.NOT_PRESENTED:
+                case PAYWALL_RESULT.ERROR:
+                case PAYWALL_RESULT.CANCELLED:
+                    return false;
+                case PAYWALL_RESULT.PURCHASED:
+                case PAYWALL_RESULT.RESTORED:
+                    // Update premium status after successful purchase
+                    setHasActiveSubscription(true);
+                    setPremium(true);
+                    break;
+                default:
+                    return false;
+            }
+        }
+
         try{
             setIsLoading(true)
             setError(null)
@@ -44,6 +98,33 @@ const CreateList = () => {
         }
     }
 
+    const getButtonTitle = () => {
+        const customListsCount = userLists.filter(list => list.name !== 'Learned').length
+        
+        if (!hasActiveSubscription && customListsCount >= 2) {
+            return "Upgrade to Create"
+        }
+        return "Create List"
+    }
+
+    const isButtonDisabled = () => {
+        const customListsCount = userLists.filter(list => list.name !== 'Learned').length
+        return !listName.trim() || (!hasActiveSubscription && customListsCount >= 2)
+    }
+
+    const getLimitWarningText = () => {
+        const customListsCount = userLists.filter(list => list.name !== 'Learned').length
+        
+        if (!hasActiveSubscription && customListsCount >= 2) {
+            if (customListsCount > 2) {
+                return `You have ${customListsCount} custom lists. Your subscription has expired. Upgrade to Premium to create more lists, or delete some existing lists.`
+            } else {
+                return `${customListsCount}/2 custom lists created. Upgrade to Premium for unlimited lists.`
+            }
+        }
+        return null
+    }
+
     const removeWord = (wordId: number) => {
         setSelectedWords(prev => prev.filter(w => w.id !== wordId))
     }
@@ -55,6 +136,16 @@ const CreateList = () => {
                 <CustomText bold textAlign="center">Create List</CustomText>
                 <View/>
             </View>
+
+            {/* Show list count for non-premium users */}
+            {getLimitWarningText() && (
+                <View style={[styles.limitWarning, { backgroundColor: colors.card }]}>
+                    <CustomText fontSize="small" color="gray" textAlign="center">
+                        {getLimitWarningText()}
+                    </CustomText>
+                </View>
+            )}
+
             <CustomInput
                 placeholder="List Name"
                 value={listName}
@@ -99,12 +190,11 @@ const CreateList = () => {
                     </View>
                 )}
             </View>
-            
             <CustomButton
-                title="Create List" 
+                title={getButtonTitle()}
                 onPress={handleCreateList} 
                 isLoading={isLoading}
-                disabled={!listName.trim()}
+                disabled={isButtonDisabled()}
              />
              
              {error && (
@@ -141,6 +231,13 @@ const styles = StyleSheet.create({
         alignItems: "center",
         width: "100%",
         marginBottom: "2%"
+    },
+    limitWarning: {
+        width: "100%",
+        padding: 10,
+        borderRadius: 8,
+        marginBottom: 10,
+        alignItems: "center",
     },
     addWordsSection: {
         width: "100%",

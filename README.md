@@ -1,5 +1,5 @@
 # Termy
-AI vocabulary mobile app (75% Done)
+AI vocabulary mobile app (85% Done)
 
 ## Built With
 Frontend: React Native, Expo, TypeScript, and SQLite<br>

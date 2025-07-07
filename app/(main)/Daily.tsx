@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, View } from 'react-native'
 import PagerView from 'react-native-pager-view'
 
+
 const Daily = () => {
   const { userName, wordTopics, dailyWordGoal, dailyWordsCompletedToday, currentStreak, totalWordsLearned, dailyWordNotificationTime } = useUserStore()
   const [dailyVocab, setDailyVocab] = useState<Word[]>([])
@@ -25,6 +26,7 @@ const Daily = () => {
   
   // Calculate time until next day
   useEffect(() => {
+
     const updateTimer = () => {
       const now = new Date();
       const [hour, minute] = dailyWordNotificationTime.split(':').map(Number);

@@ -6,6 +6,7 @@ export default function SettingsLayout() {
     <Stack screenOptions={{ headerShown: false, gestureEnabled: false }}>
       <Stack.Screen name="Profile" />
       <Stack.Screen name="NotificationSettings" />
+      <Stack.Screen name="PremiumSettings" />
     </Stack>
   )
 }
