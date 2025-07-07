@@ -1,4 +1,5 @@
-# Termy
+# <img src="https://github.com/user-attachments/assets/9e369ccf-df6f-41ae-bbda-3f55575d41f6" alt="icon" width="32" height="32" style="border-radius: 50px;"> Termy 
+
 Termy is a mobile app that helps you start your journey toward a smarter vocabulary, with just a few minutes a day.
 
 ## Built With
@@ -12,5 +13,3 @@ Termy is still in development (80% done). Want to help test the app for its Andr
 
 ## Join The iOS Beta
 Coming Soon
-
-
