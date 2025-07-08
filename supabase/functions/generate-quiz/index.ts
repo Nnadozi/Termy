@@ -1,7 +1,3 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
-
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 
@@ -71,6 +67,7 @@ Requirements:
 7. Questions should test understanding, not just memorization
 8. The questions should be in random order - shuffle the questions array so that the questions are in a random order
 9. DO NOT create part of speech questions
+10. All questions should be high quality and engaging, real world examples
 
 IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
 {
@@ -110,7 +107,7 @@ IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
         messages: [
           {
             role: 'system',
-            content: 'You are a vocabulary quiz generator. Generate engaging and educational quiz questions that test understanding of word meanings and usage. ALWAYS return valid JSON only.'
+            content: 'You are a vocabulary quiz generator. Generate engaging quiz questions. ALWAYS return valid JSON only.'
           },
           {
             role: 'user',
@@ -176,14 +173,3 @@ IMPORTANT: Return ONLY valid JSON in this exact format, no additional text:
   }
 })
 
-/* To invoke locally:
-
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
-
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/generate-quiz' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-    --header 'Content-Type: application/json' \
-    --data '{"name":"Functions"}'
-
-*/

@@ -1,8 +1,9 @@
 import { useTheme } from "@react-navigation/native";
 import { router } from "expo-router";
-import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import CustomIcon from "./CustomIcon";
 import CustomText from "./CustomText";
+import LoadingSpinner from './LoadingSpinner';
 
 interface ListPreviewProps {
     title: string
@@ -22,10 +23,20 @@ const ListPreview = ({title, description, count, customList, onDelete, isDeletin
                 <View style={{flexDirection:"row", alignItems:"center", justifyContent:"space-between",gap:"2%"}}>
                     <CustomText style={{width:"90%"}} numberOfLines={2} opposite  fontSize="large" bold>{title}</CustomText>
                     {isDeleting ? (
-                        <ActivityIndicator size="small" color={colors.background} />
-                    ) : (
-                        <CustomIcon opposite name="delete" size={25} onPress={onDelete} />
-                    )}
+                        <LoadingSpinner 
+                          size="small" 
+                          color={colors.background} 
+                          variant="button"
+                        />
+                      ) : (
+                        <CustomIcon 
+                          name="trash" 
+                          type="feather" 
+                          size={20} 
+                          color="#FF4444" 
+                          onPress={onDelete}
+                        />
+                      )}
                 </View>
             ) : (
                 <CustomText opposite fontSize="large" bold>{title}</CustomText>

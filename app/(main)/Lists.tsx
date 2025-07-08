@@ -3,12 +3,13 @@ import CustomInput from '@/components/CustomInput'
 import CustomText from '@/components/CustomText'
 import ErrorDisplay from '@/components/ErrorDisplay'
 import ListPreview from '@/components/ListPreview'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import Page from '@/components/Page'
 import { deleteList, getAllLists } from '@/database/wordCache'
 import { List } from '@/types/list'
 import { router, useFocusEffect } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, ScrollView, View } from 'react-native'
+import { Alert, ScrollView, View } from 'react-native'
 
 const Lists = () => {
   const [lists, setLists] = useState<List[]>([])
@@ -93,14 +94,12 @@ const Lists = () => {
           value={search} 
           onChangeText={setSearch} 
           style={{marginBottom:"3%", width:"100%"}} 
+          maxLength={50}
         />
       )}
       
       {loading ? (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", width: "100%" }}>
-          <ActivityIndicator size="large" color="#007AFF" />
-          <CustomText style={{marginTop:"2%"}} textAlign='center'>Loading lists...</CustomText>
-        </View>
+        <LoadingSpinner text="Loading lists..." />
       ) : error ? (
         <ErrorDisplay
           title="Failed to Load Lists"

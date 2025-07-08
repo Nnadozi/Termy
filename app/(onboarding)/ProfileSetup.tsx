@@ -1,13 +1,14 @@
 import ColorPickerModal from '@/components/ColorPickerModal'
 import CustomInput from '@/components/CustomInput'
 import CustomText from '@/components/CustomText'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import OnboardingPage from '@/components/OnboardingPage'
 import useUserStore from '@/stores/userStore'
 import { Avatar } from '@rneui/base'
 import { router } from 'expo-router'
 import leoProfanity from 'leo-profanity'
 import { useState } from 'react'
-import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const ProfileSetup = () => {
   const [username, setUsername] = useState("")
@@ -58,12 +59,10 @@ const ProfileSetup = () => {
       customOnPress={setUpProfile}
     >
       {isLoading && (
-        <View style={{ alignItems: 'center', marginBottom: 20 }}>
-          <ActivityIndicator size="large" color="#FF6A00" />
-          <CustomText style={{ marginTop: 10, opacity: 0.7 }}>
-            Setting up your profile...
-          </CustomText>
-        </View>
+        <LoadingSpinner 
+          text="Setting up your profile..."
+          variant="inline"
+        />
       )}
       
       <View style={styles.avatarContainer}>

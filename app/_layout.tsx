@@ -1,5 +1,6 @@
 import { useThemeStore } from "@/stores/themeStore";
 import useUserStore from "@/stores/userStore";
+import notificationService from "@/utils/notificationService";
 import { useNotificationNavigation } from "@/utils/useNotificationNavigation";
 import { ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
@@ -20,7 +21,7 @@ SplashScreen.setOptions({
 
 export default function RootLayout() {
   const { isDark, colors } = useThemeStore(); 
-  const { isPremium, setPremium } = useUserStore()
+  const { isPremium, setPremium, notificationsEnabled, dailyWordNotificationTime, isOnboardingComplete, resetDailyCompletion } = useUserStore()
   const [loaded, error] = useFonts({
     'DMSans-Regular': require('../assets/fonts/DMSans-Regular.ttf'),
     'DMSans-Bold': require('../assets/fonts/DMSans-Bold.ttf'),
@@ -28,6 +29,35 @@ export default function RootLayout() {
   });
 
   useNotificationNavigation();
+
+  // Initialize notification service
+  useEffect(() => {
+    const initNotifications = async () => {
+      if (isOnboardingComplete) {
+        await notificationService.initialize();
+        if (notificationsEnabled) {
+          await notificationService.updateNotificationSchedule();
+        }
+      }
+    };
+    
+    initNotifications();
+  }, [isOnboardingComplete, notificationsEnabled, dailyWordNotificationTime]);
+
+  // Check and reset daily completion if it's a new day
+  useEffect(() => {
+    const checkDailyReset = () => {
+      const { lastQuizDate, resetDailyCompletion } = useUserStore.getState();
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (lastQuizDate && lastQuizDate !== today) {
+        console.log('New day detected, resetting daily completion');
+        resetDailyCompletion();
+      }
+    };
+    
+    checkDailyReset();
+  }, [resetDailyCompletion]);
 
   useEffect(() => {
     if (loaded || error) {
@@ -79,6 +109,19 @@ export default function RootLayout() {
           } else {
             setPremium(false)
           }
+          
+          // Check if it's a new day and reset daily completion
+          const { lastQuizDate } = useUserStore.getState();
+          const today = new Date().toISOString().split('T')[0];
+          if (lastQuizDate && lastQuizDate !== today) {
+            console.log('App state change - New day detected, resetting daily completion');
+            resetDailyCompletion();
+          }
+          
+          // Reschedule notifications if needed
+          if (isOnboardingComplete && notificationsEnabled) {
+            await notificationService.rescheduleStreakReminderForToday();
+          }
         } catch (error) {
           console.error('Error refreshing subscription status:', error);
         }
@@ -90,7 +133,7 @@ export default function RootLayout() {
     return () => {
       subscription?.remove();
     };
-  }, [setPremium]);
+  }, [setPremium, isOnboardingComplete, notificationsEnabled, resetDailyCompletion]);
 
   return (
     <>

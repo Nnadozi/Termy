@@ -7,7 +7,7 @@ import notificationService from "@/utils/notificationService"
 import { useTheme } from "@react-navigation/native"
 import { useRouter } from "expo-router"
 import { useState } from "react"
-import { Alert, StyleSheet, View } from "react-native"
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native"
 
 const NotificationsSetup = () => {
   const {colors} = useTheme()
@@ -19,21 +19,20 @@ const NotificationsSetup = () => {
 
   // Parse current time to get hour and minute
   const [hour, minute] = dailyWordNotificationTime.split(':').map(Number)
-  const [hourInput, setHourInput] = useState(hour.toString())
+  const [hourInput, setHourInput] = useState(hour > 12 ? (hour - 12).toString() : (hour === 0 ? '12' : hour.toString()))
   const [minuteInput, setMinuteInput] = useState(minute.toString().padStart(2, '0'))
+  const [isPM, setIsPM] = useState(hour >= 12)
 
   const handleHourChange = (text: string) => {
     // Only allow numbers
     const numericText = text.replace(/[^0-9]/g, '')
     
-    // Prevent hours above 23
+    // Prevent hours above 12
     const hour = parseInt(numericText) || 0
-    if (hour > 23) return
+    if (hour > 12) return
     
     setHourInput(numericText)
-    const minute = parseInt(minuteInput) || 0
-    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
-    setDailyWordNotificationTime(timeString)
+    updateTimeString(numericText, minuteInput, isPM)
   }
 
   const handleMinuteChange = (text: string) => {
@@ -45,9 +44,34 @@ const NotificationsSetup = () => {
     if (minute > 59) return
     
     setMinuteInput(numericText)
-    const hour = parseInt(hourInput) || 0
-    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
+    updateTimeString(hourInput, numericText, isPM)
+  }
+
+  const handleAMPMToggle = () => {
+    setIsPM(!isPM)
+    updateTimeString(hourInput, minuteInput, !isPM)
+  }
+
+  const updateTimeString = (hour: string, minute: string, pm: boolean) => {
+    let hourNum = parseInt(hour) || 0
+    const minuteNum = parseInt(minute) || 0
+    
+    // Convert to 24-hour format for storage
+    if (pm && hourNum !== 12) {
+      hourNum += 12
+    } else if (!pm && hourNum === 12) {
+      hourNum = 0
+    }
+    
+    const timeString = `${hourNum.toString().padStart(2, '0')}:${minuteNum.toString().padStart(2, '0')}`
     setDailyWordNotificationTime(timeString)
+  }
+
+  const formatTimeForDisplay = (timeString: string) => {
+    const [hour, minute] = timeString.split(':').map(Number)
+    const hour12 = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour)
+    const ampm = hour >= 12 ? 'PM' : 'AM'
+    return `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`
   }
 
   const handleEnableNotifications = async () => {
@@ -58,7 +82,7 @@ const NotificationsSetup = () => {
         // Do NOT schedule notifications here
         Alert.alert(
           'Notifications Enabled', 
-          `You'll receive daily word reminders at ${dailyWordNotificationTime}`
+          `You'll receive daily word reminders at ${formatTimeForDisplay(dailyWordNotificationTime)}`
         )
       } else {
         Alert.alert(
@@ -76,8 +100,8 @@ const NotificationsSetup = () => {
     const hour = parseInt(hourInput)
     const minute = parseInt(minuteInput)
     
-    if (isNaN(hour) || hour < 0 || hour > 23) {
-      Alert.alert('Invalid Hour', 'Hour must be between 0 and 23')
+    if (isNaN(hour) || hour < 1 || hour > 12) {
+      Alert.alert('Invalid Hour', 'Hour must be between 1 and 12')
       return
     }
     
@@ -124,7 +148,7 @@ const NotificationsSetup = () => {
               <CustomText bold style={{marginBottom: "3%"}}>Notification Time</CustomText>
               <View style={styles.timeInputRow}>
                 <View style={styles.inputWrapper}>
-                  <CustomText fontSize="small" opacity={0.7}>Hour (0-23)</CustomText>
+                  <CustomText fontSize="small" opacity={0.7}>Hour (1-12)</CustomText>
                   <CustomInput
                     value={hourInput}
                     onChangeText={handleHourChange}
@@ -146,9 +170,23 @@ const NotificationsSetup = () => {
                     maxLength={2}
                   />
                 </View>
+                <View style={styles.ampmContainer}>
+                  <TouchableOpacity 
+                    style={[styles.ampmButton, !isPM && styles.ampmButtonActive]} 
+                    onPress={() => !isPM || handleAMPMToggle()}
+                  >
+                    <CustomText style={!isPM ? styles.ampmTextActive : styles.ampmText}>AM</CustomText>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.ampmButton, isPM && styles.ampmButtonActive]} 
+                    onPress={() => isPM || handleAMPMToggle()}
+                  >
+                    <CustomText style={isPM ? styles.ampmTextActive : styles.ampmText}>PM</CustomText>
+                  </TouchableOpacity>
+                </View>
               </View>
               <CustomText fontSize="small" opacity={0.7} style={{marginTop: "2%"}}>
-                Format: HH:MM (24-hour format)
+                Current time: {formatTimeForDisplay(dailyWordNotificationTime)}
               </CustomText>
             </View>
 
@@ -195,6 +233,31 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     width: 60,
     height: 60,
+  },
+  ampmContainer: {
+    marginLeft: "5%",
+    flexDirection: "row",
+    gap: 2,
+  },
+  ampmButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  ampmButtonActive: {
+    backgroundColor: '#FF6A00',
+    borderColor: '#FF6A00',
+  },
+  ampmText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  ampmTextActive: {
+    fontSize: 14,
+    color: 'white',
+    fontWeight: 'bold',
   },
 })
 

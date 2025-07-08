@@ -3,6 +3,7 @@ import CustomButton from "@/components/CustomButton";
 import CustomIcon from "@/components/CustomIcon";
 import CustomInput from "@/components/CustomInput";
 import CustomText from "@/components/CustomText";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import Page from "@/components/Page";
 import useUserStore, { allWordTopics, resetUserStore } from "@/stores/userStore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,7 +11,7 @@ import { useTheme } from '@react-navigation/native';
 import { Avatar, Chip } from '@rneui/base';
 import { router } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 
 const Profile = () => {
   const { 
@@ -91,12 +92,12 @@ const Profile = () => {
   }
 
   const confirmDeleteProfile = () => {
-    if (deleteConfirmationText !== 'DELETE') {
+    if (deleteConfirmationText.trim() !== 'DELETE') {
       Alert.alert('Error', 'Please type "DELETE" exactly to confirm')
       return
     }
     
-    if (usernameConfirmation !== userName) {
+    if (usernameConfirmation.trim() !== userName) {
       Alert.alert('Error', 'Username does not match. Please enter your exact username.')
       return
     }
@@ -393,6 +394,7 @@ const Profile = () => {
                 onChangeText={setDeleteConfirmationText}
                 placeholder="Type DELETE"
                 style={{ marginBottom: 15 }}
+                maxLength={10}
               />
             </View>
 
@@ -408,6 +410,7 @@ const Profile = () => {
                 onChangeText={setUsernameConfirmation}
                 placeholder="Enter your username"
                 style={{ marginBottom: 15 }}
+                maxLength={20}
               />
             </View>
 
@@ -440,10 +443,10 @@ const Profile = () => {
               />
               {isDeleting && (
                 <View style={{ alignItems: 'center', marginTop: 10 }}>
-                  <ActivityIndicator size="small" color={colors.primary} />
-                  <CustomText fontSize="small" style={{ marginTop: 5, opacity: 0.7 }}>
-                    Deleting your account...
-                  </CustomText>
+                  <LoadingSpinner 
+                    text="Deleting profile..."
+                    variant="inline"
+                  />
                 </View>
               )}
             </View>

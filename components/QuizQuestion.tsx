@@ -51,7 +51,21 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
     console.log('handleTypedAnswer called:', { hasAnswered, typedAnswer })
     if (hasAnswered || !typedAnswer.trim()) return // Prevent empty answers
     
+    console.log('Answer check:', {
+      typedAnswer: `"${typedAnswer}"`,
+      correctAnswer: `"${question.correctAnswer}"`,
+      typedTrimmed: `"${typedAnswer.trim()}"`,
+      correctTrimmed: `"${question.correctAnswer.trim()}"`,
+      typedLower: `"${typedAnswer.trim().toLowerCase()}"`,
+      correctLower: `"${question.correctAnswer.toLowerCase()}"`,
+      lengths: {
+        typed: typedAnswer.trim().toLowerCase().length,
+        correct: question.correctAnswer.toLowerCase().length
+      }
+    })
+    
     const correct = typedAnswer.trim().toLowerCase() === question.correctAnswer.toLowerCase()
+    console.log('Is correct:', correct)
     setIsCorrect(correct)
     setHasAnswered(true)
     
@@ -131,7 +145,33 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
         )}
         {question.type === 'fill_blank' && question.context && (
           <CustomText fontSize="large" bold >
-            {hasAnswered ? question.context : question.context.replace(question.correctAnswer, '_____')}
+            {(() => {
+              console.log('Fill blank debug:', { 
+                context: question.context, 
+                correctAnswer: question.correctAnswer,
+                hasAnswered 
+              })
+              
+              if (hasAnswered) {
+                return question.context
+              }
+              
+              // Try to replace the word in the context
+              const replaced = question.context.replace(question.correctAnswer, '_'.repeat(question.correctAnswer.length))
+              console.log('Replaced result:', replaced)
+              
+              // If no replacement happened, try case-insensitive replacement
+              if (replaced === question.context) {
+                const caseInsensitiveReplaced = question.context.replace(
+                  new RegExp(question.correctAnswer, 'gi'), 
+                  '_'.repeat(question.correctAnswer.length)
+                )
+                console.log('Case-insensitive replaced result:', caseInsensitiveReplaced)
+                return caseInsensitiveReplaced
+              }
+              
+              return replaced
+            })()}
           </CustomText>
         )}
       </View>
@@ -176,6 +216,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
               onSubmitEditing={handleTypedAnswer}
               returnKeyType="done"
               editable={!hasAnswered}
+              maxLength={30}
             />
             {!hasAnswered && (
               <CustomButton
@@ -199,11 +240,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
           >
             {isCorrect ? '✓ Correct!' : '✗ Incorrect'}
           </CustomText>
-          {!isCorrect && typedAnswer && (
-            <CustomText fontSize="normal" textAlign="center" >
-              Correct answer: {question.correctAnswer}
-            </CustomText>
-          )}
+
         </View>
       )}
 

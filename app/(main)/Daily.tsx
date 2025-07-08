@@ -2,6 +2,7 @@ import CustomButton from '@/components/CustomButton'
 import CustomText from '@/components/CustomText'
 import DailyWordCard from '@/components/DailyWordCard'
 import ErrorDisplay from '@/components/ErrorDisplay'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import Page from '@/components/Page'
 import { cacheDailyWords, clearCachedWords, getCachedDailyWords, hasCachedWordsForToday } from '@/database/wordCache'
 import { getDailyWords } from '@/database/wordService'
@@ -10,7 +11,7 @@ import { Word } from '@/types/word'
 import { useTheme } from '@react-navigation/native'
 import { router } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, View } from 'react-native'
+import { View } from 'react-native'
 import PagerView from 'react-native-pager-view'
 
 
@@ -139,6 +140,14 @@ const Daily = () => {
     // This will trigger the useEffect to reload
   }
 
+  if (loading) {
+    return (
+      <Page>
+        <LoadingSpinner text="Loading daily words..." />
+      </Page>
+    )
+  }
+
   return (
     <Page style={{ justifyContent: "flex-start", alignItems: "flex-start" }}>
       <View style={{ width: "100%", marginBottom: "3%" }}>
@@ -151,12 +160,7 @@ const Daily = () => {
         )}
       </View>
       
-      {loading ? (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center",width:"100%" }}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <CustomText style={{marginVertical:"2%"}} textAlign='center'>Loading your words...</CustomText>
-        </View>
-      ) : error ? (
+      {error ? (
         <ErrorDisplay
           title="Failed to Load Words"
           message={error}

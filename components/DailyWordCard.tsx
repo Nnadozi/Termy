@@ -5,10 +5,11 @@ import { useTheme } from '@react-navigation/native'
 import { CheckBox } from '@rneui/base'
 import * as Speech from 'expo-speech'
 import { useState } from 'react'
-import { ActivityIndicator, Alert, Modal, ScrollView, Share, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Alert, Modal, ScrollView, Share, StyleSheet, TouchableOpacity, View } from 'react-native'
 import CustomButton from './CustomButton'
 import CustomIcon from './CustomIcon'
 import CustomText from './CustomText'
+import LoadingSpinner from './LoadingSpinner'
 
 interface DailyWordCardProps {
   word: Word
@@ -160,10 +161,10 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
           <CustomText fontSize='small' textAlign='center'>
             {word.part_of_speech ? `${word.part_of_speech} · ${word.category}` : word.category}
           </CustomText>
-          <CustomText textAlign='center'>
+          <CustomText textAlign='center' numberOfLines={3}>
             {word.definition}
           </CustomText>
-          <CustomText fontSize='small' italic textAlign='center'>
+          <CustomText fontSize='small' italic textAlign='center' numberOfLines={2}>
            {word.example_usage}
           </CustomText>
           <View style={styles.buttonRow}>
@@ -218,12 +219,10 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
 
             <ScrollView style={styles.modalContent}>
               {loadingLists ? (
-                <View style={styles.emptyState}>
-                  <ActivityIndicator size="small" color={colors.primary} />
-                  <CustomText textAlign="center" opacity={0.7} style={{ marginTop: 10 }}>
-                    Loading lists...
-                  </CustomText>
-                </View>
+                <LoadingSpinner 
+                  text="Loading lists..."
+                  variant="inline"
+                />
               ) : availableLists.length > 0 ? (
                 availableLists.map((list) => (
                   <TouchableOpacity
@@ -248,6 +247,7 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
                         fontSize="small" 
                         style={{ opacity: 0.7 }}
                         color={selectedLists.includes(list.name) ? colors.background : colors.text}
+                        numberOfLines={2}
                       >
                         {list.description}
                       </CustomText>

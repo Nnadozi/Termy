@@ -156,6 +156,7 @@ const CreateList = () => {
                 value={listDescription}
                 onChangeText={setListDescription}
                 multiline={true}
+                numberOfLines={4}
                 style={{height: "20%"}}
                 maxLength={85}
             />

@@ -1,39 +1,27 @@
 During testing:
-- handle overflowing text (ex: welcome message)
 - make ui better (onboarding setting up profile loading thing)
-- percentage based styles
-- make new dev accounts
-- update db (difficulty system?)
-- buff premium
-- make sure notifications work (NOTIFICATIONS.md)
 - make store art
-- obfuscation
-- get testers
 - edge cases
   - no more words
   - unique daily words
-- suggestions
-- loading GIFs
-- odd cache bug after onboarding (words change just once) / keep practicing
 - Set up iOS testing and IAP: https://www.revenuecat.com/docs/test-and-launch/sandbox/apple-app-store
-- multiple quiz pass text
-- gamification
-- weird flashing bug when adding words to list
-- find co maintainer
-- license testers?
-- paywall
-- obfuscation
-- make the app better
+- update db (difficulty system?)
+- switch to local db?
+- replace paywall with ads?
+  - unlimited custom lists
+  - more than 3 daily words
+  - no ads
+- overhaul
 
 Future:
 - inline words
 - app tutorial
-- languages
 - different voices
+- gamification
 - new word categories (tech)
 - word filter insde lists (pos, category, etc)
 - animations
-- more parts of speech
+- find co maintainer
 - fix adbmob thing by 7/28/25
 - update target api for old apps by 8/31/25
-- obfuscation
+- try and make new play console account

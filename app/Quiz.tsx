@@ -5,13 +5,14 @@ import ErrorDisplay from '@/components/ErrorDisplay'
 import Page from '@/components/Page'
 import QuizQuestion from '@/components/QuizQuestion'
 import { addWordsToList } from '@/database/wordCache'
+import { useThemeStore } from '@/stores/themeStore'
 import useUserStore from '@/stores/userStore'
 import { QuizQuestion as QuizQuestionType } from '@/types/quiz'
+import notificationService from '@/utils/notificationService'
 import { showToast } from '@/utils/ShowToast'
-import { useTheme } from '@react-navigation/native'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Animated, ScrollView, View } from 'react-native'
+import { Animated, Image, ScrollView, View } from 'react-native'
 import ConfettiCannon from 'react-native-confetti-cannon'
 
 const Quiz = () => {
@@ -24,7 +25,8 @@ const Quiz = () => {
   const [score, setScore] = useState(0)
   const [quizCompleted, setQuizCompleted] = useState(false)
   const hasGenerated = useRef(false)
-  const {colors} = useTheme()
+  const {colors} = useThemeStore()
+  const { isDark } = useThemeStore()
   const { userName, updateQuizStats, dailyWordsCompletedToday } = useUserStore()
   
   // Animation values
@@ -122,6 +124,9 @@ const Quiz = () => {
         // Update user stats
         updateQuizStats(percentage, wordsArray.length)
         
+        // Notify the notification service that daily words are completed
+        await notificationService.onDailyWordsCompleted()
+        
         showToast(`🎉 All daily words have been learned!`)
       } catch (error) {
         console.error('Error adding words to Learned list:', error)
@@ -176,12 +181,22 @@ const Quiz = () => {
   }, [quizCompleted])
 
   if (loading) {
+    const spinnerSource = isDark 
+      ? require('@/assets/images/spinner-dark.gif')
+      : require('@/assets/images/spinner-light.gif')
+    
     return (
       <Page>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <CustomText style={{marginTop:"2%"}} fontSize='large' bold>Creating questions...</CustomText>
-          <CustomText  fontSize='normal'>It's time to test your knowledge!</CustomText>
+          <Image 
+            source={spinnerSource}
+            style={{ width: 150, height: 150 }}
+            resizeMode="contain"
+          />
+          <CustomText fontSize='large' bold>Creating questions...</CustomText>
+          <CustomText fontSize='normal' style={{opacity: 0.7 }}>
+            It's time to test your knowledge!
+          </CustomText>
         </View>
       </Page>
     )
@@ -238,9 +253,7 @@ const Quiz = () => {
             </CustomText>
             <CustomText fontSize="normal"  textAlign="center" style={{ marginBottom:"3%" }}>
               {passed 
-                ? dailyWordsCompletedToday 
-                  ? 'You\'ve completed today\'s words!'
-                  : 'Great job! You\'ve successfully learned these words.'
+                ? 'Great job! You\'ve successfully learned these words.'
                 : 'You need 80% to pass. Keep practicing!'
               }
             </CustomText>

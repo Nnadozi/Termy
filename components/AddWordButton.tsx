@@ -1,7 +1,8 @@
 import { Word } from '@/types/word';
 import React, { useState } from 'react';
-import { ActivityIndicator, TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import CustomIcon from './CustomIcon';
+import LoadingSpinner from './LoadingSpinner';
 import WordSelectorModal from './WordSelectorModal';
 
 interface AddWordButtonProps {
@@ -40,7 +41,11 @@ const AddWordButton: React.FC<AddWordButtonProps> = ({
     <>
       <TouchableOpacity onPress={() => setModalVisible(true)} disabled={isLoading}>
         {isLoading ? (
-          <ActivityIndicator size="small" color={iconColor || "#007AFF"} />
+          <LoadingSpinner 
+            size="small" 
+            color={iconColor || "#007AFF"} 
+            variant="button"
+          />
         ) : (
           <CustomIcon
             name={iconName}

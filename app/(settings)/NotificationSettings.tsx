@@ -7,7 +7,7 @@ import useUserStore from "@/stores/userStore"
 import notificationService from "@/utils/notificationService"
 import { useTheme } from "@react-navigation/native"
 import { useState } from "react"
-import { Alert, StyleSheet, Switch, View } from "react-native"
+import { Alert, StyleSheet, Switch, TouchableOpacity, View } from "react-native"
 
 const NotificationSettings = () => {
     const { colors } = useTheme()
@@ -20,8 +20,60 @@ const NotificationSettings = () => {
 
     // Parse current time to get hour and minute
     const [hour, minute] = dailyWordNotificationTime.split(':').map(Number)
-    const [hourInput, setHourInput] = useState(hour.toString())
+    const [hourInput, setHourInput] = useState(hour > 12 ? (hour - 12).toString() : (hour === 0 ? '12' : hour.toString()))
     const [minuteInput, setMinuteInput] = useState(minute.toString().padStart(2, '0'))
+    const [isPM, setIsPM] = useState(hour >= 12)
+
+    const handleHourChange = (text: string) => {
+        // Only allow numbers
+        const numericText = text.replace(/[^0-9]/g, '')
+        
+        // Prevent hours above 12
+        const hour = parseInt(numericText) || 0
+        if (hour > 12) return
+        
+        setHourInput(numericText)
+        updateTimeString(numericText, minuteInput, isPM)
+    }
+
+    const handleMinuteChange = (text: string) => {
+        // Only allow numbers
+        const numericText = text.replace(/[^0-9]/g, '')
+        
+        // Prevent minutes above 59
+        const minute = parseInt(numericText) || 0
+        if (minute > 59) return
+        
+        setMinuteInput(numericText)
+        updateTimeString(hourInput, numericText, isPM)
+    }
+
+    const handleAMPMToggle = () => {
+        setIsPM(!isPM)
+        updateTimeString(hourInput, minuteInput, !isPM)
+    }
+
+    const updateTimeString = (hour: string, minute: string, pm: boolean) => {
+        let hourNum = parseInt(hour) || 0
+        const minuteNum = parseInt(minute) || 0
+        
+        // Convert to 24-hour format for storage
+        if (pm && hourNum !== 12) {
+            hourNum += 12
+        } else if (!pm && hourNum === 12) {
+            hourNum = 0
+        }
+        
+        const timeString = `${hourNum.toString().padStart(2, '0')}:${minuteNum.toString().padStart(2, '0')}`
+        setDailyWordNotificationTime(timeString)
+    }
+
+    const formatTimeForDisplay = (timeString: string) => {
+        const [hour, minute] = timeString.split(':').map(Number)
+        const hour12 = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour)
+        const ampm = hour >= 12 ? 'PM' : 'AM'
+        return `${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`
+    }
 
     const handleToggleNotifications = async (enabled: boolean) => {
         try {
@@ -30,7 +82,7 @@ const NotificationSettings = () => {
                 if (hasPermission) {
                     setNotificationsEnabled(true)
                     await notificationService.scheduleDailyWordNotification(dailyWordNotificationTime)
-                    Alert.alert('Notifications Enabled', `You'll receive daily word reminders at ${dailyWordNotificationTime}`)
+                    Alert.alert('Notifications Enabled', `You'll receive daily word reminders at ${formatTimeForDisplay(dailyWordNotificationTime)}`)
                 } else {
                     Alert.alert('Permission Denied', 'Please enable notifications in your device settings.')
                     return
@@ -46,40 +98,12 @@ const NotificationSettings = () => {
         }
     }
 
-    const handleHourChange = (text: string) => {
-        // Only allow numbers
-        const numericText = text.replace(/[^0-9]/g, '')
-        
-        // Prevent hours above 23
-        const hour = parseInt(numericText) || 0
-        if (hour > 23) return
-        
-        setHourInput(numericText)
-        const minute = parseInt(minuteInput) || 0
-        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
-        setDailyWordNotificationTime(timeString)
-    }
-
-    const handleMinuteChange = (text: string) => {
-        // Only allow numbers
-        const numericText = text.replace(/[^0-9]/g, '')
-        
-        // Prevent minutes above 59
-        const minute = parseInt(numericText) || 0
-        if (minute > 59) return
-        
-        setMinuteInput(numericText)
-        const hour = parseInt(hourInput) || 0
-        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`
-        setDailyWordNotificationTime(timeString)
-    }
-
     const handleSaveTime = async () => {
         const hour = parseInt(hourInput)
         const minute = parseInt(minuteInput)
         
-        if (isNaN(hour) || hour < 0 || hour > 23) {
-            Alert.alert('Invalid Hour', 'Hour must be between 0 and 23')
+        if (isNaN(hour) || hour < 1 || hour > 12) {
+            Alert.alert('Invalid Hour', 'Hour must be between 1 and 12')
             return
         }
         
@@ -91,7 +115,7 @@ const NotificationSettings = () => {
         try {
             if (notificationsEnabled) {
                 await notificationService.scheduleDailyWordNotification(dailyWordNotificationTime)
-                Alert.alert('Time Updated', `Notifications will now be sent at ${dailyWordNotificationTime}`)
+                Alert.alert('Time Updated', `Notifications will now be sent at ${formatTimeForDisplay(dailyWordNotificationTime)}`)
             }
         } catch (error) {
             console.error('Error updating notification time:', error)
@@ -157,7 +181,7 @@ const NotificationSettings = () => {
                     <View style={styles.timeInputContainer}>
                         <View style={styles.timeInputRow}>
                             <View style={styles.inputWrapper}>
-                                <CustomText fontSize="small" opacity={0.7}>Hour (0-23)</CustomText>
+                                <CustomText fontSize="small" opacity={0.7}>Hour (1-12)</CustomText>
                                 <CustomInput
                                     value={hourInput}
                                     onChangeText={handleHourChange}
@@ -179,7 +203,24 @@ const NotificationSettings = () => {
                                     maxLength={2}
                                 />
                             </View>
+                            <View style={styles.ampmContainer}>
+                                <TouchableOpacity 
+                                    style={[styles.ampmButton, !isPM && styles.ampmButtonActive]} 
+                                    onPress={() => !isPM || handleAMPMToggle()}
+                                >
+                                    <CustomText style={!isPM ? styles.ampmTextActive : styles.ampmText}>AM</CustomText>
+                                </TouchableOpacity>
+                                <TouchableOpacity 
+                                    style={[styles.ampmButton, isPM && styles.ampmButtonActive]} 
+                                    onPress={() => isPM || handleAMPMToggle()}
+                                >
+                                    <CustomText style={isPM ? styles.ampmTextActive : styles.ampmText}>PM</CustomText>
+                                </TouchableOpacity>
+                            </View>
                         </View>
+                        <CustomText fontSize="small" opacity={0.7} style={{marginTop: "2%", textAlign: "center"}}>
+                            Current time: {formatTimeForDisplay(dailyWordNotificationTime)}
+                        </CustomText>
                         <CustomButton 
                             title="Save Time" 
                             onPress={handleSaveTime}
@@ -262,9 +303,35 @@ const styles = StyleSheet.create({
         height: 60,
         marginTop: "2%",
     },
+    ampmContainer: {
+        marginLeft: "5%",
+        flexDirection: "row",
+        gap: 2,
+    },
+    ampmButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: '#ccc',
+    },
+    ampmButtonActive: {
+        backgroundColor: '#FF6A00',
+        borderColor: '#FF6A00',
+    },
+    ampmText: {
+        fontSize: 14,
+        color: '#666',
+    },
+    ampmTextActive: {
+        fontSize: 14,
+        color: 'white',
+        fontWeight: 'bold',
+    },
     saveButton: {
         alignSelf: "center",
         width: "40%",
+        marginTop: "3%",
     },
     testButton: {
         marginTop: "3%",

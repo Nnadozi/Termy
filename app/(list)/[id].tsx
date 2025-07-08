@@ -4,13 +4,14 @@ import CustomInput from "@/components/CustomInput"
 import CustomText from "@/components/CustomText"
 import DailyWordCard from "@/components/DailyWordCard"
 import ErrorDisplay from "@/components/ErrorDisplay"
+import LoadingSpinner from "@/components/LoadingSpinner"
 import Page from "@/components/Page"
 import { addWordsToList, getList } from "@/database/wordCache"
 import { List } from "@/types/list"
 import { Word } from "@/types/word"
 import { router, useLocalSearchParams } from "expo-router"
 import { useEffect, useRef, useState } from "react"
-import { ActivityIndicator, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import PagerView from "react-native-pager-view"
 
 const ListScreen = () => {
@@ -106,10 +107,7 @@ const ListScreen = () => {
             </View>
            
             {loading ? (
-                <View style={{flex:1, justifyContent:"center", alignItems:"center"}}>
-                    <ActivityIndicator size="large" color="#007AFF" />
-                    <CustomText style={{marginTop:"2%"}} textAlign='center'>Loading list...</CustomText>
-                </View>
+                <LoadingSpinner text="Loading list..." />
             ) : error ? (
                 <ErrorDisplay
                     title="Failed to Load List"
@@ -149,7 +147,7 @@ const ListScreen = () => {
                 </View>
             )}
             {list && (
-                <CustomInput placeholder="Search" value={search} onChangeText={setSearch} style={{marginVertical:"3%"}} />  
+                <CustomInput placeholder="Search" value={search} onChangeText={setSearch} style={{marginVertical:"3%"}} maxLength={50} />  
             )}
         </Page>
     )

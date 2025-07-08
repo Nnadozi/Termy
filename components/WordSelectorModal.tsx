@@ -3,10 +3,11 @@ import { Word } from '@/types/word';
 import { useTheme } from '@react-navigation/native';
 import { CheckBox } from '@rneui/base';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import CustomButton from './CustomButton';
 import CustomInput from './CustomInput';
 import CustomText from './CustomText';
+import LoadingSpinner from './LoadingSpinner';
 
 interface WordSelectorModalProps {
   visible: boolean;
@@ -39,6 +40,7 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
   const [customWord, setCustomWord] = useState('');
   const [customDefinition, setCustomDefinition] = useState('');
   const [customExample, setCustomExample] = useState('');
+  const [customPartOfSpeech, setCustomPartOfSpeech] = useState('');
 
   // Load available words when modal opens
   useEffect(() => {
@@ -106,14 +108,15 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
       word: customWord.trim(),
       definition: customDefinition.trim(),
       example_usage: customExample.trim() || '',
-      part_of_speech: '',
-      category: 'Custom'
+      part_of_speech: customPartOfSpeech.trim() || '',
+      category: 'custom'
     };
 
     setSelectedWords(prev => [...prev, newWord]);
     setCustomWord('');
     setCustomDefinition('');
     setCustomExample('');
+    setCustomPartOfSpeech('');
     
     // Switch to learned tab to show the selected word
     setActiveTab('learned');
@@ -130,13 +133,14 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
     setCustomWord('');
     setCustomDefinition('');
     setCustomExample('');
+    setCustomPartOfSpeech('');
     onClose();
   };
 
   const renderLearnedTab = () => (
     <ScrollView style={styles.tabContent}>
       <CustomText fontSize="small" style={{ marginBottom:"2%"}}>
-        Select words from your learned vocabulary
+        Select words from your vocabulary
       </CustomText>
       
       {/* Show selected words first */}
@@ -158,10 +162,10 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
               onPress={() => toggleWordSelection(word)}
             >
               <View style={styles.wordItemContent}>
-                <CustomText bold style={{ color: colors.background }}>
+                <CustomText bold style={{ color: colors.background }} numberOfLines={1}>
                   {word.word}
                 </CustomText>
-                <CustomText fontSize="small" style={{ color: colors.background }}>
+                <CustomText fontSize="small" style={{ color: colors.background }} numberOfLines={2}>
                   {word.definition}
                 </CustomText>
                 <CustomText fontSize="small" style={{ color: colors.background }}>
@@ -181,23 +185,21 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
       
       {/* Show loading state */}
       {loading ? (
-        <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-          <ActivityIndicator size="small" color={colors.primary} />
-          <CustomText fontSize="small" opacity={0.7} style={{ marginTop: 10 }}>
-            Loading words...
-          </CustomText>
-        </View>
+        <LoadingSpinner 
+          text="Loading words..."
+          variant="inline"
+        />
       ) : availableWords.length === 0 ? (
         <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-          <CustomText fontSize="small" opacity={0.7}>No learned words available</CustomText>
+          <CustomText fontSize="small" opacity={0.7}>No words available</CustomText>
           <CustomText fontSize="small" opacity={0.5} style={{ marginTop: 5 }}>
-            Complete your daily words to add them here
+            Add some words to your lists first
           </CustomText>
         </View>
       ) : (
         /* Show available words */
         availableWords
-          .filter(word => word.category !== 'Custom' && !selectedWords.some(w => w.id === word.id))
+          .filter(word => !selectedWords.some(w => w.id === word.id))
           .map(word => (
             <TouchableOpacity
               key={word.id}
@@ -213,10 +215,10 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
               onPress={() => toggleWordSelection(word)}
             >
               <View style={styles.wordItemContent}>
-                <CustomText bold color = {selectedWords.some(w => w.id === word.id) ? colors.background : colors.text }>
+                <CustomText bold color = {selectedWords.some(w => w.id === word.id) ? colors.background : colors.text } numberOfLines={1}>
                   {word.word}
                 </CustomText>
-                <CustomText fontSize="small" color = {selectedWords.some(w => w.id === word.id) ? colors.background : colors.text }>
+                <CustomText fontSize="small" color = {selectedWords.some(w => w.id === word.id) ? colors.background : colors.text } numberOfLines={2}>
                   {word.definition}
                 </CustomText>
                 <CustomText fontSize="small" color = {selectedWords.some(w => w.id === word.id) ? colors.background : colors.primary }>
@@ -241,10 +243,10 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
       </CustomText>
       
       {/* Show success message if words were added */}
-      {selectedWords.filter(w => w.category === 'Custom').length > 0 && (
+      {selectedWords.filter(w => w.category === 'custom').length > 0 && (
         <View style={[styles.successMessage, { backgroundColor: colors.primary }]}>
           <CustomText fontSize="small">
-            ✓ {selectedWords.filter(w => w.category === 'Custom').length} custom word{selectedWords.filter(w => w.category === 'Custom').length !== 1 ? 's' : ''} added
+            ✓ {selectedWords.filter(w => w.category === 'custom').length} custom word{selectedWords.filter(w => w.category === 'custom').length !== 1 ? 's' : ''} added
           </CustomText>
         </View>
       )}
@@ -254,20 +256,32 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
         value={customWord}
         onChangeText={setCustomWord}
         style={{marginBottom:"2%"}}
+        maxLength={30}
       />
       <CustomInput
         placeholder="Enter definition *"
         value={customDefinition}
         onChangeText={setCustomDefinition}
         multiline
+        numberOfLines={3}
         style={{marginBottom:"2%"}}
+        maxLength={200}
+      />
+      <CustomInput
+        placeholder="Enter part of speech (optional)"
+        value={customPartOfSpeech}
+        onChangeText={setCustomPartOfSpeech}
+        style={{marginBottom:"2%"}}
+        maxLength={20}
       />
       <CustomInput
         placeholder="Enter example usage *"
         value={customExample}
         onChangeText={setCustomExample}
         multiline
+        numberOfLines={3}
         style={{marginBottom:"2%"}}
+        maxLength={300}
       />
       <CustomButton
         title="Add Custom Word"
@@ -315,7 +329,7 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
                 onPress={() => setActiveTab('learned')}
               >
                 <CustomText color={activeTab === 'learned' ? colors.background : colors.text}>
-                  Learned
+                  Existing Words
                 </CustomText>
               </TouchableOpacity>
               {allowCustomWords && (
