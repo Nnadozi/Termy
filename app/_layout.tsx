@@ -9,6 +9,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { AppState, Platform } from "react-native";
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 import "../global.css";
 
@@ -94,14 +95,16 @@ export default function RootLayout() {
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'}/>
-      <ThemeProvider value={colors}> 
-        <Stack screenOptions={{headerShown: false, gestureEnabled: false}}>
-          <Stack.Screen name="(onboarding)" />
-          <Stack.Screen name="(main)" />
-          <Stack.Screen name="(list)" />
-          <Stack.Screen name="Quiz" />
-        </Stack>  
-      </ThemeProvider>
+      <SafeAreaProvider>  
+        <ThemeProvider value={colors}> 
+          <Stack screenOptions={{headerShown: false, gestureEnabled: false}}>
+            <Stack.Screen name="(onboarding)" />
+            <Stack.Screen name="(main)" />
+            <Stack.Screen name="(list)" />
+            <Stack.Screen name="Quiz" />
+          </Stack>  
+        </ThemeProvider>
+      </SafeAreaProvider>
       <Toast />
     </>
   );

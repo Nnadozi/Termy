@@ -1,7 +1,7 @@
 import { useTheme } from '@react-navigation/native';
 import React from 'react';
-import { SafeAreaView, StyleSheet, ViewStyle } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StyleSheet, ViewStyle } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface PageProps {
   children:React.ReactNode
@@ -13,8 +13,10 @@ const Page = ({style, children}:PageProps) => {
   const {colors} = useTheme();
   return (
     <SafeAreaView style={[styles.con, style, {
-      paddingTop: insets.top * 1.3,
-      paddingBottom: insets.bottom * 1.3,
+      paddingTop: insets.top * 0.5,
+      paddingBottom: insets.bottom * 0.5,
+      paddingLeft: insets.top * 0.75,
+      paddingRight: insets.top * 0.75,
       backgroundColor: colors.background,
     }]}>
       {children}
@@ -29,7 +31,6 @@ const styles = StyleSheet.create({
         flex:1,
         justifyContent:"center",
         alignItems:"center",
-        paddingHorizontal:"5%",
         backgroundColor:"white"
     }
 })

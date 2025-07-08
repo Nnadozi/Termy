@@ -1,15 +1,13 @@
-Work on:
+During testing:
 - handle overflowing text (ex: welcome message)
 - make ui better (onboarding setting up profile loading thing)
 - percentage based styles
-
-Launch v1.0.0: 7/1/25
-During testing:
 - make new dev accounts
 - update db (difficulty system?)
 - buff premium
 - make sure notifications work (NOTIFICATIONS.md)
 - make store art
+- obfuscation
 - get testers
 - edge cases
   - no more words
@@ -17,13 +15,16 @@ During testing:
 - suggestions
 - loading GIFs
 - odd cache bug after onboarding (words change just once) / keep practicing
-- test on different devices (iOS notifications and purchases)
+- Set up iOS testing and IAP: https://www.revenuecat.com/docs/test-and-launch/sandbox/apple-app-store
 - multiple quiz pass text
 - gamification
 - weird flashing bug when adding words to list
 - find co maintainer
 - license testers?
+- paywall
+- obfuscation
 - make the app better
+
 Future:
 - inline words
 - app tutorial
@@ -35,3 +36,4 @@ Future:
 - more parts of speech
 - fix adbmob thing by 7/28/25
 - update target api for old apps by 8/31/25
+- obfuscation

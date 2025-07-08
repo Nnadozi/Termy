@@ -67,6 +67,14 @@
             "billingPermission": "Allow Termy to make purchases and manage subscriptions."
           }
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true
+          }
+        }
       ]
     ],
     "experiments": {

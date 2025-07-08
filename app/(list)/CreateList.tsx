@@ -108,8 +108,7 @@ const CreateList = () => {
     }
 
     const isButtonDisabled = () => {
-        const customListsCount = userLists.filter(list => list.name !== 'Learned').length
-        return !listName.trim() || (!hasActiveSubscription && customListsCount >= 2)
+        return !listName.trim()
     }
 
     const getLimitWarningText = () => {
