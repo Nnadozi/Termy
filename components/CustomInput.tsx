@@ -27,7 +27,8 @@ const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength,
     style={[styles.input, style, 
       { width: width || '100%' },
       {color: colors.text},
-      {borderColor: colors.border}
+      {borderColor: colors.border},
+      {textAlign: textAlign || 'left'}
     ]}
     placeholderTextColor={"darkgray"}
     maxLength={maxLength ?? 100}
@@ -35,7 +36,7 @@ const CustomInput = ({placeholder, value, onChangeText, style, width, maxLength,
     keyboardType={keyboardType}
     multiline={multiline}
     numberOfLines={multiline ? (numberOfLines || 3) : undefined}
-    textAlignVertical={multiline ? "top" : textAlign as "auto" | "center" | "top" | "bottom"}
+    textAlignVertical={multiline ? "top" : "center"}
     onSubmitEditing={onSubmitEditing}
     returnKeyType={returnKeyType}
     editable={editable}
@@ -48,10 +49,8 @@ export default CustomInput
 const styles = StyleSheet.create({
     input:{
         borderWidth: 1,
-        padding:"4%",
-        paddingLeft:"3%",
-        paddingRight:"10%",
+        padding: 15,
         borderRadius: 10,
-        marginVertical:"1%",
+        marginVertical: "1%",
     }
 })

@@ -10,9 +10,10 @@ import useUserStore from '@/stores/userStore'
 import { QuizQuestion as QuizQuestionType } from '@/types/quiz'
 import notificationService from '@/utils/notificationService'
 import { showToast } from '@/utils/ShowToast'
+import Constants from 'expo-constants'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
-import { Animated, Image, ScrollView, View } from 'react-native'
+import { ActivityIndicator, Animated, Image, Platform, ScrollView, View } from 'react-native'
 import ConfettiCannon from 'react-native-confetti-cannon'
 
 const Quiz = () => {
@@ -39,12 +40,16 @@ const Quiz = () => {
       setError(null)
       setLoading(true)
       
+      // Get environment variables with fallbacks
+      const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || process.env.EXPO_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+      
       // Call the Supabase edge function instead of OpenAI directly
-      const response = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/generate-quiz`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/generate-quiz`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${supabaseAnonKey}`
         },
         body: JSON.stringify({ words })
       })
@@ -181,18 +186,25 @@ const Quiz = () => {
   }, [quizCompleted])
 
   if (loading) {
-    const spinnerSource = isDark 
-      ? require('@/assets/images/spinner-dark.gif')
-      : require('@/assets/images/spinner-light.gif')
-    
     return (
       <Page>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Image 
-            source={spinnerSource}
-            style={{ width: 150, height: 150 }}
-            resizeMode="contain"
-          />
+          {Platform.OS === 'ios' ? (
+            <ActivityIndicator 
+              size="large" 
+              color={isDark ? '#FF6A00' : '#FF6A00'} 
+              style={{ marginBottom: 20 }}
+            />
+          ) : (
+            <Image 
+              source={isDark 
+                ? require('@/assets/images/spinner-dark.gif')
+                : require('@/assets/images/spinner-light.gif')
+              }
+              style={{ width: 150, height: 150 }}
+              resizeMode="contain"
+            />
+          )}
           <CustomText fontSize='large' bold>Creating questions...</CustomText>
           <CustomText fontSize='normal' style={{opacity: 0.7 }}>
             It's time to test your knowledge!

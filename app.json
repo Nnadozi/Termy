@@ -9,8 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.nnadozi.termy"
+      "bundleIdentifier": "com.nnadozi.termy",
+      "infoPlist": {
+        "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
+        "UISupportedInterfaceOrientations~ipad": ["UIInterfaceOrientationPortrait"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -58,14 +61,6 @@
         "expo-notifications",
         {
           "icon": "./assets/images/icon.png"
-        }
-      ],
-      [
-        "expo-iap",
-        {
-          "android": {
-            "billingPermission": "Allow Termy to make purchases and manage subscriptions."
-          }
         }
       ],
       [

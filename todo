@@ -1,20 +1,16 @@
 During testing:
-- make ui better (onboarding setting up profile loading thing)
-- make store art
-- edge cases
-  - no more words
-  - unique daily words
-- Set up iOS testing and IAP: https://www.revenuecat.com/docs/test-and-launch/sandbox/apple-app-store
 - update db (difficulty system?)
 - switch to local db?
-- replace paywall with ads?
-  - unlimited custom lists
-  - more than 3 daily words
-  - no ads
-- overhaul
+- Make better UI
+- Handle edge cases
+- implement ads (rebuild)
+- Add time picker for notificationsd (rebuild)
+- last: completely clean up codebase
+- get rid of env local
 
 Future:
-- inline words
+- rebuild for expo store review (add rate later)
+- inline word definitions
 - app tutorial
 - different voices
 - gamification
@@ -23,5 +19,7 @@ Future:
 - animations
 - find co maintainer
 - fix adbmob thing by 7/28/25
-- update target api for old apps by 8/31/25
+- update target api for old apps by 8/31/25 (more ads?)
+  - Sumitt: Add more ads, fix iPad tilt issue, fix styles, edge functions?, env
+  - CellWise: Fix iPad tilt issue, fix styles
 - try and make new play console account

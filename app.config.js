@@ -2,8 +2,6 @@ const IS_DEV = process.env.APP_VARIANT === 'development';
 
 import appJson from './app.json';
 
-
-//packages have to be the same for now (testing paywall)
 export default {
   ...appJson,
   expo: {
@@ -12,13 +10,13 @@ export default {
     ios: {
       ...appJson.expo?.ios,
       bundleIdentifier: IS_DEV 
-        ? 'com.nnadozi.termy' 
+        ? 'com.nnadozi.termy.dev' 
         : 'com.nnadozi.termy',
     },
     android: {
       ...appJson.expo?.android,
       package: IS_DEV 
-        ? 'com.nnadozi.termy' 
+        ? 'com.nnadozi.termy.dev' 
         : 'com.nnadozi.termy',
       googleServicesFile: IS_DEV 
         ? process.env.GOOGLE_SERVICES_DEV ??  './google-services-dev.json'
@@ -29,7 +27,10 @@ export default {
       router: {},
       eas: {
         projectId: "3f69e2d6-5620-4b05-a7c5-c9771c732a84"
-      }
+      },
+      // Make environment variables available to the app
+      supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
+      supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
     }
   }
 }; 

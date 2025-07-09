@@ -82,7 +82,7 @@ const Lists = () => {
 
   return (
     <Page style={{flex: 1, justifyContent:"flex-start", alignItems:"flex-start"}}>
-       <View style={{width:"100%", marginBottom:"3%", flexDirection:"row", alignItems:"center", justifyContent:"space-between"}}>
+      <View style={{width:"100%", marginBottom:"3%", flexDirection:"row", alignItems:"center", justifyContent:"space-between"}}>
         <CustomText fontSize='XL' bold>Lists</CustomText>
         <CustomIcon name="plus" type="entypo" size={30} onPress={() => router.navigate("/(list)/CreateList")} />
       </View>
@@ -108,7 +108,7 @@ const Lists = () => {
         />
       ) : (
         <>
-          <CustomText style={{marginBottom:"2%"}} bold>Default Lists</CustomText>
+          <CustomText style={{marginTop:5}} bold>Default Lists</CustomText>
           {learnedList && (
             <ListPreview 
               customList={false} 
@@ -117,13 +117,13 @@ const Lists = () => {
               count={learnedList.words.length} 
             />
           )}
-          <View style={{width:"100%", marginVertical:"2%"}}>
+          <View style={{width:"100%", marginVertical:5}}>
             <CustomText bold>Custom Lists ({customLists.length})</CustomText>
           </View>
           <View style={{width:"100%", marginBottom:"0%", flex: 1}}>
             {
               customLists.length > 0 ? (
-                <ScrollView style={{width:"100%", flex: 1}}>
+                <ScrollView style={{width:"100%", }}>
                 {customLists.map((list) => (
                   <ListPreview
                     key={list.id}

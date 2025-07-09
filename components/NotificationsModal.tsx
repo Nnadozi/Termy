@@ -1,6 +1,7 @@
 import useUserStore from "@/stores/userStore"
 import notificationService from "@/utils/notificationService"
 import { useTheme } from "@react-navigation/native"
+import { router } from "expo-router"
 import { Alert, Modal, Pressable, StyleSheet, Switch, View } from "react-native"
 import CustomButton from "./CustomButton"
 import CustomIcon from "./CustomIcon"
@@ -62,8 +63,9 @@ const NotificationsModal = ({visible, onRequestClose}: NotificationsModalProps) 
             <Pressable onPress={onRequestClose} style={styles.backdrop}>    
                 <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
                     <View style={styles.header}>
-                        <CustomIcon name="notifications" size={24} primary />
-                        <CustomText bold fontSize="large">Notifications</CustomText>
+                        <CustomIcon name="chevron-left" size={30} onPress={() => router.back()} />
+                        <CustomText bold textAlign="center">Notifications</CustomText>
+                        <View />
                     </View>
                     
                     <View style={styles.section}>
@@ -122,9 +124,10 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: "5%",
-        gap: 10,
+        width: '100%',
+        marginBottom: 20,
     },
     section: {
         marginBottom: "5%",

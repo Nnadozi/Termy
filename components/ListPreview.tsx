@@ -33,7 +33,7 @@ const ListPreview = ({title, description, count, customList, onDelete, isDeletin
                           name="trash" 
                           type="feather" 
                           size={20} 
-                          color="#FF4444" 
+                          opposite
                           onPress={onDelete}
                         />
                       )}
@@ -58,16 +58,17 @@ const styles = StyleSheet.create({
         width: "100%",
         marginVertical:"2%",
         borderRadius:5,
-        elevation:5,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
+        elevation: 5,
     },
     wordRow:{
         flexDirection:"row",
         alignItems:"center",
         justifyContent:"flex-start",
-        gap:"2%",
+        gap:5,
         borderWidth:1,
         borderBottomLeftRadius:5,
         borderBottomRightRadius:5,

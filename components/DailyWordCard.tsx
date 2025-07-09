@@ -184,7 +184,7 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
                 size={20} 
                 name='trash' 
                 type='feather' 
-                color='#FF4444' 
+                color={colors.primary}
               />
             )}
           </View>
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
       flexDirection:"row",
       alignItems:"center",
       justifyContent:"space-between",     
-      gap:"3%",
+      gap:10,
     },
     scrollButton: {
       marginVertical:"3%",

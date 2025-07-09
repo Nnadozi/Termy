@@ -1,6 +1,5 @@
 import { useTheme } from '@react-navigation/native';
 import { Button } from '@rneui/base';
-import React from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 
 interface CustomButtonProps {
@@ -38,7 +37,7 @@ const styles = StyleSheet.create({
     con:{
         justifyContent:"center",
         alignItems:"center",
-        padding:"3.5%",
+        padding:12.5,
         borderRadius:100,
         backgroundColor:"black",
     }

@@ -8,20 +8,16 @@ import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { AppState, Platform } from "react-native";
-import Purchases, { LOG_LEVEL } from 'react-native-purchases';
+import { AppState } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
-SplashScreen.setOptions({
-  fade: true,
-});
 
 export default function RootLayout() {
   const { isDark, colors } = useThemeStore(); 
-  const { isPremium, setPremium, notificationsEnabled, dailyWordNotificationTime, isOnboardingComplete, resetDailyCompletion } = useUserStore()
+  const { notificationsEnabled, dailyWordNotificationTime, isOnboardingComplete, resetDailyCompletion } = useUserStore()
   const [loaded, error] = useFonts({
     'DMSans-Regular': require('../assets/fonts/DMSans-Regular.ttf'),
     'DMSans-Bold': require('../assets/fonts/DMSans-Bold.ttf'),
@@ -34,10 +30,18 @@ export default function RootLayout() {
   useEffect(() => {
     const initNotifications = async () => {
       if (isOnboardingComplete) {
+        // Clear all existing notifications for debugging
+        console.log('DEBUG: Clearing all existing notifications');
+        await notificationService.cancelAllNotifications();
+        
         await notificationService.initialize();
-        if (notificationsEnabled) {
-          await notificationService.updateNotificationSchedule();
-        }
+        // Temporarily disable all notification scheduling to debug
+        console.log('DEBUG: Skipping notification scheduling to test unwanted notifications');
+        // if (notificationsEnabled) {
+        //   await notificationService.updateNotificationSchedule();
+        //   // Debug: List all scheduled notifications
+        //   await notificationService.debugScheduledNotifications();
+        // }
       }
     };
     
@@ -69,62 +73,25 @@ export default function RootLayout() {
     return null;
   }
 
-  useEffect(() =>{
-    Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
-    if (Platform.OS === 'ios') {
-      Purchases.configure({apiKey: "goog_FSBsUShdAwKnxRNIbhpbyAZfvGq"});
-    } else if (Platform.OS === 'android') {
-        Purchases.configure({apiKey: "goog_FSBsUShdAwKnxRNIbhpbyAZfvGq"});
-    }
-   // keys are safe to expose :)
-  },[])
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try{
-        const customerInfo = await Purchases.getCustomerInfo();
-        console.log('Customer info:', customerInfo);
-        if(typeof customerInfo.entitlements.active["premium"] !== "undefined") {
-          setPremium(true)
-        } else {
-          setPremium(false)
-        }
-    } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    }
-    fetchProducts();
-  },[])
-
-  // Listen for app state changes to refresh subscription status
+  // Listen for app state changes
   useEffect(() => {
     const handleAppStateChange = async (nextAppState: string) => {
       if (nextAppState === 'active') {
-        // App has come to the foreground, refresh subscription status
-        try {
-          const customerInfo = await Purchases.getCustomerInfo();
-          console.log('App state change - Customer info:', customerInfo);
-          if(typeof customerInfo.entitlements.active["premium"] !== "undefined") {
-            setPremium(true)
-          } else {
-            setPremium(false)
-          }
-          
-          // Check if it's a new day and reset daily completion
-          const { lastQuizDate } = useUserStore.getState();
-          const today = new Date().toISOString().split('T')[0];
-          if (lastQuizDate && lastQuizDate !== today) {
-            console.log('App state change - New day detected, resetting daily completion');
-            resetDailyCompletion();
-          }
-          
-          // Reschedule notifications if needed
-          if (isOnboardingComplete && notificationsEnabled) {
-            await notificationService.rescheduleStreakReminderForToday();
-          }
-        } catch (error) {
-          console.error('Error refreshing subscription status:', error);
+        // App has come to the foreground
+        
+        // Check if it's a new day and reset daily completion
+        const { lastQuizDate, dailyWordsCompletedToday } = useUserStore.getState();
+        const today = new Date().toISOString().split('T')[0];
+        if (lastQuizDate && lastQuizDate !== today) {
+          console.log('App state change - New day detected, resetting daily completion');
+          resetDailyCompletion();
         }
+        
+        // Only reschedule notifications if onboarding is complete, notifications are enabled, and daily words are not completed
+        // Temporarily disabled for debugging
+        // if (isOnboardingComplete && notificationsEnabled && !dailyWordsCompletedToday) {
+        //   await notificationService.rescheduleStreakReminderForToday();
+        // }
       }
     };
 
@@ -133,7 +100,7 @@ export default function RootLayout() {
     return () => {
       subscription?.remove();
     };
-  }, [setPremium, isOnboardingComplete, notificationsEnabled, resetDailyCompletion]);
+  }, [isOnboardingComplete, notificationsEnabled, resetDailyCompletion]);
 
   return (
     <>

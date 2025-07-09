@@ -13,9 +13,9 @@ const Welcome = () => {
   return (
     <Page>
       <Image resizeMode="contain" source={require("../../assets/images/icon.png")} style={styles.image} />
-      <CustomText fontSize="large" bold style={{marginTop:"3%"}}>Welcome to Termy</CustomText>
-      <CustomText style={{marginVertical:"1%"}} fontSize="normal">Master your English vocabulary.</CustomText>
-      <CustomButton marginVertical="3%" title="Get Started" onPress={() => router.navigate("/(onboarding)/Intro")} />
+      <CustomText fontSize="large" bold style={{marginTop:10}}>Welcome to Termy</CustomText>
+      <CustomText fontSize="normal">Master your English vocabulary.</CustomText>
+      <CustomButton  marginVertical={10} title="Get Started" onPress={() => router.navigate("/(onboarding)/Intro")} />
     </Page>
   );
 }

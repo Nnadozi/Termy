@@ -110,10 +110,13 @@ class NotificationService {
       await this.cancelStreakReminderNotification();
 
       const { dailyWordNotificationTime, dailyWordsCompletedToday } = useUserStore.getState();
+      console.log('scheduleStreakReminderNotificationOnce called - dailyWordsCompletedToday:', dailyWordsCompletedToday);
+      
       if (dailyWordsCompletedToday) {
         console.log('No streak reminder needed: daily words already completed.');
         return null;
       }
+      
       const [wordHour, wordMinute] = dailyWordNotificationTime.split(':').map(Number);
       let reminderHour = wordHour - 2;
       let reminderMinute = wordMinute;
@@ -174,7 +177,19 @@ class NotificationService {
 
   // Call this at the start of each day to reschedule the streak reminder if needed
   async rescheduleStreakReminderForToday(): Promise<void> {
-    await this.scheduleStreakReminderNotificationOnce();
+    try {
+      const { dailyWordsCompletedToday, dailyWordNotificationTime } = useUserStore.getState();
+      
+      // Only schedule if daily words are not completed
+      if (!dailyWordsCompletedToday) {
+        await this.scheduleStreakReminderNotificationOnce();
+      } else {
+        // If daily words are completed, cancel any existing streak reminders
+        await this.cancelStreakReminderNotification();
+      }
+    } catch (error) {
+      console.error('Error rescheduling streak reminder:', error);
+    }
   }
 
   // Send immediate notification
@@ -236,6 +251,24 @@ class NotificationService {
     }
   }
 
+  // Debug function to list all scheduled notifications
+  async debugScheduledNotifications(): Promise<void> {
+    try {
+      const notifications = await this.getScheduledNotifications();
+      console.log('=== DEBUG: All Scheduled Notifications ===');
+      notifications.forEach((notification, index) => {
+        console.log(`${index + 1}. ID: ${notification.identifier}`);
+        console.log(`   Title: ${notification.content.title}`);
+        console.log(`   Type: ${notification.content.data?.type}`);
+        console.log(`   Trigger:`, notification.trigger);
+        console.log('---');
+      });
+      console.log('=== END DEBUG ===');
+    } catch (error) {
+      console.error('Error debugging notifications:', error);
+    }
+  }
+
   // Setup notification listeners
   setupNotificationListeners(): (() => void) {
     // Handle notification received while app is in foreground
@@ -285,15 +318,24 @@ class NotificationService {
   // Update notification schedule based on user preferences
   async updateNotificationSchedule(): Promise<void> {
     try {
-      const { notificationsEnabled, dailyWordNotificationTime } = useUserStore.getState();
+      const { notificationsEnabled, dailyWordNotificationTime, dailyWordsCompletedToday } = useUserStore.getState();
+      console.log('updateNotificationSchedule called:', { notificationsEnabled, dailyWordsCompletedToday });
       
       if (notificationsEnabled) {
         // Schedule daily word notification
         await this.scheduleDailyWordNotification(dailyWordNotificationTime);
         
-        // Schedule streak reminder
-        await this.scheduleStreakReminderNotificationOnce();
+        // Only schedule streak reminder if daily words are not completed
+        if (!dailyWordsCompletedToday) {
+          console.log('Scheduling streak reminder - daily words not completed');
+          await this.scheduleStreakReminderNotificationOnce();
+        } else {
+          console.log('Cancelling streak reminder - daily words already completed');
+          // Cancel any existing streak reminders if daily words are completed
+          await this.cancelStreakReminderNotification();
+        }
       } else {
+        console.log('Notifications disabled, cancelling all notifications');
         // Cancel all notifications if disabled
         await this.cancelAllNotifications();
       }

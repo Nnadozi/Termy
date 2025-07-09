@@ -296,7 +296,7 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle="formSheet"
+      presentationStyle="pageSheet"
       onRequestClose={handleCancel}
     >
       <KeyboardAvoidingView 

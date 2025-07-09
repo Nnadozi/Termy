@@ -209,22 +209,41 @@ const clearUserData = async () => {
   try {
     await initializeDatabase();
     
-    // Use a transaction to ensure atomicity and prevent locking
-    await db.withTransactionAsync(async () => {
+    // Clear data in smaller, safer operations instead of one large transaction
+    try {
       await db.execAsync('DELETE FROM dailyWords');
-      // Clear all user-created lists but preserve default lists
+      console.log('Cleared daily words');
+    } catch (error) {
+      console.log('Error clearing daily words:', error);
+    }
+    
+    try {
       await db.execAsync('DELETE FROM lists WHERE name != "Learned"');
-      // Clear words from the Learned list but keep the list structure
+      console.log('Cleared user lists');
+    } catch (error) {
+      console.log('Error clearing user lists:', error);
+    }
+    
+    try {
       await db.runAsync('UPDATE lists SET words = ? WHERE name = "Learned"', [null]);
-    });
+      console.log('Cleared Learned list words');
+    } catch (error) {
+      console.log('Error clearing Learned list words:', error);
+    }
     
     // Ensure the Learned list exists after clearing
-    await createDefaultListsDirect();
+    try {
+      await createDefaultListsDirect();
+      console.log('Recreated default lists');
+    } catch (error) {
+      console.log('Error recreating default lists:', error);
+    }
     
     console.log('User data cleared from database (preserving default lists structure)');
   } catch (error) {
     console.error('Error clearing user data:', error);
-    throw error;
+    // Don't throw the error to prevent the profile deletion from failing
+    // The AsyncStorage clear and userStore reset will still work
   }
 };
 
@@ -394,9 +413,68 @@ const getAllLists = async () => {
   }
 }
 
+const clearUserDataIOSSafe = async () => {
+  try {
+    console.log('Starting iOS-safe user data clearing...')
+    
+    // Initialize database first
+    await initializeDatabase();
+    console.log('Database initialized for clearing')
+    
+    // Clear daily words with simple operation
+    try {
+      const result = await db.execAsync('DELETE FROM dailyWords');
+      console.log('Daily words cleared:', result)
+    } catch (error) {
+      console.log('Error clearing daily words:', error)
+    }
+    
+    // Clear user lists with simple operation
+    try {
+      const result = await db.execAsync('DELETE FROM lists WHERE name != "Learned"');
+      console.log('User lists cleared:', result)
+    } catch (error) {
+      console.log('Error clearing user lists:', error)
+    }
+    
+    // Clear Learned list words with simple operation
+    try {
+      const result = await db.runAsync('UPDATE lists SET words = ? WHERE name = "Learned"', [null]);
+      console.log('Learned list words cleared:', result)
+    } catch (error) {
+      console.log('Error clearing Learned list words:', error)
+    }
+    
+    // Ensure Learned list exists (this is the most likely to fail)
+    try {
+      const existingList = await db.getFirstAsync(
+        'SELECT id FROM lists WHERE name = ?',
+        ['Learned']
+      );
+      
+      if (!existingList) {
+        await db.runAsync(
+          'INSERT INTO lists (name, description, words) VALUES (?, ?, ?)',
+          ['Learned', 'Successfully completed vocabulary', null]
+        );
+        console.log('Recreated Learned list')
+      } else {
+        console.log('Learned list already exists')
+      }
+    } catch (error) {
+      console.log('Error ensuring Learned list exists:', error)
+    }
+    
+    console.log('iOS-safe user data clearing completed')
+  } catch (error) {
+    console.error('Error in iOS-safe user data clearing:', error)
+    // Don't throw - let the process continue
+  }
+};
+
 
 export {
-    addWordsToList, addWordToList, cacheDailyWords, clearAllData, clearCachedWords, clearUserData, createList, deleteList, getAllLists, getCachedDailyWords, getList, hasCachedWordsForToday,
-    initializeDatabase, removeWordFromList
+  addWordsToList, addWordToList, cacheDailyWords, clearAllData, clearCachedWords, clearUserData, clearUserDataIOSSafe, createList, deleteList, getAllLists, getCachedDailyWords, getList, hasCachedWordsForToday,
+  initializeDatabase, removeWordFromList
 };
 

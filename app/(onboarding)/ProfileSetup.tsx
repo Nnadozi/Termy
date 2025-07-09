@@ -8,7 +8,7 @@ import { Avatar } from '@rneui/base'
 import { router } from 'expo-router'
 import leoProfanity from 'leo-profanity'
 import { useState } from 'react'
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const ProfileSetup = () => {
   const [username, setUsername] = useState("")
@@ -58,39 +58,45 @@ const ProfileSetup = () => {
       disableNext={!isValidUsername(username) || isLoading}
       customOnPress={setUpProfile}
     >
-      {isLoading && (
-        <LoadingSpinner 
-          text="Setting up your profile..."
-          variant="inline"
-        />
-      )}
-      
-      <View style={styles.avatarContainer}>
-        <TouchableOpacity onPress={() => setShowColorPicker(true)} disabled={isLoading}>
-          <Avatar 
-            size={150} 
-            rounded 
-            title={username.charAt(0).toUpperCase() || "A"}
-            containerStyle={{ alignSelf: "center", backgroundColor: avatarColor }} 
+      <ScrollView 
+        style={{ flex: 1, width: '100%' }}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {isLoading && (
+          <LoadingSpinner 
+            text="Setting up your profile..."
+            variant="inline"
           />
-        </TouchableOpacity>
-        <CustomText style={styles.tapText}>Tap to change color</CustomText>
-      </View>
-      
-      <CustomText textAlign='center' bold>What should we call you?</CustomText>
-      <CustomInput
-        placeholder="Enter your username (ex: Zixon77)"
-        onChangeText={setUsername}
-        value={username}
-        maxLength={20}
-        keyboardType="default"
-        editable={!isLoading}
-      />
-      <View style={styles.rulesContainer}>
-        <CustomText>• No special characters</CustomText>
-        <CustomText>• No emojis</CustomText>
-        <CustomText>• No profanity</CustomText>
-      </View>
+        )}
+        
+        <View style={styles.avatarContainer}>
+          <TouchableOpacity onPress={() => setShowColorPicker(true)} disabled={isLoading}>
+            <Avatar 
+              size={150} 
+              rounded 
+              title={username.charAt(0).toUpperCase() || "A"}
+              containerStyle={{ alignSelf: "center", backgroundColor: avatarColor }} 
+            />
+          </TouchableOpacity>
+          <CustomText style={{marginTop:10}}>Tap to change avatar color</CustomText>
+          <CustomText textAlign='center' fontSize='small'>Choose wisely!</CustomText>
+        </View>
+        
+        <CustomInput
+          placeholder="Enter your username (ex: Zixon77)"
+          onChangeText={setUsername}
+          value={username}
+          maxLength={20}
+          keyboardType="default"
+          editable={!isLoading}
+        />
+        <View style={styles.rulesContainer}>
+          <CustomText>• No special characters</CustomText>
+          <CustomText>• No emojis</CustomText>
+          <CustomText>• No profanity</CustomText>
+        </View>
+      </ScrollView>
       <ColorPickerModal
         visible={showColorPicker}
         onClose={() => setShowColorPicker(false)}
@@ -110,14 +116,11 @@ const styles = StyleSheet.create({
   avatarContainer: {
     alignItems: "center",
     width: "100%",
-    marginBottom: "5%",
-  },
-  tapText: {
-    marginTop: "3%"
+    marginBottom: 10,
   },
   rulesContainer: {
     gap: 10,
-    marginTop: "1%"
+    marginTop: 10
   }
 })
 

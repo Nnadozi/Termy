@@ -6,8 +6,9 @@ import Page from "@/components/Page"
 import useUserStore from "@/stores/userStore"
 import notificationService from "@/utils/notificationService"
 import { useTheme } from "@react-navigation/native"
+import { router } from "expo-router"
 import { useState } from "react"
-import { Alert, StyleSheet, Switch, TouchableOpacity, View } from "react-native"
+import { Alert, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native"
 
 const NotificationSettings = () => {
     const { colors } = useTheme()
@@ -139,124 +140,136 @@ const NotificationSettings = () => {
 
     return (
         <Page style={styles.container}>
-            <View style={styles.header}>
-                <CustomText bold fontSize="XL">Notification Settings</CustomText>
-                <CustomText opacity={0.7} style={{marginTop: "2%"}}>
-                    Manage your daily word reminders
-                </CustomText>
+            {/* Header with back button */}
+            <View style={styles.topRow}>
+                <CustomIcon name="chevron-left" onPress={() => router.back()} />
+                <CustomText bold fontSize='XL'>Notification Settings</CustomText>
+                <View/>
             </View>
 
-            {/* Enable/Disable Notifications */}
-            <View style={[styles.section, { borderBottomColor: colors.border }]}>
-                <View style={styles.sectionHeader}>
-                    <CustomIcon name="notifications" size={24} primary />
-                    <View style={styles.sectionText}>
-                        <CustomText bold>Daily Word Notifications</CustomText>
-                        <CustomText fontSize="small" opacity={0.7}>
-                            Receive reminders when new words are available
-                        </CustomText>
-                    </View>
-                    <Switch
-                        value={notificationsEnabled}
-                        onValueChange={handleToggleNotifications}
-                        trackColor={{ false: colors.border, true: colors.primary }}
-                        thumbColor={colors.background}
-                    />
+            <ScrollView 
+                style={{ flex: 1, width: '100%' }}
+                contentContainerStyle={{ paddingBottom: 20 }}
+                showsVerticalScrollIndicator={false}
+            >
+                <View style={styles.header}>
+                    <CustomText opacity={0.7} style={{marginTop: "2%"}}>
+                        Manage your daily word reminders
+                    </CustomText>
                 </View>
-            </View>
 
-            {/* Notification Time */}
-            {notificationsEnabled && (
+                {/* Enable/Disable Notifications */}
                 <View style={[styles.section, { borderBottomColor: colors.border }]}>
                     <View style={styles.sectionHeader}>
-                        <CustomIcon name="time" size={24} primary />
+                        <CustomIcon name="notifications" size={24} primary />
                         <View style={styles.sectionText}>
-                            <CustomText bold>Notification Time</CustomText>
+                            <CustomText bold>Daily Word Notifications</CustomText>
                             <CustomText fontSize="small" opacity={0.7}>
-                                Set when you want to receive daily reminders
+                                Receive reminders when new words are available
                             </CustomText>
                         </View>
-                    </View>
-                    
-                    <View style={styles.timeInputContainer}>
-                        <View style={styles.timeInputRow}>
-                            <View style={styles.inputWrapper}>
-                                <CustomText fontSize="small" opacity={0.7}>Hour (1-12)</CustomText>
-                                <CustomInput
-                                    value={hourInput}
-                                    onChangeText={handleHourChange}
-                                    placeholder="9"
-                                    style={styles.timeInput}
-                                    keyboardType="numeric"
-                                    maxLength={2}
-                                />
-                            </View>
-                            <CustomText fontSize="large" bold style={{marginHorizontal: "5%"}}>:</CustomText>
-                            <View style={styles.inputWrapper}>
-                                <CustomText fontSize="small" opacity={0.7}>Minute (0-59)</CustomText>
-                                <CustomInput
-                                    value={minuteInput}
-                                    onChangeText={handleMinuteChange}
-                                    placeholder="00"
-                                    style={styles.timeInput}
-                                    keyboardType="numeric"
-                                    maxLength={2}
-                                />
-                            </View>
-                            <View style={styles.ampmContainer}>
-                                <TouchableOpacity 
-                                    style={[styles.ampmButton, !isPM && styles.ampmButtonActive]} 
-                                    onPress={() => !isPM || handleAMPMToggle()}
-                                >
-                                    <CustomText style={!isPM ? styles.ampmTextActive : styles.ampmText}>AM</CustomText>
-                                </TouchableOpacity>
-                                <TouchableOpacity 
-                                    style={[styles.ampmButton, isPM && styles.ampmButtonActive]} 
-                                    onPress={() => isPM || handleAMPMToggle()}
-                                >
-                                    <CustomText style={isPM ? styles.ampmTextActive : styles.ampmText}>PM</CustomText>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                        <CustomText fontSize="small" opacity={0.7} style={{marginTop: "2%", textAlign: "center"}}>
-                            Current time: {formatTimeForDisplay(dailyWordNotificationTime)}
-                        </CustomText>
-                        <CustomButton 
-                            title="Save Time" 
-                            onPress={handleSaveTime}
-                            style={styles.saveButton}
+                        <Switch
+                            value={notificationsEnabled}
+                            onValueChange={handleToggleNotifications}
+                            trackColor={{ false: colors.border, true: colors.primary }}
+                            thumbColor={colors.background}
                         />
                     </View>
                 </View>
-            )}
 
-            {/* Test Notification */}
-            {notificationsEnabled && (
-                <View style={[styles.section, { borderBottomColor: colors.border }]}>
-                    <View style={styles.sectionHeader}>
-                        <CustomIcon name="send" size={24} primary />
-                        <View style={styles.sectionText}>
-                            <CustomText bold>Test Notifications</CustomText>
-                            <CustomText fontSize="small" opacity={0.7}>
-                                Send a test notification to verify settings
+                {/* Notification Time */}
+                {notificationsEnabled && (
+                    <View style={[styles.section, { borderBottomColor: colors.border }]}>
+                        <View style={styles.sectionHeader}>
+                            <CustomIcon name="time" size={24} primary />
+                            <View style={styles.sectionText}>
+                                <CustomText bold>Notification Time</CustomText>
+                                <CustomText fontSize="small" opacity={0.7}>
+                                    Set when you want to receive daily reminders
+                                </CustomText>
+                            </View>
+                        </View>
+                        
+                        <View style={styles.timeInputContainer}>
+                            <View style={styles.timeInputRow}>
+                                <View style={styles.inputWrapper}>
+                                    <CustomText fontSize="small" opacity={0.7}>Hour (1-12)</CustomText>
+                                    <CustomInput
+                                        value={hourInput}
+                                        onChangeText={handleHourChange}
+                                        placeholder="9"
+                                        style={styles.timeInput}
+                                        keyboardType="numeric"
+                                        maxLength={2}
+                                    />
+                                </View>
+                                <CustomText fontSize="large" bold style={{marginHorizontal: "5%"}}>:</CustomText>
+                                <View style={styles.inputWrapper}>
+                                    <CustomText fontSize="small" opacity={0.7}>Minute (0-59)</CustomText>
+                                    <CustomInput
+                                        value={minuteInput}
+                                        onChangeText={handleMinuteChange}
+                                        placeholder="00"
+                                        style={styles.timeInput}
+                                        keyboardType="numeric"
+                                        maxLength={2}
+                                    />
+                                </View>
+                                <View style={styles.ampmContainer}>
+                                    <TouchableOpacity 
+                                        style={[styles.ampmButton, !isPM && styles.ampmButtonActive]} 
+                                        onPress={() => !isPM || handleAMPMToggle()}
+                                    >
+                                        <CustomText style={!isPM ? styles.ampmTextActive : styles.ampmText}>AM</CustomText>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity 
+                                        style={[styles.ampmButton, isPM && styles.ampmButtonActive]} 
+                                        onPress={() => isPM || handleAMPMToggle()}
+                                    >
+                                        <CustomText style={isPM ? styles.ampmTextActive : styles.ampmText}>PM</CustomText>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            <CustomText fontSize="small" opacity={0.7} style={{marginTop: "2%", textAlign: "center"}}>
+                                Current time: {formatTimeForDisplay(dailyWordNotificationTime)}
                             </CustomText>
+                            <CustomButton 
+                                title="Save Time" 
+                                onPress={handleSaveTime}
+                                style={styles.saveButton}
+                            />
                         </View>
                     </View>
-                    <CustomButton 
-                        title="Send Test Notification" 
-                        onPress={handleTestNotification}
-                        style={styles.testButton}
-                    />
-                </View>
-            )}
+                )}
 
-            {/* Info Section */}
-            <View style={styles.infoSection}>
-                <CustomIcon name="information-circle" size={20} style={{opacity: 0.7}} />
-                <CustomText fontSize="small" opacity={0.7} style={styles.infoText}>
-                    Notifications help you maintain your learning streak by reminding you to practice daily words.
-                </CustomText>
-            </View>
+                {/* Test Notification */}
+                {notificationsEnabled && (
+                    <View style={[styles.section, { borderBottomColor: colors.border }]}>
+                        <View style={styles.sectionHeader}>
+                            <CustomIcon name="send" size={24} primary />
+                            <View style={styles.sectionText}>
+                                <CustomText bold>Test Notifications</CustomText>
+                                <CustomText fontSize="small" opacity={0.7}>
+                                    Send a test notification to verify settings
+                                </CustomText>
+                            </View>
+                        </View>
+                        <CustomButton 
+                            title="Send Test Notification" 
+                            onPress={handleTestNotification}
+                            style={styles.testButton}
+                        />
+                    </View>
+                )}
+
+                {/* Info Section */}
+                <View style={styles.infoSection}>
+                    <CustomIcon name="information-circle" size={20} style={{opacity: 0.7}} />
+                    <CustomText fontSize="small" opacity={0.7} style={styles.infoText}>
+                        Notifications help you maintain your learning streak by reminding you to practice daily words.
+                    </CustomText>
+                </View>
+            </ScrollView>
         </Page>
     )
 }
@@ -266,6 +279,12 @@ export default NotificationSettings
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: "5%",
+    },
+    topRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '5%',
     },
     header: {
         marginBottom: "8%",

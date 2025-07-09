@@ -11,7 +11,7 @@ import { useTheme } from '@react-navigation/native';
 import { Avatar, Chip } from '@rneui/base';
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 
 const Profile = () => {
   const { 
@@ -97,7 +97,8 @@ const Profile = () => {
       return
     }
     
-    if (usernameConfirmation.trim() !== userName) {
+    // Add null/undefined checks for userName
+    if (!userName || !usernameConfirmation.trim() || usernameConfirmation.trim() !== userName.trim()) {
       Alert.alert('Error', 'Username does not match. Please enter your exact username.')
       return
     }
@@ -119,27 +120,96 @@ const Profile = () => {
 
   const performDeleteProfile = async () => {
     setIsDeleting(true)
+    
     try {
-      // Clear AsyncStorage completely
-      await AsyncStorage.clear()
+      console.log('Starting profile deletion process...')
       
-      // Clear user data but preserve default lists (like "Learned")
+      // Step 1: Cancel notifications first (safest operation)
+      console.log('Step 1: Cancelling notifications...')
       try {
-        const { clearUserData } = await import('@/database/wordCache')
-        await clearUserData()
-      } catch (dbError) {
-        console.log('Database clear failed, but continuing with profile deletion:', dbError)
+        const notificationService = await import('@/utils/notificationService')
+        await notificationService.default.cancelAllNotifications()
+        console.log('Notifications cancelled successfully')
+      } catch (notifError) {
+        console.log('Notification cancellation failed, but continuing:', notifError)
       }
       
-      // Reset userStore to initial state
-      resetUserStore()
-      // Add a small delay to ensure store is reset before navigating
+      // Step 2: Reset user store first (this is safe)
+      console.log('Step 2: Resetting user store...')
+      try {
+        resetUserStore()
+        console.log('User store reset successfully')
+      } catch (storeError) {
+        console.log('User store reset failed, but continuing:', storeError)
+      }
+      
+      // Step 3: Clear AsyncStorage (this can be problematic on iOS)
+      console.log('Step 3: Clearing AsyncStorage...')
+      try {
+        // Clear specific keys instead of all storage
+        const keys = await AsyncStorage.getAllKeys()
+        if (keys.length > 0) {
+          await AsyncStorage.multiRemove(keys)
+          console.log('AsyncStorage cleared successfully')
+        }
+      } catch (storageError) {
+        console.log('AsyncStorage clear failed, but continuing:', storageError)
+      }
+      
+      // Step 4: Clear database (this is the most likely crash point)
+      console.log('Step 4: Clearing database...')
+      try {
+        if (Platform.OS === 'ios') {
+          // Use iOS-safe approach
+          const { clearUserDataIOSSafe } = await import('@/database/wordCache')
+          await clearUserDataIOSSafe()
+          console.log('Database cleared successfully (iOS-safe)')
+        } else {
+          // Use regular approach for Android
+          const { clearUserData } = await import('@/database/wordCache')
+          await clearUserData()
+          console.log('Database cleared successfully (Android)')
+        }
+      } catch (dbError) {
+        console.log('Database clear failed, but continuing:', dbError)
+      }
+      
+      // Step 5: Navigate to onboarding
+      console.log('Step 5: Navigating to onboarding...')
+      
+      // Use a longer delay and try multiple navigation approaches
       setTimeout(() => {
-        router.replace('/(onboarding)')
-      }, 100)
+        try {
+          console.log('Attempting navigation with router.replace...')
+          router.replace('/(onboarding)')
+        } catch (navError1) {
+          console.log('router.replace failed, trying router.push...', navError1)
+          try {
+            router.push('/(onboarding)')
+          } catch (navError2) {
+            console.log('router.push failed, trying router.navigate...', navError2)
+            try {
+              router.navigate('/(onboarding)')
+            } catch (navError3) {
+              console.log('All navigation methods failed:', navError3)
+              // Last resort: show an alert and let user manually navigate
+              Alert.alert(
+                'Profile Deleted',
+                'Your profile has been deleted successfully. Please restart the app to continue.',
+                [{ text: 'OK' }]
+              )
+            }
+          }
+        }
+      }, 1000) // Increased delay to 1 second
+      
     } catch (error) {
-      console.error('Error deleting profile:', error)
-      Alert.alert('Error', 'Failed to delete profile. Please try again.')
+      console.error('Critical error during profile deletion:', error)
+      Alert.alert(
+        'Deletion Error', 
+        'There was an error deleting your profile. Please try again or restart the app.',
+        [{ text: 'OK' }]
+      )
     } finally {
       setIsDeleting(false)
     }
@@ -375,93 +445,110 @@ const Profile = () => {
 
       {/* Secure Deletion Confirmation Modal - Outside ScrollView */}
       {showDeleteConfirmation && (
-        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.6)' }]}>
           <View style={[styles.modalContent, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <CustomText fontSize='XL' bold style={{ marginBottom: 15, color: '#FF4444', textAlign: 'center' }}>
-              Confirm Deletion
-            </CustomText>
+            {/* Header with Icon */}
+            <View style={styles.modalHeader}>
+              <CustomIcon name="warning" size={32} style={{ marginBottom: 10 }} primary />
+              <CustomText fontSize='XL' bold style={{ color: '#FF4444', textAlign: 'center' }}>
+                Confirm Deletion
+              </CustomText>
+            </View>
             
-            <CustomText fontSize='normal' style={{ marginBottom: 20, textAlign: 'center' }}>
-              To confirm deletion, please complete the following steps:
+            <CustomText fontSize='normal' style={{ marginBottom: 25, textAlign: 'center', opacity: 0.8 }}>
+              This action will permanently delete your profile and all data. Please complete the verification steps below.
             </CustomText>
 
+            {/* Step 1 */}
             <View style={styles.confirmationStep}>
-              <CustomText fontSize='normal' bold style={{ marginBottom: 10 }}>
-                Step 1: Type "DELETE" to confirm
-              </CustomText>
+              <View style={styles.stepHeader}>
+                <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}>
+                  <CustomText fontSize="small" bold style={{ color: colors.background }}>1</CustomText>
+                </View>
+                <CustomText fontSize='normal' bold style={{ marginLeft: 12 }}>
+                  Type "DELETE" to confirm
+                </CustomText>
+              </View>
               <CustomInput
                 value={deleteConfirmationText}
                 onChangeText={setDeleteConfirmationText}
                 placeholder="Type DELETE"
-                style={{ marginBottom: 15 }}
+                style={{
+                  ...styles.confirmationInput,
+                  borderColor: colors.border,
+                  backgroundColor: colors.background
+                }}
                 maxLength={10}
+                textAlign="center"
               />
             </View>
 
+            {/* Step 2 */}
             <View style={styles.confirmationStep}>
-              <CustomText fontSize='normal' bold style={{ marginBottom: 10 }}>
-                Step 2: Enter your username
-              </CustomText>
-              <CustomText fontSize='small' style={{ marginBottom: 5, opacity: 0.7 }}>
-                Username: {userName}
+              <View style={styles.stepHeader}>
+                <View style={[styles.stepNumber, { backgroundColor: colors.primary }]}>
+                  <CustomText fontSize="small" bold style={{ color: colors.background }}>2</CustomText>
+                </View>
+                <CustomText fontSize='normal' bold style={{ marginLeft: 12 }}>
+                  Enter your username
+                </CustomText>
+              </View>
+              <CustomText fontSize='small' style={{ marginBottom: 8, opacity: 0.7, marginLeft: 44 }}>
+                Username: <CustomText bold>{userName}</CustomText>
               </CustomText>
               <CustomInput
                 value={usernameConfirmation}
                 onChangeText={setUsernameConfirmation}
                 placeholder="Enter your username"
-                style={{ marginBottom: 15 }}
+                style={{
+                  ...styles.confirmationInput,
+                  borderColor: colors.border,
+                  backgroundColor: colors.background
+                }}
                 maxLength={20}
+                textAlign="center"
               />
             </View>
 
-            {/* Help text to guide the user */}
-            {(deleteConfirmationText !== 'DELETE' || usernameConfirmation !== userName) && (
-              <View style={styles.helpText}>
-                <CustomText fontSize='small' style={{ textAlign: 'center', opacity: 0.7 }}>
+            {/* Help text */}
+            {(deleteConfirmationText !== 'DELETE' || !userName || usernameConfirmation.trim() !== userName.trim()) && (
+              <View style={[styles.helpText, { borderTopColor: colors.border }]}>
+                <CustomIcon name="info" size={16} primary style={{ marginRight: 8 }} />
+                <CustomText fontSize='small' style={{ opacity: 0.7, flex: 1 }}>
                   {deleteConfirmationText !== 'DELETE' && 'Please type "DELETE" exactly'}
-                  {deleteConfirmationText === 'DELETE' && usernameConfirmation !== userName && 'Please enter your username correctly'}
+                  {deleteConfirmationText === 'DELETE' && (!userName || usernameConfirmation.trim() !== userName.trim()) && 'Please enter your username correctly'}
                 </CustomText>
               </View>
             )}
 
-            {/* Buttons always visible at bottom */}
+            {/* Buttons */}
             <View style={styles.modalButtons}>
               <CustomButton
                 title="Cancel"
                 onPress={cancelDeleteProfile}
-                style={{ ...styles.modalButton, backgroundColor: colors.border, marginBottom: 10 }}
+                style={{
+                  ...styles.modalButton,
+                  backgroundColor: colors.border
+                }}
               />
               <CustomButton
                 title={isDeleting ? "Deleting..." : "Confirm Deletion"}
                 onPress={confirmDeleteProfile}
-                disabled={isDeleting || deleteConfirmationText.trim() !== 'DELETE' || usernameConfirmation.trim() !== userName}
-                style={{ 
-                  ...styles.modalButton, 
-                  backgroundColor: (deleteConfirmationText.trim() === 'DELETE' && usernameConfirmation.trim() === userName) ? '#FF4444' : '#CCCCCC',
-                  opacity: (deleteConfirmationText.trim() === 'DELETE' && usernameConfirmation.trim() === userName) ? 1 : 0.6
+                disabled={isDeleting || deleteConfirmationText.trim() !== 'DELETE' || !userName || usernameConfirmation.trim() !== userName.trim()}
+                style={{
+                  ...styles.modalButton,
+                  backgroundColor: (deleteConfirmationText.trim() === 'DELETE' && userName && usernameConfirmation.trim() === userName.trim()) ? '#FF4444' : '#CCCCCC',
+                  opacity: (deleteConfirmationText.trim() === 'DELETE' && userName && usernameConfirmation.trim() === userName.trim()) ? 1 : 0.6
                 }}
               />
               {isDeleting && (
-                <View style={{ alignItems: 'center', marginTop: 10 }}>
+                <View style={{ alignItems: 'center', marginTop: 15 }}>
                   <LoadingSpinner 
                     text="Deleting profile..."
                     variant="inline"
                   />
                 </View>
               )}
-            </View>
-            
-            {/* Debug info - remove this after testing */}
-            <View style={{ padding: 10, backgroundColor: '#f0f0f0', marginTop: 10, borderRadius: 5 }}>
-              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
-                Debug: DELETE="{deleteConfirmationText}" | Username="{usernameConfirmation}" | Expected="{userName}"
-              </CustomText>
-              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
-                DELETE match: {deleteConfirmationText.trim() === 'DELETE' ? 'YES' : 'NO'}
-              </CustomText>
-              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
-                Username match: {usernameConfirmation.trim() === userName ? 'YES' : 'NO'}
-              </CustomText>
             </View>
           </View>
         </View>
@@ -532,8 +619,33 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
   },
+  modalHeader: {
+    alignItems: 'center',
+    marginBottom: 15,
+  },
   confirmationStep: {
     marginBottom: 20,
+  },
+  stepHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  stepNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  confirmationInput: {
+    width: '100%',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    fontSize: 16,
+    textAlign: 'center',
   },
   modalButtons: {
     flexDirection: 'column',
@@ -550,6 +662,8 @@ const styles = StyleSheet.create({
     padding: 10,
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 })
 

@@ -123,79 +123,110 @@ const NotificationsSetup = () => {
       style={styles.container}
       customOnPress={validateTime}
     >
-      <View style={styles.content}>
-        {!notificationsEnabled ? (
-          <>
-            <CustomIcon name="notifications" style={{marginBottom: "3%"}} size={125} primary/>
-            <CustomText primary fontSize="large" bold textAlign="center">Enable Notifications</CustomText>
-            <CustomText textAlign="center" opacity={0.5}>Know when your daily words are ready</CustomText>
-            <CustomText 
-              textAlign="center" bold
-              primary fontSize="small" style={{marginTop: "3%"}}
-              onPress={handleEnableNotifications}>
-              Tap here to enable 
-            </CustomText>
-          </>
-        ) : (
-          <>
-            <CustomText textAlign="center" bold fontSize="large">When do you want new words?</CustomText>
-            <CustomText textAlign="center" opacity={0.7} style={{marginBottom: "5%"}}>
-              Reminder notifications will be sent at this time
-            </CustomText>
-            
-            {/* Time Input */}
-            <View style={styles.inputContainer}>
-              <CustomText bold style={{marginBottom: "3%"}}>Notification Time</CustomText>
-              <View style={styles.timeInputRow}>
-                <View style={styles.inputWrapper}>
-                  <CustomText fontSize="small" opacity={0.7}>Hour (1-12)</CustomText>
-                  <CustomInput
-                    value={hourInput}
-                    onChangeText={handleHourChange}
-                    placeholder="9"
-                    style={styles.timeInput}
-                    keyboardType="numeric"
-                    maxLength={2}
-                  />
+        <View style={styles.content}>
+          {!notificationsEnabled ? (
+            <>
+              <CustomIcon name="notifications" style={{marginBottom: "3%"}} size={125} primary/>
+              <CustomText primary fontSize="large" bold textAlign="center">Enable Notifications</CustomText>
+              <CustomText textAlign="center" opacity={0.5}>Know when your daily words are ready</CustomText>
+              <CustomText 
+                textAlign="center" bold
+                primary fontSize="small" style={{marginTop: "3%"}}
+                onPress={handleEnableNotifications}>
+                Tap here to enable 
+              </CustomText>
+            </>
+          ) : (
+            <>           
+              {/* Time Input */}
+              <View style={styles.inputContainer}>
+               <View style={styles.timeInputRow}>
+                  <View style={styles.inputWrapper}>
+                    <CustomText bold style={styles.inputLabel}>Hour</CustomText>
+                    <CustomInput
+                      value={hourInput}
+                      onChangeText={handleHourChange}
+                      placeholder="9"
+                      style={{
+                        ...styles.timeInput,
+                        borderColor: colors.border,
+                        backgroundColor: colors.card,
+                      }}
+                      keyboardType="numeric"
+                      maxLength={2}
+               
+                    />
+                  </View>
+                  
+                  <CustomText fontSize="large" bold style={{
+                    ...styles.separator,
+                    color: colors.text
+                  }}>:</CustomText>
+                  
+                  <View style={styles.inputWrapper}>
+                    <CustomText bold style={styles.inputLabel}>Minute</CustomText>
+                    <CustomInput
+                      value={minuteInput}
+                      onChangeText={handleMinuteChange}
+                      placeholder="00"
+                      style={{
+                        ...styles.timeInput,
+                        borderColor: colors.border,
+                        backgroundColor: colors.card
+                      }}
+                      keyboardType="numeric"
+                      maxLength={2}
+                     
+                    />
+                  </View>
                 </View>
-                <CustomText fontSize="large" bold style={{marginHorizontal: "5%"}}>:</CustomText>
-                <View style={styles.inputWrapper}>
-                  <CustomText fontSize="small" opacity={0.7}>Minute (0-59)</CustomText>
-                  <CustomInput
-                    value={minuteInput}
-                    onChangeText={handleMinuteChange}
-                    placeholder="00"
-                    style={styles.timeInput}
-                    keyboardType="numeric"
-                    maxLength={2}
-                  />
-                </View>
+
                 <View style={styles.ampmContainer}>
                   <TouchableOpacity 
-                    style={[styles.ampmButton, !isPM && styles.ampmButtonActive]} 
+                    style={{
+                      ...styles.ampmButton,
+                      borderColor: colors.border,
+                      backgroundColor: colors.card,
+                      ...(!isPM && {
+                        backgroundColor: colors.primary,
+                        borderColor: colors.primary
+                      })
+                    }} 
                     onPress={() => !isPM || handleAMPMToggle()}
                   >
-                    <CustomText style={!isPM ? styles.ampmTextActive : styles.ampmText}>AM</CustomText>
+                    <CustomText style={{
+                      color: !isPM ? colors.background : colors.text
+                    }}>AM</CustomText>
                   </TouchableOpacity>
                   <TouchableOpacity 
-                    style={[styles.ampmButton, isPM && styles.ampmButtonActive]} 
+                    style={{
+                      ...styles.ampmButton,
+                      borderColor: colors.border,
+                      backgroundColor: colors.card,
+                      ...(isPM && {
+                        backgroundColor: colors.primary,
+                        borderColor: colors.primary
+                      })
+                    }} 
                     onPress={() => isPM || handleAMPMToggle()}
                   >
-                    <CustomText style={isPM ? styles.ampmTextActive : styles.ampmText}>PM</CustomText>
+                    <CustomText style={{
+                      color: isPM ? colors.background : colors.text
+                    }}>PM</CustomText>
                   </TouchableOpacity>
                 </View>
-              </View>
-              <CustomText fontSize="small" opacity={0.7} style={{marginTop: "2%"}}>
-                Current time: {formatTimeForDisplay(dailyWordNotificationTime)}
-              </CustomText>
-            </View>
 
-            <CustomText fontSize="small" textAlign="center" style={{marginTop: "5%"}}>
-              You can change this later in Settings
-            </CustomText>
-          </>
-        )}
-      </View>
+                <CustomText opacity={0.7} style={styles.currentTime}>
+                  Set for: <CustomText bold>{formatTimeForDisplay(dailyWordNotificationTime)}</CustomText>
+                </CustomText>
+              </View>
+
+              <CustomText fontSize="small" textAlign="center" style={{marginTop: "2%"}}>
+                You can change this later in Settings
+              </CustomText>
+            </>
+          )}
+        </View>
     </OnboardingPage>
   )
 }
@@ -214,6 +245,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: "10%",
+    alignSelf: "center",
   },
   inputContainer: {
     width: "100%",
@@ -223,41 +255,43 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: "5%",
   },
   inputWrapper: {
     alignItems: "center",
   },
+  inputLabel: {
+    marginBottom: "8%",
+    textAlign: "center",
+  },
   timeInput: {
     textAlign: "center",
-    fontSize: 18,
-    fontWeight: "bold",
-    width: 60,
-    height: 60,
+    fontSize: 20,
+    height: 100,
+    borderWidth: 1,
+    borderRadius: 8,
+  },
+  separator: {
+    marginHorizontal: "8%",
+    textAlign: "center",
   },
   ampmContainer: {
-    marginLeft: "5%",
     flexDirection: "row",
-    gap: 2,
+    gap: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
   ampmButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
+    alignItems: "center",
+    justifyContent: "center",
   },
-  ampmButtonActive: {
-    backgroundColor: '#FF6A00',
-    borderColor: '#FF6A00',
-  },
-  ampmText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  ampmTextActive: {
-    fontSize: 14,
-    color: 'white',
-    fontWeight: 'bold',
+  currentTime: {
+    marginTop: "5%",
+    textAlign: "center",
   },
 })
 

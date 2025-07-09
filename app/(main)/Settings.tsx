@@ -8,7 +8,7 @@ import { useTheme } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Linking, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const Settings = () => {
   const [appearanceModalVisible, setAppearanceModalVisible] = useState(false);
@@ -18,14 +18,16 @@ const Settings = () => {
 
   const options = [
     { key: "user", value: "Profile", type: "antdesign", onPress: () => {router.push("/(settings)/Profile")} },
-    { key: "crown", value: "Premium", type: "font-awesome-5", onPress: () => router.push("/(settings)/PremiumSettings") },
     { key: "palette", value: "Appearance", type: "ionicons", onPress: () => setAppearanceModalVisible(true) },
     { key: "notifications", value: "Notifications", type: "ionicon", onPress: () => router.push("/(settings)/NotificationSettings") },
     { key: "email", value: "Feedback & Support", type: "fontiso", onPress: () => {Linking.openURL("mailto:chikaosro@gmail.com")} },
-    { key: "star", value: "Rate", type: "ionicons", onPress: () => { Linking.openURL("https://play.google.com/store/apps/details?id=com.vocab.app") } },
-    { key: "shield", value: "Privacy Policy", type: "feather", onPress: () => { Linking.openURL("https://play.google.com/store/apps/details?id=com.vocab.app") } },
+    //{ key: "star", value: "Rate", type: "ionicons", onPress: () => { Linking.openURL("https://play.google.com/store/apps/details?id=com.nnadozi.termy&showAllReviews=true&hl=en-US&ah=iNJ77HDtA-O4MUoQipJkv3eDTP8&pli=1") } },
+    { key: "shield", value: "Privacy Policy", type: "feather", onPress: () => { Linking.openURL("https://www.termsfeed.com/live/bfc3acad-1c4a-476e-8e39-6f0becf8e3ad") } },
     { key: "information-circle", value: "Version", type: "ionicon", onPress: () => {} },
   ];
+
+  
+
 
   const showOption = (option: { key: string; value: string; type: any; onPress: () => void }, index: number) => {
     return (
@@ -42,7 +44,7 @@ const Settings = () => {
             <CustomText color="gray">{Constants.expoConfig?.version}</CustomText>
           </View>
         ) : (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: "3%" }}> 
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}> 
             <CustomIcon type={option.type} size={20} name={option.key} />
             <CustomText>{option.value}</CustomText>
           </View>
@@ -56,7 +58,13 @@ const Settings = () => {
       <View style={{ width: "100%", marginBottom: "3%" }}>
         <CustomText bold fontSize='XL'>Settings</CustomText>
       </View>
-      {options.map((option, index) => showOption(option, index))}
+      <ScrollView 
+        style={{ flex: 1, width: '100%' }}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {options.map((option, index) => showOption(option, index))}
+      </ScrollView>
       <AppearanceModal visible={appearanceModalVisible} onRequestClose={() => setAppearanceModalVisible(false)} />
       <LanguageModal visible={languageModalVisible} onRequestClose={() => setLanguageModalVisible(false)} />
       <NotificationsModal visible={notificationsModalVisible} onRequestClose={() => setNotificationsModalVisible(false)} />
@@ -70,6 +78,6 @@ const styles = StyleSheet.create({
   optionContainer: {
     width: "100%",
     borderBottomWidth: 0.25,
-    paddingVertical: "5%"
+    paddingVertical: 20
   },
 });

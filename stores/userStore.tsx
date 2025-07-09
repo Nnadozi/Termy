@@ -25,7 +25,6 @@ interface UserState {
   dailyWordsCompletedToday: boolean
   dailyWordNotificationTime: string
   joinDate: string
-  isPremium: boolean
 }
 
 interface UserActions {
@@ -40,7 +39,6 @@ interface UserActions {
   setJoinDate: (date: string) => void
   setDailyWordNotificationTime: (time: string) => void
   resetUserStore: () => void
-  setPremium: (value: boolean) => void
 }
 
 type UserStore = UserState & UserActions
@@ -49,7 +47,7 @@ const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
       userName: '',
-      avatarColor: ' #FF6A00', 
+      avatarColor: '#FF6A00', 
       isOnboardingComplete: false,
       dailyWordGoal: 3,
       notificationsEnabled: false,
@@ -63,7 +61,6 @@ const useUserStore = create<UserStore>()(
       dailyWordsCompletedToday: false,
       dailyWordNotificationTime: '10:00',
       joinDate: '',
-      isPremium: false,
       setUserName: (name: string) => {
         console.log('UserStore: Setting userName to:', name)
         set({ userName: name })
@@ -194,9 +191,6 @@ const useUserStore = create<UserStore>()(
         notificationService.cancelAllNotifications().catch(error => {
           console.error('Error cancelling notifications during reset:', error)
         })
-      },
-      setPremium: (value: boolean) => {
-        set({ isPremium: value })
       }
     }),
     {

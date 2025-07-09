@@ -1,4 +1,5 @@
 import CustomButton from '@/components/CustomButton'
+import CustomIcon from '@/components/CustomIcon'
 import CustomText from '@/components/CustomText'
 import Page from '@/components/Page'
 import useUserStore from '@/stores/userStore'
@@ -34,10 +35,14 @@ const Progress = () => {
   }
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return '#4CAF50'
-    if (score >= 80) return '#FF9800'
-    if (score >= 70) return '#FF5722'
-    return '#F44336'
+    if (score >= 90) return colors.primary
+    if (score >= 80) return colors.primary
+    if (score >= 70) return colors.primary
+    return colors.primary
+  }
+
+  const getScoreGradient = (score: number) => {
+    return [colors.primary, colors.primary + 'CC']
   }
 
   return (
@@ -47,173 +52,168 @@ const Progress = () => {
         contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header with Avatar */}
-        <View style={{width:"100%", marginBottom:"5%", alignItems: "center"}}>
-          <Avatar 
-            size={80} 
-            rounded 
-            title={userName.charAt(0).toUpperCase() || "A"}
-            containerStyle={{ 
-              alignSelf: "center", 
-              backgroundColor: avatarColor,
-              marginBottom: 15
-            }} 
-          />
-          <CustomText fontSize='XL' bold>Progress</CustomText>
-          <CustomText fontSize='normal' style={{ opacity: 0.7 }}>
-            Your learning journey, {userName}
-          </CustomText>
+        {/* Modern Header with Avatar */}
+        <View style={[styles.headerGradient, { backgroundColor: colors.background }]}>
+          <View style={styles.headerContent}>
+            <Avatar 
+              size={100} 
+              rounded 
+              title={userName.charAt(0).toUpperCase() || "A"}
+              containerStyle={{  backgroundColor: avatarColor, marginBottom: 10 }} 
+            />
+            <CustomText fontSize='XL' bold>
+              Your Progress
+            </CustomText>
+            <CustomText fontSize='normal' >
+              Keep up the great work, {userName}! 
+            </CustomText>
+          </View>
         </View>
 
-        {/* Streak Section */}
-        <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText fontSize='large' bold style={{ marginBottom: 15 }}>
-            🔥 Learning Streak
-          </CustomText>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <CustomText fontSize='XL' bold style={{ color: colors.primary }}>
-                {currentStreak}
-              </CustomText>
-              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
-                Current Streak
-              </CustomText>
-            </View>
-            <View style={styles.statItem}>
-              <CustomText fontSize='XL' bold style={{ color: colors.primary }}>
-                {longestStreak}
-              </CustomText>
-              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
+        {/* Stats Grid */}
+        <View style={styles.statsGrid}>
+          {/* Streak Card */}
+          <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <CustomIcon name="local-fire-department"  primary size={24} style={{ marginBottom: 8 }} />
+            <CustomText opacity={0.75} fontSize='XL' bold  style={{ marginBottom: 4 }}>
+              {currentStreak}
+            </CustomText>
+            <CustomText bold fontSize='small' primary style={{ opacity: 0.9 }}>
+              Day Streak
+            </CustomText>
+          </View>
+
+          {/* Words Learned Card */}
+          <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <CustomIcon name="book" size={24} primary style={{ marginBottom: 8 }} />
+            <CustomText opacity={0.75} fontSize='XL' bold  style={{ marginBottom: 4 }}>
+              {totalWordsLearned}
+            </CustomText>
+            <CustomText bold fontSize='small' primary >
+              Words Learned
+            </CustomText>
+          </View>
+
+          {/* Quiz Score Card */}
+          <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <CustomIcon name="percent" size={24} primary style={{ marginBottom: 8 }} />
+            <CustomText opacity={0.75} fontSize='XL' bold  style={{ marginBottom: 4 }}>
+              {formatScore(averageQuizScore)}%
+            </CustomText>
+            <CustomText bold fontSize='small' primary >
+              Average Score
+            </CustomText>
+          </View>
+
+          {/* Quizzes Taken Card */}
+          <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <CustomIcon name="quiz" size={24} primary style={{ marginBottom: 8 }} />
+            <CustomText opacity={0.75} fontSize='XL' bold style={{ marginBottom: 4 }}>
+              {totalQuizzesTaken}
+            </CustomText>
+            <CustomText bold fontSize='small' primary >
+              Quizzes Taken
+            </CustomText>
+          </View>
+        </View>
+
+        {/* Achievement Section */}
+        <View style={[styles.section, { backgroundColor: colors.card , borderColor: colors.border}]}>  
+          <View style={styles.achievementRow}>
+            <View style={styles.achievementItem}>
+              <CustomIcon name="local-fire-department" size={20} primary />
+              <CustomText primary fontSize='normal'  style={{ marginLeft: 8 }}>
                 Longest Streak
               </CustomText>
             </View>
+            <CustomText  fontSize='normal' >
+              {longestStreak} days
+            </CustomText>
           </View>
-          <CustomText fontSize='normal' style={{ textAlign: 'center', marginTop: 10 }}>
-            {getStreakEmoji(currentStreak)} Keep it up!
-          </CustomText>
-        </View>
 
-        {/* Quiz Statistics */}
-        <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText fontSize='large' bold style={{ marginBottom: 15 }}>
-            📊 Quiz Performance
-          </CustomText>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <CustomText fontSize='XL' bold style={{ color: colors.primary }}>
-                {totalQuizzesTaken}
-              </CustomText>
-              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
-                Quizzes Taken
-              </CustomText>
-            </View>
-            <View style={styles.statItem}>
-              <CustomText fontSize='XL' bold style={{ color: getScoreColor(averageQuizScore) }}>
-                {formatScore(averageQuizScore)}%
-              </CustomText>
-              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
-                Average Score
-              </CustomText>
-            </View>
-          </View>
-        </View>
-
-        {/* Words Learned */}
-        <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText fontSize='large' bold style={{ marginBottom: 15 }}>
-            📚 Vocabulary Mastery
-          </CustomText>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <CustomText fontSize='XL' bold style={{ color: colors.primary }}>
-                {totalWordsLearned}
-              </CustomText>
-              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
-                Words Learned
-              </CustomText>
-            </View>
-            <View style={styles.statItem}>
-              <CustomText fontSize='XL' bold style={{ color: colors.primary }}>
-                {dailyWordGoal}
-              </CustomText>
-              <CustomText fontSize='small' style={{ opacity: 0.7 }}>
+          <View style={styles.achievementRow}>
+            <View style={styles.achievementItem}>
+              <CustomIcon name="target" type='feather' size={20} primary />
+              <CustomText primary fontSize='normal'  style={{ marginLeft: 8 }}>
                 Daily Goal
               </CustomText>
             </View>
-          </View>
-          <CustomText fontSize='normal' style={{ textAlign: 'center', marginTop: 10 }}>
-            🎯 You're building an impressive vocabulary!
-          </CustomText>
-        </View>
-
-        {/* Learning Preferences */}
-        <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText fontSize='large' bold style={{ marginBottom: 15 }}>
-            ⚙️ Learning Preferences
-          </CustomText>
-          <View style={styles.preferenceRow}>
-            <CustomText fontSize='normal' bold>Topics:</CustomText>
-            <CustomText fontSize='normal' style={{ opacity: 0.8 }}>
-              {wordTopics.join(', ')}
+            <CustomText  fontSize='normal' >
+              {dailyWordGoal} words
             </CustomText>
           </View>
-          <View style={styles.preferenceRow}>
-            <CustomText fontSize='normal' bold>Daily Goal:</CustomText>
-            <CustomText fontSize='normal' style={{ opacity: 0.8 }}>
-              {dailyWordGoal} words per day
+
+          <View style={styles.achievementRow}>
+            <View style={styles.achievementItem}>
+              <CustomIcon name="category" size={20} primary />
+              <CustomText primary fontSize='normal'  style={{ marginLeft: 8 }}>
+                Learning Topics
+              </CustomText>
+            </View>
+            <CustomText  fontSize='normal' >
+              {wordTopics.length}
             </CustomText>
           </View>
-          <CustomButton title='Change Preferences' onPress={() => router.push('/(settings)/Profile')} />
         </View>
-
-        {/* Motivation */}
-        <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText fontSize='large' bold style={{ marginBottom: 15 }}>
-            💪 Keep Going!
-          </CustomText>
-          <CustomText fontSize='normal' style={{ textAlign: 'center', lineHeight: 24 }}>
-            {currentStreak > 0 
-              ? `You're on a ${currentStreak}-day streak! Don't break the chain.`
-              : "Start your learning journey today and build an amazing streak!"
-            }
-          </CustomText>
-          <CustomText fontSize='normal' style={{ textAlign: 'center', marginTop: 10, opacity: 0.7 }}>
-            Every word learned is a step toward mastery.
-          </CustomText>
-        </View>
+      
+        {/* Action Button */}
+        <CustomButton 
+          title='Update Preferences' 
+          onPress={() => router.push('/(settings)/Profile')}
+        />
       </ScrollView>
     </Page>
   )
 }
 
 const styles = StyleSheet.create({
-  section: {
+  headerGradient: {
     width: '100%',
-    padding: 20,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 15,
+    paddingVertical:'5%',
+    paddingHorizontal:'3%',
+    marginBottom:5,
   },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+  headerContent: {
     alignItems: 'center',
   },
-  statItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  preferenceRow: {
+  statsGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
+  },
+  statCard: {
+    width: '48%',
+    padding:'5%',
+    borderRadius: 15,
     alignItems: 'center',
     marginBottom: 10,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  section: {
+    padding:"3%",
+    borderWidth:1,
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation:1,
+    marginBottom:10,
   },
   achievementRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    paddingVertical:10,
+  },
+  achievementItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 })
 

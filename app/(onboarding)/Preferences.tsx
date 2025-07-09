@@ -50,7 +50,7 @@ const Preferences = () => {
         contentContainerStyle={{flexGrow:1, paddingBottom:200}}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{gap:"5%"}}>
+        <View style={{gap:"3%"}}>
         <View style={styles.row}>
             <View>
               <CustomText bold>Theme</CustomText>
@@ -104,7 +104,7 @@ const Preferences = () => {
                 title={topic.charAt(0).toUpperCase() + topic.slice(1)}
                 type={selectedTopics.includes(topic) ? 'solid' : 'outline'}
                 onPress={() => toggleTopic(topic)}
-                containerStyle={{ marginVertical: "2%", marginRight:"3%" }}
+                containerStyle={{ marginVertical: 5, marginRight:10 }}
                 buttonStyle={{
                   backgroundColor: selectedTopics.includes(topic)
                     ? colors.colors.primary

@@ -27,7 +27,7 @@ const Finish = () => {
     const scheduleNotifications = async () => {
       if (notificationsEnabled) {
         await notificationService.scheduleDailyWordNotification(dailyWordNotificationTime);
-        await notificationService.scheduleStreakReminderNotification();
+        await notificationService.scheduleStreakReminderNotificationOnce();
       }
     };
     scheduleNotifications();
@@ -40,7 +40,7 @@ const Finish = () => {
       subTitle="You're all set up -  enjoy Termy!"
       nextPage="/(main)/Daily"
     >
-      <CustomIcon name='celebration' type='material' size={200}  />
+      <CustomIcon name='celebration' type='material' size={300}  />
     </OnboardingPage>
   )
 }
