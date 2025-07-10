@@ -7,8 +7,10 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from "expo-status-bar";
+import { getTrackingPermissionsAsync, requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 import { useEffect } from "react";
-import { AppState } from "react-native";
+import { AppState, Platform } from "react-native";
+import mobileAds, { MaxAdContentRating } from 'react-native-google-mobile-ads';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 import "../global.css";
@@ -26,29 +28,25 @@ export default function RootLayout() {
 
   useNotificationNavigation();
 
-  // Initialize notification service
+
   useEffect(() => {
     const initNotifications = async () => {
       if (isOnboardingComplete) {
-        // Clear all existing notifications for debugging
+        console.log('Onboarding complete - initializing notifications');
         console.log('DEBUG: Clearing all existing notifications');
         await notificationService.cancelAllNotifications();
-        
         await notificationService.initialize();
-        // Temporarily disable all notification scheduling to debug
-        console.log('DEBUG: Skipping notification scheduling to test unwanted notifications');
-        // if (notificationsEnabled) {
-        //   await notificationService.updateNotificationSchedule();
-        //   // Debug: List all scheduled notifications
-        //   await notificationService.debugScheduledNotifications();
-        // }
+        // Don't call updateNotificationSchedule here - it's already handled in completeOnboarding()
+        console.log('DEBUG: Notifications will be scheduled by completeOnboarding() if enabled');
+      } else {
+        console.log('Onboarding not complete - cancelling all notifications');
+        await notificationService.cancelAllNotifications();
       }
     };
     
     initNotifications();
-  }, [isOnboardingComplete, notificationsEnabled, dailyWordNotificationTime]);
+  }, [isOnboardingComplete]);
 
-  // Check and reset daily completion if it's a new day
   useEffect(() => {
     const checkDailyReset = () => {
       const { lastQuizDate, resetDailyCompletion } = useUserStore.getState();
@@ -73,25 +71,18 @@ export default function RootLayout() {
     return null;
   }
 
-  // Listen for app state changes
   useEffect(() => {
     const handleAppStateChange = async (nextAppState: string) => {
       if (nextAppState === 'active') {
-        // App has come to the foreground
-        
-        // Check if it's a new day and reset daily completion
         const { lastQuizDate, dailyWordsCompletedToday } = useUserStore.getState();
         const today = new Date().toISOString().split('T')[0];
         if (lastQuizDate && lastQuizDate !== today) {
           console.log('App state change - New day detected, resetting daily completion');
           resetDailyCompletion();
         }
-        
-        // Only reschedule notifications if onboarding is complete, notifications are enabled, and daily words are not completed
-        // Temporarily disabled for debugging
-        // if (isOnboardingComplete && notificationsEnabled && !dailyWordsCompletedToday) {
-        //   await notificationService.rescheduleStreakReminderForToday();
-        // }
+        if (isOnboardingComplete && notificationsEnabled && !dailyWordsCompletedToday) {
+          await notificationService.rescheduleStreakReminderForToday();
+        }
       }
     };
 
@@ -101,6 +92,39 @@ export default function RootLayout() {
       subscription?.remove();
     };
   }, [isOnboardingComplete, notificationsEnabled, resetDailyCompletion]);
+
+  useEffect(() => {
+    async function prepareAds() {
+      if (Platform.OS !== 'ios') {
+        setupAds(); 
+        return;
+      }
+      const { status } = await getTrackingPermissionsAsync();
+      if (status === 'granted') {
+        console.log(`Tracking already granted: ${status}`);
+        setupAds();
+      } else {
+        const { status: newStatus } = await requestTrackingPermissionsAsync();
+        console.log(`Tracking permission status: ${newStatus}`);
+        if (newStatus === 'granted') {
+          setupAds();
+        }
+      }
+    }
+    function setupAds() {
+      mobileAds()
+        .setRequestConfiguration({
+          maxAdContentRating: MaxAdContentRating.T,
+          tagForUnderAgeOfConsent: true,
+        })
+        .then(() => {
+          console.log("Ad setup done!");
+          mobileAds().initialize();
+        });
+    }
+  
+    prepareAds();
+  }, []);
 
   return (
     <>

@@ -192,7 +192,7 @@ const Daily = () => {
           <View style={{ flex: 1, width:"100%", justifyContent:"center", alignItems: "center" }}>
             <CustomText fontSize='large' bold>Time for a Quiz!</CustomText>
             <CustomText>You've learned all your words for today!</CustomText>
-            <CustomButton marginVertical={"3%"} width={"80%"} title='Start Quiz' 
+            <CustomButton marginVertical={10} width={"80%"} title='Start Quiz' 
             onPress={() => router.push({pathname:"/Quiz", params:{words:JSON.stringify(dailyVocab)}})} 
             />
             <CustomButton width={"80%"} title='Keep practicing' onPress={() => pagerRef.current?.setPage(0)} />

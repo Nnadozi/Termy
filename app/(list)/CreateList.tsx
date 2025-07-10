@@ -9,10 +9,16 @@ import { addWordsToList, createList, getAllLists } from "@/database/wordCache"
 import { Word } from "@/types/word"
 import { useTheme } from "@react-navigation/native"
 import { router } from "expo-router"
-import { useEffect, useState } from "react"
-import { StyleSheet, TouchableOpacity, View } from "react-native"
+import { useEffect, useRef, useState } from "react"
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native"
+import { BannerAd, BannerAdSize, TestIds, useForeground } from 'react-native-google-mobile-ads'
 
 const CreateList = () => {
+    const bannerRef = useRef<BannerAd>(null);
+    useForeground(() => {
+      Platform.OS === 'ios' && bannerRef.current?.load();
+    });
+
     const [listName, setListName] = useState("")
     const [listDescription, setListDescription] = useState("")
     const [selectedWords, setSelectedWords] = useState<Word[]>([])
@@ -144,6 +150,9 @@ const CreateList = () => {
                 title="Add Words to List"
                 allowCustomWords={true}
              />
+            <View style={{ justifyContent: "center", alignItems: "center" ,alignSelf:"center", marginTop: "10%"}}>
+                <BannerAd unitId={TestIds.BANNER} size={BannerAdSize.BANNER} ref={bannerRef} />
+            </View>
         </Page>
     )
 }
@@ -164,7 +173,7 @@ const styles = StyleSheet.create({
     },
     addWordsSection: {
         width: "100%",
-        marginVertical: "3%",
+        marginVertical: 10,
         marginHorizontal: "2%"
     },
     selectedWordsContainer: {

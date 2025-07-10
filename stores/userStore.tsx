@@ -90,12 +90,40 @@ const useUserStore = create<UserStore>()(
           } catch (error) {
             console.error('Error updating notification schedule:', error)
           }
+        } else {
+          console.log('Onboarding not complete - notifications will be scheduled after onboarding completion')
+          // If onboarding is not complete, just store the preference but don't schedule
+          // Notifications will be scheduled when onboarding completes
         }
       },
       completeOnboarding: () => {
+        const state = get();
+        if (state.isOnboardingComplete) {
+          console.log('UserStore: Onboarding already completed - skipping duplicate call');
+          return;
+        }
+        
         console.log('UserStore: Completing onboarding')
         const today = new Date().toISOString().split('T')[0]
         set({ isOnboardingComplete: true, joinDate: today })
+        
+        // Schedule notifications if they were enabled during onboarding
+        if (state.notificationsEnabled) {
+          console.log('Onboarding complete - scheduling notifications that were enabled during onboarding')
+          // Use a small delay to ensure state is updated before scheduling
+          setTimeout(async () => {
+            try {
+              await notificationService.scheduleDailyWordNotification(state.dailyWordNotificationTime)
+              console.log('Daily notification scheduled successfully')
+              await notificationService.scheduleStreakReminderNotificationOnce()
+              console.log('Streak reminder scheduled successfully')
+            } catch (error) {
+              console.error('Error scheduling notifications after onboarding:', error)
+            }
+          }, 100)
+        } else {
+          console.log('Onboarding complete - notifications were not enabled during onboarding')
+        }
       },
       setWordTopics: (topics: string[]) => {
         console.log('UserStore: Setting wordTopics to:', topics)
@@ -156,7 +184,7 @@ const useUserStore = create<UserStore>()(
         console.log('UserStore: Setting dailyWordNotificationTime to:', time)
         set({ dailyWordNotificationTime: time })
         
-        // Only update notification schedule if onboarding is complete
+        // Only update notification schedule if onboarding is complete and notifications are enabled
         const state = get();
         if (state.notificationsEnabled && state.isOnboardingComplete) {
           try {
@@ -165,6 +193,10 @@ const useUserStore = create<UserStore>()(
           } catch (error) {
             console.error('Error updating notification time:', error)
           }
+        } else if (!state.isOnboardingComplete) {
+          console.log('Onboarding not complete - notification time will be scheduled after onboarding completion')
+          // If onboarding is not complete, just store the time but don't schedule
+          // Notifications will be scheduled when onboarding completes
         }
       },
       resetUserStore: () => {

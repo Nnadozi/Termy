@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     con:{
         justifyContent:"center",
         alignItems:"center",
-        padding:12.5,
+        padding:10,
         borderRadius:100,
         backgroundColor:"black",
     }

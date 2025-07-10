@@ -117,7 +117,7 @@ const Lists = () => {
               count={learnedList.words.length} 
             />
           )}
-          <View style={{width:"100%", marginVertical:5}}>
+          <View style={{width:"100%", marginTop:15}}>
             <CustomText bold>Custom Lists ({customLists.length})</CustomText>
           </View>
           <View style={{width:"100%", marginBottom:"0%", flex: 1}}>

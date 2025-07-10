@@ -13,10 +13,10 @@ const Page = ({style, children}:PageProps) => {
   const {colors} = useTheme();
   return (
     <SafeAreaView style={[styles.con, style, {
-      paddingTop: insets.top * 0.5,
-      paddingBottom: insets.bottom * 0.5,
-      paddingLeft: insets.top * 0.75,
-      paddingRight: insets.top * 0.75,
+      paddingTop: insets.top * 0.25,
+      paddingBottom: insets.bottom * 0.25,
+      paddingLeft: insets.top * 0.5 ,
+      paddingRight: insets.top * 0.5,
       backgroundColor: colors.background,
     }]}>
       {children}

@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    padding:"3%",
+    padding:10,
     alignItems: 'center',
   },
   wordItem: {

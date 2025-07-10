@@ -18,7 +18,7 @@ const ListPreview = ({title, description, count, customList, onDelete, isDeletin
     const { colors } = useTheme();
     return (
         <TouchableOpacity onPress={() => router.navigate(`/(list)/${title}`)} activeOpacity={0.8} style={[styles.container, {backgroundColor: colors.primary,shadowColor: colors.border }]} >
-            <View style={{padding:"4%"}}>
+            <View style={{padding:15}}>
             {customList ? (
                 <View style={{flexDirection:"row", alignItems:"center", justifyContent:"space-between",gap:"2%"}}>
                     <CustomText style={{width:"90%"}} numberOfLines={2} opposite  fontSize="large" bold>{title}</CustomText>
@@ -56,7 +56,7 @@ export default ListPreview
 const styles = StyleSheet.create({
     container: {
         width: "100%",
-        marginVertical:"2%",
+        marginVertical:5,
         borderRadius:5,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
@@ -72,6 +72,6 @@ const styles = StyleSheet.create({
         borderWidth:1,
         borderBottomLeftRadius:5,
         borderBottomRightRadius:5,
-        padding:"2%"
+        padding:7.5
     }
 })

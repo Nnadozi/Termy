@@ -1,15 +1,16 @@
 During testing:
-- update db (difficulty system?)
-- switch to local db?
-- Make better UI
+- Update db (difficulty system?)
+- Switch to local db
+- Improve UI
 - Handle edge cases
-- implement ads (rebuild)
-- Add time picker for notificationsd (rebuild)
-- last: completely clean up codebase
-- get rid of env local
+- Cursor through the codebase (last)
+- Get rid of env local (Don't use EXPO_PUBLIC)
+- Fix iOS ipad rotation thing
+- Get real ad ids (and add more)
 
 Future:
 - rebuild for expo store review (add rate later)
+- Marketing URL for ads
 - inline word definitions
 - app tutorial
 - different voices

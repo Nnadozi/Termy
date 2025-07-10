@@ -1,16 +1,11 @@
 import CustomIcon from '@/components/CustomIcon';
 import OnboardingPage from '@/components/OnboardingPage';
 import { clearCachedWords } from '@/database/wordCache';
-import useUserStore from '@/stores/userStore';
-import notificationService from "@/utils/notificationService";
 import { useEffect } from 'react';
 
 const Finish = () => {
-  const { completeOnboarding, notificationsEnabled, dailyWordNotificationTime } = useUserStore();
-
   useEffect(() => {
-    // Ensure onboarding is marked as complete
-    completeOnboarding();
+    // Onboarding is already completed in ProfileSetup - no need to call completeOnboarding here
     
     // Clear any cached words when onboarding completes
     const clearCache = async () => {
@@ -23,15 +18,8 @@ const Finish = () => {
     };
     clearCache();
 
-    // After onboarding is complete, schedule notifications if enabled
-    const scheduleNotifications = async () => {
-      if (notificationsEnabled) {
-        await notificationService.scheduleDailyWordNotification(dailyWordNotificationTime);
-        await notificationService.scheduleStreakReminderNotificationOnce();
-      }
-    };
-    scheduleNotifications();
-  }, [completeOnboarding, notificationsEnabled, dailyWordNotificationTime]);
+    // Notifications are already handled in completeOnboarding() from ProfileSetup - no need to schedule here
+  }, []);
 
   return (
     <OnboardingPage
@@ -40,7 +28,7 @@ const Finish = () => {
       subTitle="You're all set up -  enjoy Termy!"
       nextPage="/(main)/Daily"
     >
-      <CustomIcon name='celebration' type='material' size={300}  />
+      <CustomIcon name='celebration' type='material' size={150}  />
     </OnboardingPage>
   )
 }

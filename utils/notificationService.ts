@@ -73,6 +73,13 @@ class NotificationService {
   // Schedule daily word notification
   async scheduleDailyWordNotification(time: string): Promise<string | null> {
     try {
+      // Check if onboarding is complete before scheduling notifications
+      const { isOnboardingComplete } = useUserStore.getState();
+      if (!isOnboardingComplete) {
+        console.log('Onboarding not complete - skipping daily word notification scheduling');
+        return null;
+      }
+
       // Cancel existing daily word notifications
       await this.cancelDailyWordNotifications();
       
@@ -106,6 +113,13 @@ class NotificationService {
   // Schedule a one-time streak reminder notification for today if daily words are not completed
   async scheduleStreakReminderNotificationOnce(): Promise<string | null> {
     try {
+      // Check if onboarding is complete before scheduling notifications
+      const { isOnboardingComplete } = useUserStore.getState();
+      if (!isOnboardingComplete) {
+        console.log('Onboarding not complete - skipping streak reminder scheduling');
+        return null;
+      }
+
       // Cancel any existing streak reminder for today
       await this.cancelStreakReminderNotification();
 

@@ -10,10 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.nnadozi.termy",
-      "infoPlist": {
-        "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
-        "UISupportedInterfaceOrientations~ipad": ["UIInterfaceOrientationPortrait"]
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
@@ -23,56 +20,65 @@
       "edgeToEdgeEnabled": true,
       "package": "com.nnadozi.termy"
     },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 1000,
-          "resizeMode": "contain",
-          "backgroundColor": "#FF6A00"
-        }
-      ],
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "./assets/fonts/DMSans-Regular.ttf",
-            "./assets/fonts/DMSans-Bold.ttf",
-            "./assets/fonts/DMSans-Italic.ttf"
-          ]
-        }
-      ],
-      [
-        "expo-secure-store",
-        {
-          "configureAndroidBackup": true,
-          "faceIDPermission": "Allow Termy to access your Face ID biometric data."
-        }
-      ],
-      ["expo-sqlite"],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/icon.png"
-        }
-      ],
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "enableProguardInReleaseBuilds": true
+          "web": {
+        "bundler": "metro",
+        "output": "static",
+        "favicon": "./assets/images/favicon.png"
+      },
+      "plugins": [
+        "expo-router",
+        [
+          "expo-splash-screen",
+          {
+            "image": "./assets/images/splash-icon.png",
+            "imageWidth": 1000,
+            "resizeMode": "contain",
+            "backgroundColor": "#FF6A00"
           }
-        }
-      ]
-    ],
-    "experiments": {
+        ],
+        [
+          "expo-font",
+          {
+            "fonts": [
+              "./assets/fonts/DMSans-Regular.ttf",
+              "./assets/fonts/DMSans-Bold.ttf",
+              "./assets/fonts/DMSans-Italic.ttf"
+            ]
+          }
+        ],
+        [
+          "expo-secure-store",
+          {
+            "configureAndroidBackup": true,
+            "faceIDPermission": "Allow Termy to access your Face ID biometric data."
+          }
+        ],
+        ["expo-sqlite"],
+        [
+          "expo-notifications",
+          {
+            "icon": "./assets/images/icon.png"
+          }
+        ],
+        [
+          "expo-build-properties",
+          {
+            "android": {
+              "enableProguardInReleaseBuilds": true
+            },
+            "ios": {
+              "useFrameworks": "static"
+            }
+          }
+        ],
+        [
+          "expo-tracking-transparency",
+          {
+            "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+          }
+        ]
+      ],
+      "experiments": {
       "typedRoutes": true
     },
     "extra": {

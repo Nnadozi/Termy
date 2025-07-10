@@ -1,13 +1,13 @@
 import CustomIcon from "@/components/CustomIcon"
-import CustomInput from "@/components/CustomInput"
 import CustomText from "@/components/CustomText"
 import OnboardingPage from "@/components/OnboardingPage"
 import useUserStore from "@/stores/userStore"
 import notificationService from "@/utils/notificationService"
+import DateTimePicker from '@react-native-community/datetimepicker'
 import { useTheme } from "@react-navigation/native"
 import { useRouter } from "expo-router"
 import { useState } from "react"
-import { Alert, StyleSheet, TouchableOpacity, View } from "react-native"
+import { Alert, Platform, StyleSheet, TouchableOpacity, View } from "react-native"
 
 const NotificationsSetup = () => {
   const {colors} = useTheme()
@@ -17,54 +17,22 @@ const NotificationsSetup = () => {
 } = useUserStore()
   const router = useRouter()
 
-  // Parse current time to get hour and minute
+  // Parse current time to create a Date object
   const [hour, minute] = dailyWordNotificationTime.split(':').map(Number)
-  const [hourInput, setHourInput] = useState(hour > 12 ? (hour - 12).toString() : (hour === 0 ? '12' : hour.toString()))
-  const [minuteInput, setMinuteInput] = useState(minute.toString().padStart(2, '0'))
-  const [isPM, setIsPM] = useState(hour >= 12)
+  const [selectedTime, setSelectedTime] = useState(() => {
+    const date = new Date()
+    date.setHours(hour, minute, 0, 0)
+    return date
+  })
+  const [showTimePicker, setShowTimePicker] = useState(false)
 
-  const handleHourChange = (text: string) => {
-    // Only allow numbers
-    const numericText = text.replace(/[^0-9]/g, '')
-    
-    // Prevent hours above 12
-    const hour = parseInt(numericText) || 0
-    if (hour > 12) return
-    
-    setHourInput(numericText)
-    updateTimeString(numericText, minuteInput, isPM)
-  }
-
-  const handleMinuteChange = (text: string) => {
-    // Only allow numbers
-    const numericText = text.replace(/[^0-9]/g, '')
-    
-    // Prevent minutes above 59
-    const minute = parseInt(numericText) || 0
-    if (minute > 59) return
-    
-    setMinuteInput(numericText)
-    updateTimeString(hourInput, numericText, isPM)
-  }
-
-  const handleAMPMToggle = () => {
-    setIsPM(!isPM)
-    updateTimeString(hourInput, minuteInput, !isPM)
-  }
-
-  const updateTimeString = (hour: string, minute: string, pm: boolean) => {
-    let hourNum = parseInt(hour) || 0
-    const minuteNum = parseInt(minute) || 0
-    
-    // Convert to 24-hour format for storage
-    if (pm && hourNum !== 12) {
-      hourNum += 12
-    } else if (!pm && hourNum === 12) {
-      hourNum = 0
+  const handleTimeChange = (event: any, date?: Date) => {
+    setShowTimePicker(Platform.OS === 'ios')
+    if (date) {
+      setSelectedTime(date)
+      const timeString = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+      setDailyWordNotificationTime(timeString)
     }
-    
-    const timeString = `${hourNum.toString().padStart(2, '0')}:${minuteNum.toString().padStart(2, '0')}`
-    setDailyWordNotificationTime(timeString)
   }
 
   const formatTimeForDisplay = (timeString: string) => {
@@ -79,49 +47,38 @@ const NotificationsSetup = () => {
       const hasPermission = await notificationService.requestPermissions()
       if (hasPermission) {
         setNotificationsEnabled(true)
-        // Do NOT schedule notifications here
-        Alert.alert(
-          'Notifications Enabled', 
-          `You'll receive daily word reminders at ${formatTimeForDisplay(dailyWordNotificationTime)}`
-        )
+        // Don't schedule notifications immediately during onboarding
+        // They will be scheduled when onboarding completes
+        Alert.alert('Notifications Enabled', `You'll receive daily word reminders at ${formatTimeForDisplay(dailyWordNotificationTime)}!`)
       } else {
-        Alert.alert(
-          'Permission Denied', 
-          'Please enable notifications in your device settings to receive daily word reminders.'
-        )
+        Alert.alert('Permission Denied', 'Please enable notifications in your device settings.')
       }
     } catch (error) {
       console.error('Error enabling notifications:', error)
-      Alert.alert('Error', 'Failed to enable notifications. Please try again.')
+      Alert.alert('Error', 'Failed to enable notifications.')
     }
   }
 
-  const validateTime = async () => {
-    const hour = parseInt(hourInput)
-    const minute = parseInt(minuteInput)
-    
-    if (isNaN(hour) || hour < 1 || hour > 12) {
-      Alert.alert('Invalid Hour', 'Hour must be between 1 and 12')
-      return
+  const handleContinue = async () => {
+    // Notifications are optional - users can continue without enabling them
+    try {
+      // Don't schedule notifications here - they will be scheduled when onboarding completes
+      // Navigate to ProfileSetup instead of Finish
+      router.push('/(onboarding)/ProfileSetup')
+    } catch (error) {
+      console.error('Error during navigation:', error)
+      Alert.alert('Error', 'Failed to continue. Please try again.')
     }
-    
-    if (isNaN(minute) || minute < 0 || minute > 59) {
-      Alert.alert('Invalid Minute', 'Minute must be between 0 and 59')
-      return
-    }
-    // Do NOT schedule notifications here
-    // If validation passes, navigate manually
-    router.navigate('/(onboarding)/ProfileSetup')
   }
-  
+
   return (
     <OnboardingPage
       progress={0.6}
-      title="Enable Notifications"
-      subTitle="Know when new words are available"
+      title="Notification Setup"
+      subTitle="Get reminded to learn your daily words (optional)"
       nextPage="/(onboarding)/ProfileSetup"
-      style={styles.container}
-      customOnPress={validateTime}
+      customOnPress={handleContinue}
+      disableNext={false}
     >
         <View style={styles.content}>
           {!notificationsEnabled ? (
@@ -135,86 +92,46 @@ const NotificationsSetup = () => {
                 onPress={handleEnableNotifications}>
                 Tap here to enable 
               </CustomText>
+              <CustomText 
+                textAlign="center" 
+                fontSize="small" 
+                opacity={0.7} 
+                style={{marginTop: "5%"}}>
+                You can skip this and enable notifications later in Settings
+              </CustomText>
             </>
           ) : (
             <>           
-              {/* Time Input */}
-              <View style={styles.inputContainer}>
-               <View style={styles.timeInputRow}>
-                  <View style={styles.inputWrapper}>
-                    <CustomText bold style={styles.inputLabel}>Hour</CustomText>
-                    <CustomInput
-                      value={hourInput}
-                      onChangeText={handleHourChange}
-                      placeholder="9"
-                      style={{
-                        ...styles.timeInput,
-                        borderColor: colors.border,
-                        backgroundColor: colors.card,
-                      }}
-                      keyboardType="numeric"
-                      maxLength={2}
-               
-                    />
-                  </View>
-                  
-                  <CustomText fontSize="large" bold style={{
-                    ...styles.separator,
-                    color: colors.text
-                  }}>:</CustomText>
-                  
-                  <View style={styles.inputWrapper}>
-                    <CustomText bold style={styles.inputLabel}>Minute</CustomText>
-                    <CustomInput
-                      value={minuteInput}
-                      onChangeText={handleMinuteChange}
-                      placeholder="00"
-                      style={{
-                        ...styles.timeInput,
-                        borderColor: colors.border,
-                        backgroundColor: colors.card
-                      }}
-                      keyboardType="numeric"
-                      maxLength={2}
-                     
-                    />
-                  </View>
-                </View>
+              {/* Time Picker */}
+              <View style={styles.timePickerContainer}>
+                <CustomText bold style={styles.timePickerLabel}>Notification Time</CustomText>
+                
+                <TouchableOpacity 
+                  style={{
+                    ...styles.timePickerButton,
+                    borderColor: colors.border,
+                    backgroundColor: colors.card,
+                  }}
+                  onPress={() => setShowTimePicker(true)}
+                >
+                  <CustomText fontSize="large" bold style={{color: colors.text}}>
+                    {formatTimeForDisplay(dailyWordNotificationTime)}
+                  </CustomText>
+                  <CustomText fontSize="small" opacity={0.7} style={{marginTop: "2%"}}>
+                    Tap to change time
+                  </CustomText>
+                </TouchableOpacity>
 
-                <View style={styles.ampmContainer}>
-                  <TouchableOpacity 
-                    style={{
-                      ...styles.ampmButton,
-                      borderColor: colors.border,
-                      backgroundColor: colors.card,
-                      ...(!isPM && {
-                        backgroundColor: colors.primary,
-                        borderColor: colors.primary
-                      })
-                    }} 
-                    onPress={() => !isPM || handleAMPMToggle()}
-                  >
-                    <CustomText style={{
-                      color: !isPM ? colors.background : colors.text
-                    }}>AM</CustomText>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={{
-                      ...styles.ampmButton,
-                      borderColor: colors.border,
-                      backgroundColor: colors.card,
-                      ...(isPM && {
-                        backgroundColor: colors.primary,
-                        borderColor: colors.primary
-                      })
-                    }} 
-                    onPress={() => isPM || handleAMPMToggle()}
-                  >
-                    <CustomText style={{
-                      color: isPM ? colors.background : colors.text
-                    }}>PM</CustomText>
-                  </TouchableOpacity>
-                </View>
+                {showTimePicker && (
+                  <DateTimePicker
+                    value={selectedTime}
+                    mode="time"
+                    is24Hour={false}
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={handleTimeChange}
+                    style={styles.timePicker}
+                  />
+                )}
 
                 <CustomText opacity={0.7} style={styles.currentTime}>
                   Set for: <CustomText bold>{formatTimeForDisplay(dailyWordNotificationTime)}</CustomText>
@@ -247,47 +164,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: "10%",
     alignSelf: "center",
   },
-  inputContainer: {
+  timePickerContainer: {
     width: "100%",
     alignItems: "center",
   },
-  timeInputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: "5%",
-  },
-  inputWrapper: {
-    alignItems: "center",
-  },
-  inputLabel: {
-    marginBottom: "8%",
+  timePickerLabel: {
+    marginBottom: 10,
     textAlign: "center",
   },
-  timeInput: {
-    textAlign: "center",
-    fontSize: 20,
-    height: 100,
-    borderWidth: 1,
-    borderRadius: 8,
-  },
-  separator: {
-    marginHorizontal: "8%",
-    textAlign: "center",
-  },
-  ampmContainer: {
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  ampmButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
+  timePickerButton: {
+    padding:"8%",
+    borderRadius: 15,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+    minWidth: 150,
+  },
+  timePicker: {
+    marginTop: "5%",
   },
   currentTime: {
     marginTop: "5%",

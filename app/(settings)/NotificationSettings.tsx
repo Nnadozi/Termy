@@ -1,14 +1,14 @@
 import CustomButton from "@/components/CustomButton"
 import CustomIcon from "@/components/CustomIcon"
-import CustomInput from "@/components/CustomInput"
 import CustomText from "@/components/CustomText"
 import Page from "@/components/Page"
 import useUserStore from "@/stores/userStore"
 import notificationService from "@/utils/notificationService"
+import DateTimePicker from '@react-native-community/datetimepicker'
 import { useTheme } from "@react-navigation/native"
 import { router } from "expo-router"
 import { useState } from "react"
-import { Alert, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native"
+import { Alert, Platform, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from "react-native"
 
 const NotificationSettings = () => {
     const { colors } = useTheme()
@@ -19,54 +19,22 @@ const NotificationSettings = () => {
         setDailyWordNotificationTime,
     } = useUserStore()
 
-    // Parse current time to get hour and minute
+    // Parse current time to create a Date object
     const [hour, minute] = dailyWordNotificationTime.split(':').map(Number)
-    const [hourInput, setHourInput] = useState(hour > 12 ? (hour - 12).toString() : (hour === 0 ? '12' : hour.toString()))
-    const [minuteInput, setMinuteInput] = useState(minute.toString().padStart(2, '0'))
-    const [isPM, setIsPM] = useState(hour >= 12)
+    const [selectedTime, setSelectedTime] = useState(() => {
+        const date = new Date()
+        date.setHours(hour, minute, 0, 0)
+        return date
+    })
+    const [showTimePicker, setShowTimePicker] = useState(false)
 
-    const handleHourChange = (text: string) => {
-        // Only allow numbers
-        const numericText = text.replace(/[^0-9]/g, '')
-        
-        // Prevent hours above 12
-        const hour = parseInt(numericText) || 0
-        if (hour > 12) return
-        
-        setHourInput(numericText)
-        updateTimeString(numericText, minuteInput, isPM)
-    }
-
-    const handleMinuteChange = (text: string) => {
-        // Only allow numbers
-        const numericText = text.replace(/[^0-9]/g, '')
-        
-        // Prevent minutes above 59
-        const minute = parseInt(numericText) || 0
-        if (minute > 59) return
-        
-        setMinuteInput(numericText)
-        updateTimeString(hourInput, numericText, isPM)
-    }
-
-    const handleAMPMToggle = () => {
-        setIsPM(!isPM)
-        updateTimeString(hourInput, minuteInput, !isPM)
-    }
-
-    const updateTimeString = (hour: string, minute: string, pm: boolean) => {
-        let hourNum = parseInt(hour) || 0
-        const minuteNum = parseInt(minute) || 0
-        
-        // Convert to 24-hour format for storage
-        if (pm && hourNum !== 12) {
-            hourNum += 12
-        } else if (!pm && hourNum === 12) {
-            hourNum = 0
+    const handleTimeChange = (event: any, date?: Date) => {
+        setShowTimePicker(Platform.OS === 'ios')
+        if (date) {
+            setSelectedTime(date)
+            const timeString = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+            setDailyWordNotificationTime(timeString)
         }
-        
-        const timeString = `${hourNum.toString().padStart(2, '0')}:${minuteNum.toString().padStart(2, '0')}`
-        setDailyWordNotificationTime(timeString)
     }
 
     const formatTimeForDisplay = (timeString: string) => {
@@ -83,14 +51,13 @@ const NotificationSettings = () => {
                 if (hasPermission) {
                     setNotificationsEnabled(true)
                     await notificationService.scheduleDailyWordNotification(dailyWordNotificationTime)
-                    Alert.alert('Notifications Enabled', `You'll receive daily word reminders at ${formatTimeForDisplay(dailyWordNotificationTime)}`)
+                    Alert.alert('Notifications Enabled', `You'll receive daily word reminders at ${formatTimeForDisplay(dailyWordNotificationTime)}!`)
                 } else {
                     Alert.alert('Permission Denied', 'Please enable notifications in your device settings.')
                     return
                 }
             } else {
                 setNotificationsEnabled(false)
-                await notificationService.cancelAllNotifications()
                 Alert.alert('Notifications Disabled', 'You will no longer receive daily word reminders.')
             }
         } catch (error) {
@@ -100,19 +67,6 @@ const NotificationSettings = () => {
     }
 
     const handleSaveTime = async () => {
-        const hour = parseInt(hourInput)
-        const minute = parseInt(minuteInput)
-        
-        if (isNaN(hour) || hour < 1 || hour > 12) {
-            Alert.alert('Invalid Hour', 'Hour must be between 1 and 12')
-            return
-        }
-        
-        if (isNaN(minute) || minute < 0 || minute > 59) {
-            Alert.alert('Invalid Minute', 'Minute must be between 0 and 59')
-            return
-        }
-
         try {
             if (notificationsEnabled) {
                 await notificationService.scheduleDailyWordNotification(dailyWordNotificationTime)
@@ -139,102 +93,85 @@ const NotificationSettings = () => {
     }
 
     return (
-        <Page style={styles.container}>
-            {/* Header with back button */}
-            <View style={styles.topRow}>
-                <CustomIcon name="chevron-left" onPress={() => router.back()} />
-                <CustomText bold fontSize='XL'>Notification Settings</CustomText>
-                <View/>
-            </View>
-
-            <ScrollView 
+        <Page style={{ justifyContent: "flex-start", alignItems: "flex-start" }}>
+            <ScrollView
                 style={{ flex: 1, width: '100%' }}
                 contentContainerStyle={{ paddingBottom: 20 }}
                 showsVerticalScrollIndicator={false}
             >
-                <View style={styles.header}>
-                    <CustomText opacity={0.7} style={{marginTop: "2%"}}>
-                        Manage your daily word reminders
-                    </CustomText>
+                {/* Header */}
+                <View style={styles.topRow}>
+                    <CustomIcon name="chevron-left" onPress={() => router.back()} />
+                    <CustomText  fontSize='large' bold >Notification Settings</CustomText>
+                    <View/>
                 </View>
 
-                {/* Enable/Disable Notifications */}
-                <View style={[styles.section, { borderBottomColor: colors.border }]}>
-                    <View style={styles.sectionHeader}>
-                        <CustomIcon name="notifications" size={24} primary />
-                        <View style={styles.sectionText}>
-                            <CustomText bold>Daily Word Notifications</CustomText>
-                            <CustomText fontSize="small" opacity={0.7}>
-                                Receive reminders when new words are available
-                            </CustomText>
+                {/* Main Toggle Section */}
+                <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                    <CustomText  bold style={{ marginBottom: 15 }}>
+                        Daily Word Reminders
+                    </CustomText>
+                    <View style={styles.toggleContainer}>
+                        <View style={styles.toggleInfo}>
+                            <CustomIcon name="notifications" size={24} primary />
+                            <View style={styles.toggleText}>
+                                <CustomText bold>Enable Notifications</CustomText>
+                                <CustomText fontSize="small" opacity={0.7}>
+                                    Get notified when your daily words are ready
+                                </CustomText>
+                            </View>
                         </View>
                         <Switch
                             value={notificationsEnabled}
                             onValueChange={handleToggleNotifications}
                             trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor={colors.background}
+                            thumbColor={notificationsEnabled ? colors.background : colors.text}
                         />
                     </View>
                 </View>
 
-                {/* Notification Time */}
+                {/* Time Settings Section */}
                 {notificationsEnabled && (
-                    <View style={[styles.section, { borderBottomColor: colors.border }]}>
-                        <View style={styles.sectionHeader}>
-                            <CustomIcon name="time" size={24} primary />
-                            <View style={styles.sectionText}>
-                                <CustomText bold>Notification Time</CustomText>
-                                <CustomText fontSize="small" opacity={0.7}>
-                                    Set when you want to receive daily reminders
+                    <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                        <CustomText  bold style={{ marginBottom: 15 }}>
+                            Notification Time
+                        </CustomText>
+                        <View style={styles.timeContainer}>
+                            <View style={styles.timeInfo}>
+                                <CustomIcon name="timer" size={24} primary />
+                                <View style={styles.timeText}>
+                                    <CustomText bold>Daily Reminder Time</CustomText>
+                                    <CustomText fontSize="small" opacity={0.7}>
+                                        Set when you want to receive daily reminders
+                                    </CustomText>
+                                </View>
+                            </View>
+                            
+                            <TouchableOpacity 
+                                style={[styles.timePickerButton, { borderColor: colors.border, backgroundColor: colors.background }]}
+                                onPress={() => setShowTimePicker(true)}
+                            >
+                                <CustomText fontSize="large" bold style={{color: colors.text}}>
+                                    {formatTimeForDisplay(dailyWordNotificationTime)}
                                 </CustomText>
-                            </View>
-                        </View>
-                        
-                        <View style={styles.timeInputContainer}>
-                            <View style={styles.timeInputRow}>
-                                <View style={styles.inputWrapper}>
-                                    <CustomText fontSize="small" opacity={0.7}>Hour (1-12)</CustomText>
-                                    <CustomInput
-                                        value={hourInput}
-                                        onChangeText={handleHourChange}
-                                        placeholder="9"
-                                        style={styles.timeInput}
-                                        keyboardType="numeric"
-                                        maxLength={2}
-                                    />
-                                </View>
-                                <CustomText fontSize="large" bold style={{marginHorizontal: "5%"}}>:</CustomText>
-                                <View style={styles.inputWrapper}>
-                                    <CustomText fontSize="small" opacity={0.7}>Minute (0-59)</CustomText>
-                                    <CustomInput
-                                        value={minuteInput}
-                                        onChangeText={handleMinuteChange}
-                                        placeholder="00"
-                                        style={styles.timeInput}
-                                        keyboardType="numeric"
-                                        maxLength={2}
-                                    />
-                                </View>
-                                <View style={styles.ampmContainer}>
-                                    <TouchableOpacity 
-                                        style={[styles.ampmButton, !isPM && styles.ampmButtonActive]} 
-                                        onPress={() => !isPM || handleAMPMToggle()}
-                                    >
-                                        <CustomText style={!isPM ? styles.ampmTextActive : styles.ampmText}>AM</CustomText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity 
-                                        style={[styles.ampmButton, isPM && styles.ampmButtonActive]} 
-                                        onPress={() => isPM || handleAMPMToggle()}
-                                    >
-                                        <CustomText style={isPM ? styles.ampmTextActive : styles.ampmText}>PM</CustomText>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            <CustomText fontSize="small" opacity={0.7} style={{marginTop: "2%", textAlign: "center"}}>
-                                Current time: {formatTimeForDisplay(dailyWordNotificationTime)}
-                            </CustomText>
-                            <CustomButton 
-                                title="Save Time" 
+                                <CustomText fontSize="small" opacity={0.7} style={{marginTop: 4}}>
+                                    Tap to change time
+                                </CustomText>
+                            </TouchableOpacity>
+
+                            {showTimePicker && (
+                                <DateTimePicker
+                                    value={selectedTime}
+                                    mode="time"
+                                    is24Hour={false}
+                                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                    onChange={handleTimeChange}
+                                    style={styles.timePicker}
+                                />
+                            )}
+
+                            <CustomButton
+                                title="Save Time"
                                 onPress={handleSaveTime}
                                 style={styles.saveButton}
                             />
@@ -242,32 +179,45 @@ const NotificationSettings = () => {
                     </View>
                 )}
 
-                {/* Test Notification */}
+                {/* Test Notification Section */}
                 {notificationsEnabled && (
-                    <View style={[styles.section, { borderBottomColor: colors.border }]}>
-                        <View style={styles.sectionHeader}>
-                            <CustomIcon name="send" size={24} primary />
-                            <View style={styles.sectionText}>
-                                <CustomText bold>Test Notifications</CustomText>
-                                <CustomText fontSize="small" opacity={0.7}>
-                                    Send a test notification to verify settings
-                                </CustomText>
+                    <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                        <CustomText  bold style={{ marginBottom: 15 }}>
+                            Test Notifications
+                        </CustomText>
+                        <View style={styles.testContainer}>
+                            <View style={styles.testInfo}>
+                                <CustomIcon name="send" size={24} primary />
+                                <View style={styles.testText}>
+                                    <CustomText bold>Send Test Notification</CustomText>
+                                    <CustomText fontSize="small" opacity={0.7}>
+                                        Verify your notification settings are working
+                                    </CustomText>
+                                </View>
                             </View>
+                            <CustomButton
+                                title="Send Test"
+                                onPress={handleTestNotification}
+                                style={styles.testButton}
+                            />
                         </View>
-                        <CustomButton 
-                            title="Send Test Notification" 
-                            onPress={handleTestNotification}
-                            style={styles.testButton}
-                        />
                     </View>
                 )}
 
                 {/* Info Section */}
-                <View style={styles.infoSection}>
-                    <CustomIcon name="information-circle" size={20} style={{opacity: 0.7}} />
-                    <CustomText fontSize="small" opacity={0.7} style={styles.infoText}>
-                        Notifications help you maintain your learning streak by reminding you to practice daily words.
+                <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                    <CustomText  bold style={{ marginBottom: 15 }}>
+                        About Notifications
                     </CustomText>
+                    <View style={styles.infoContainer}>
+                        <CustomIcon name="info" size={20} primary />
+                        <View style={styles.infoText}>
+                            <CustomText fontSize="small">
+                                Notifications help you maintain your learning streak by reminding you when new words are available. 
+                                You can change these settings at any time.
+                            </CustomText>
+                        </View>
+                    </View>
                 </View>
             </ScrollView>
         </Page>
@@ -277,96 +227,87 @@ const NotificationSettings = () => {
 export default NotificationSettings
 
 const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: "5%",
-    },
     topRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '5%',
-    },
-    header: {
-        marginBottom: "8%",
+        width: "100%",
+        marginBottom: "3%",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between"
     },
     section: {
-        paddingVertical: "4%",
-        borderBottomWidth: 1,
+        width: '100%',
+        padding: 20,
+        borderRadius: 12,
+        borderWidth: 1,
+        marginBottom: 15,
     },
-    sectionHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: "3%",
+    toggleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
-    sectionText: {
+    toggleInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
         flex: 1,
-        marginLeft: "3%",
     },
-    timeInputContainer: {
-        marginTop: "3%",
+    toggleText: {
+        marginLeft: 12,
+        flex: 1,
     },
-    timeInputRow: {
-        flexDirection: "row",
+    timeContainer: {
+        alignItems: 'flex-start',
+    },
+    timeInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    timeText: {
+        marginLeft: 12,
+        flex: 1,
+    },
+    timePickerButton: {
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+        borderRadius: 12,
+        borderWidth: 1,
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: "4%",
+        minWidth: 150,
+        alignSelf: 'center',
+        marginBottom: 15,
     },
-    inputWrapper: {
-        alignItems: "center",
-    },
-    timeInput: {
-        textAlign: "center",
-        fontSize: 18,
-        fontWeight: "bold",
-        width: 60,
-        height: 60,
-        marginTop: "2%",
-    },
-    ampmContainer: {
-        marginLeft: "5%",
-        flexDirection: "row",
-        gap: 2,
-    },
-    ampmButton: {
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: '#ccc',
-    },
-    ampmButtonActive: {
-        backgroundColor: '#FF6A00',
-        borderColor: '#FF6A00',
-    },
-    ampmText: {
-        fontSize: 14,
-        color: '#666',
-    },
-    ampmTextActive: {
-        fontSize: 14,
-        color: 'white',
-        fontWeight: 'bold',
+    timePicker: {
+        marginTop: 10,
     },
     saveButton: {
         alignSelf: "center",
         width: "40%",
-        marginTop: "3%",
+    },
+    testContainer: {
+        alignItems: 'flex-start',
+    },
+    testInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    testText: {
+        marginLeft: 12,
+        flex: 1,
     },
     testButton: {
-        marginTop: "3%",
-        width: "100%",
+        alignSelf: 'center',
+        width: "40%",
     },
-    infoSection: {
-        flexDirection: "row",
-        alignItems: "flex-start",
-        marginTop: "8%",
-        padding: "4%",
-        backgroundColor: "rgba(255, 106, 0, 0.1)",
-        borderRadius: 10,
+    infoContainer: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
     },
     infoText: {
         flex: 1,
-        marginLeft: "3%",
+        marginLeft: 12,
         lineHeight: 20,
     },
 })

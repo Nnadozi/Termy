@@ -251,13 +251,13 @@ const Profile = () => {
         {/* Header */}
         <View style={styles.topRow}>
           <CustomIcon name="chevron-left"  onPress={() => router.back()}  />
-          <CustomText bold fontSize='XL'>Profile</CustomText>
+          <CustomText bold  fontSize='large'>Profile</CustomText>
           <View/> 
         </View>
 
         {/* Avatar Section */}
         <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText fontSize='large' bold style={{ marginBottom: 15, textAlign: 'center' }}>
+          <CustomText textAlign="center"  bold style={{ marginBottom: 15, textAlign: 'center' }}>
             Profile Picture
           </CustomText>
           <View style={styles.avatarContainer}>
@@ -286,7 +286,7 @@ const Profile = () => {
 
         {/* Display Name Section */}
         <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText fontSize='large' bold style={{ marginBottom: 15 }}>
+          <CustomText  bold style={{ marginBottom: 15 }}>
             Display Name
           </CustomText>
           {isEditing ? (
@@ -305,7 +305,7 @@ const Profile = () => {
 
         {/* Daily Word Goal Section */}
         <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText fontSize='large' bold style={{ marginBottom: 15 }}>
+          <CustomText  bold style={{ marginBottom: 15 }}>
             Daily Word Goal
           </CustomText>
           {isEditing ? (
@@ -325,7 +325,7 @@ const Profile = () => {
 
         {/* Topics Section */}
         <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText fontSize='large' bold style={{ marginBottom: 15 }}>
+          <CustomText  bold style={{ marginBottom: 15 }}>
             Learning Topics
           </CustomText>
           <View style={styles.topicsContainer}>
@@ -336,7 +336,7 @@ const Profile = () => {
                 type={tempWordTopics.includes(topic) ? 'solid' : 'outline'}
                 onPress={() => toggleTopic(topic)}
                 disabled={!isEditing}
-                containerStyle={{ marginVertical: "2%", marginRight:"3%" }}
+                containerStyle={{ marginVertical: 5, marginRight:10 }}
                 buttonStyle={{
                   backgroundColor: tempWordTopics.includes(topic)
                     ? colors.primary
@@ -362,7 +362,7 @@ const Profile = () => {
 
         {/* Join Date Section */}
         <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText fontSize='large' bold style={{ marginBottom: 15 }}>
+          <CustomText  bold style={{ marginBottom: 15 }}>
             Account Information
           </CustomText>
           <View style={styles.infoRow}>
@@ -375,7 +375,7 @@ const Profile = () => {
 
         {/* Delete Profile Section */}
         <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText fontSize='large' bold style={{ marginBottom: 15, color: '#FF4444' }}>
+          <CustomText  bold style={{ marginBottom: 15, color: '#FF4444' }}>
             Danger Zone
           </CustomText>
           <CustomText fontSize='normal' style={{ marginBottom: 20, opacity: 0.8 }}>

@@ -1,19 +1,20 @@
 import AppearanceModal from '@/components/AppearanceModal';
 import CustomIcon from '@/components/CustomIcon';
 import CustomText from '@/components/CustomText';
-import LanguageModal from '@/components/LanguageModal';
-import NotificationsModal from '@/components/NotificationsModal';
 import Page from '@/components/Page';
 import { useTheme } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Linking, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Linking, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { BannerAd, BannerAdSize, TestIds, useForeground } from 'react-native-google-mobile-ads';
 
 const Settings = () => {
+  const bannerRef = useRef<BannerAd>(null);
+  useForeground(() => {
+    Platform.OS === 'ios' && bannerRef.current?.load();
+  });
   const [appearanceModalVisible, setAppearanceModalVisible] = useState(false);
-  const [languageModalVisible, setLanguageModalVisible] = useState(false);
-  const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
   const { colors } = useTheme();
 
   const options = [
@@ -25,8 +26,6 @@ const Settings = () => {
     { key: "shield", value: "Privacy Policy", type: "feather", onPress: () => { Linking.openURL("https://www.termsfeed.com/live/bfc3acad-1c4a-476e-8e39-6f0becf8e3ad") } },
     { key: "information-circle", value: "Version", type: "ionicon", onPress: () => {} },
   ];
-
-  
 
 
   const showOption = (option: { key: string; value: string; type: any; onPress: () => void }, index: number) => {
@@ -66,8 +65,9 @@ const Settings = () => {
         {options.map((option, index) => showOption(option, index))}
       </ScrollView>
       <AppearanceModal visible={appearanceModalVisible} onRequestClose={() => setAppearanceModalVisible(false)} />
-      <LanguageModal visible={languageModalVisible} onRequestClose={() => setLanguageModalVisible(false)} />
-      <NotificationsModal visible={notificationsModalVisible} onRequestClose={() => setNotificationsModalVisible(false)} />
+      <View style={{ justifyContent: "center", alignItems: "center" ,alignSelf:"center"}}>
+        <BannerAd unitId={TestIds.BANNER} size={BannerAdSize.BANNER} ref={bannerRef} />
+      </View>
     </Page>
   );
 };
