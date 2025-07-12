@@ -1,3 +1,4 @@
+import OfflineIndicator from '@/components/OfflineIndicator';
 import { useThemeStore } from "@/stores/themeStore";
 import useUserStore from "@/stores/userStore";
 import notificationService from "@/utils/notificationService";
@@ -138,6 +139,7 @@ export default function RootLayout() {
             <Stack.Screen name="Quiz" />
           </Stack>  
         </ThemeProvider>
+        <OfflineIndicator />
       </SafeAreaProvider>
       <Toast />
     </>

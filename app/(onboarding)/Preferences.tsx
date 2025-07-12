@@ -50,7 +50,7 @@ const Preferences = () => {
         contentContainerStyle={{flexGrow:1, paddingBottom:200}}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{gap:"3%"}}>
+        <View style={{gap:20}}>
         <View style={styles.row}>
             <View>
               <CustomText bold>Theme</CustomText>

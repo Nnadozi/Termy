@@ -1,15 +1,13 @@
 During testing:
 - Update db (difficulty system?)
 - Switch to local db
-- Improve UI
-- Handle edge cases
 - Cursor through the codebase (last)
-- Get rid of env local (Don't use EXPO_PUBLIC)
-- Fix iOS ipad rotation thing
-- Get real ad ids (and add more)
 
 Future:
 - rebuild for expo store review (add rate later)
+- Improve UI
+- Handle edge cases
+- add ads and get real ad ids (and add more)
 - Marketing URL for ads
 - inline word definitions
 - app tutorial
@@ -17,6 +15,7 @@ Future:
 - gamification
 - new word categories (tech)
 - word filter insde lists (pos, category, etc)
+- Get rid of env local (Don't use EXPO_PUBLIC)
 - animations
 - find co maintainer
 - fix adbmob thing by 7/28/25

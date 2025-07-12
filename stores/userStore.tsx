@@ -242,7 +242,6 @@ const isConsecutiveDay = (date1: string, date2: string): boolean => {
 }
 
 export default useUserStore
-
 // Export resetUserStore for external use
 export const resetUserStore = () => {
   const store = useUserStore.getState()

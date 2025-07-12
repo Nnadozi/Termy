@@ -11,7 +11,7 @@ import { useTheme } from "@react-navigation/native"
 import { router } from "expo-router"
 import { useEffect, useRef, useState } from "react"
 import { Platform, StyleSheet, TouchableOpacity, View } from "react-native"
-import { BannerAd, BannerAdSize, TestIds, useForeground } from 'react-native-google-mobile-ads'
+import { BannerAd, useForeground } from 'react-native-google-mobile-ads'
 
 const CreateList = () => {
     const bannerRef = useRef<BannerAd>(null);
@@ -150,9 +150,6 @@ const CreateList = () => {
                 title="Add Words to List"
                 allowCustomWords={true}
              />
-            <View style={{ justifyContent: "center", alignItems: "center" ,alignSelf:"center", marginTop: "10%"}}>
-                <BannerAd unitId={TestIds.BANNER} size={BannerAdSize.BANNER} ref={bannerRef} />
-            </View>
         </Page>
     )
 }
@@ -191,3 +188,10 @@ const styles = StyleSheet.create({
         borderRadius: 5
     }
 })
+
+/**
+ * 
+ *             <View style={{marginTop: "10%",alignSelf:"center"}}>
+                <BannerAd unitId={TestIds.BANNER} size={BannerAdSize.BANNER} ref={bannerRef} />
+            </View>
+ */

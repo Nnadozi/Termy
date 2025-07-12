@@ -79,7 +79,7 @@ const ProfileSetup = () => {
               containerStyle={{ alignSelf: "center", backgroundColor: avatarColor }} 
             />
           </TouchableOpacity>
-          <CustomText style={{marginTop:10}}>Tap to change avatar color</CustomText>
+          <CustomText textAlign='center' style={{marginTop:10}}>Tap above to change your avatar color</CustomText>
           <CustomText textAlign='center' fontSize='small'>Choose wisely!</CustomText>
         </View>
         

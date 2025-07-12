@@ -1,13 +1,13 @@
 import CustomButton from '@/components/CustomButton'
 import CustomIcon from '@/components/CustomIcon'
 import CustomText from '@/components/CustomText'
-import ErrorDisplay from '@/components/ErrorDisplay'
 import Page from '@/components/Page'
 import QuizQuestion from '@/components/QuizQuestion'
 import { addWordsToList } from '@/database/wordCache'
 import { useThemeStore } from '@/stores/themeStore'
 import useUserStore from '@/stores/userStore'
 import { QuizQuestion as QuizQuestionType } from '@/types/quiz'
+import { withInternetCheck } from '@/utils/networkUtils'
 import notificationService from '@/utils/notificationService'
 import { showToast } from '@/utils/ShowToast'
 import Constants from 'expo-constants'
@@ -40,65 +40,43 @@ const Quiz = () => {
       setError(null)
       setLoading(true)
       
-      // Get environment variables with fallbacks
-      const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || process.env.EXPO_PUBLIC_SUPABASE_URL
-      const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
-      
-      // Call the Supabase edge function instead of OpenAI directly
-      const response = await fetch(`${supabaseUrl}/functions/v1/generate-quiz`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseAnonKey}`
-        },
-        body: JSON.stringify({ words })
-      })
+      // Check internet connectivity before making API call
+      await withInternetCheck(async () => {
+        // Get environment variables with fallbacks
+        const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || process.env.EXPO_PUBLIC_SUPABASE_URL
+        const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+        
+        // Call the Supabase edge function instead of OpenAI directly
+        const response = await fetch(`${supabaseUrl}/functions/v1/generate-quiz`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`
+          },
+          body: JSON.stringify({ words })
+        })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Edge function error:', errorText)
-        throw new Error(`Quiz generation failed: ${response.status}`)
-      }
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('Edge function error:', errorText)
+          throw new Error(`Quiz generation failed: ${response.status}`)
+        }
 
-      const data = await response.json()
-      
-      if (data.error) {
-        throw new Error(data.error)
-      }
-      
-      if (data.questions && Array.isArray(data.questions)) {
-        setQuestions(data.questions)
-      } else {
-        throw new Error('Invalid response format from quiz service')
-      }
+        const data = await response.json()
+        
+        if (data.error) {
+          throw new Error(data.error)
+        }
+        
+        if (data.questions && Array.isArray(data.questions)) {
+          setQuestions(data.questions)
+        } else {
+          throw new Error('Invalid response format from quiz service')
+        }
+      });
     } catch (error) {
       console.error('Error generating questions:', error)
       setError(error instanceof Error ? error.message : 'Failed to generate quiz questions')
-      
-      // Fallback: create basic questions if edge function fails
-      try {
-        const fallbackQuestions: QuizQuestionType[] = words.flatMap(word => [
-          {
-            word: word.word,
-            question: `What does "${word.word}" mean?`,
-            type: 'multiple_choice',
-            correctAnswer: word.definition,
-            options: [word.definition, 'Something else', 'Another option', 'Wrong answer']
-          },
-          {
-            word: word.word,
-            question: `Complete: ${word.example_usage.replace(word.word, '_____')}`,
-            type: 'fill_blank',
-            correctAnswer: word.word,
-            context: word.example_usage
-          }
-        ])
-        setQuestions(fallbackQuestions)
-        setError(null) // Clear error since fallback worked
-      } catch (fallbackError) {
-        console.error('Fallback questions also failed:', fallbackError)
-        setError('Unable to create quiz questions. Please try again.')
-      }
     } finally {
       setLoading(false)
     }
@@ -217,11 +195,34 @@ const Quiz = () => {
   if (error) {
     return (
       <Page>
-        <ErrorDisplay
-          title="Quiz Generation Failed"
-          message={error}
-          onRetry={retryQuizGeneration}
-        />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+          <CustomIcon 
+            name="alert-circle" 
+            type="feather" 
+            size={60} 
+            color="#FF4444" 
+            style={{ marginBottom: 20 }}
+          />
+          <CustomText fontSize="large" bold textAlign="center" style={{ marginBottom: 10 }}>
+            Quiz Generation Failed
+          </CustomText>
+          <CustomText 
+            fontSize="normal" 
+            textAlign="center" 
+            style={{ marginBottom: 20, opacity: 0.8, lineHeight: 22 }}
+          >
+            {error}
+          </CustomText>
+          <CustomButton
+            title="Go Back"
+            onPress={() => router.replace('/(main)/Daily')}
+            style={{ marginBottom: 10 }}
+          />
+          <CustomButton
+            title="Try Again"
+            onPress={retryQuizGeneration}
+          />
+        </View>
       </Page>
     )
   }

@@ -7,7 +7,7 @@ import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Linking, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { BannerAd, BannerAdSize, TestIds, useForeground } from 'react-native-google-mobile-ads';
+import { BannerAd, useForeground } from 'react-native-google-mobile-ads';
 
 const Settings = () => {
   const bannerRef = useRef<BannerAd>(null);
@@ -65,9 +65,6 @@ const Settings = () => {
         {options.map((option, index) => showOption(option, index))}
       </ScrollView>
       <AppearanceModal visible={appearanceModalVisible} onRequestClose={() => setAppearanceModalVisible(false)} />
-      <View style={{ justifyContent: "center", alignItems: "center" ,alignSelf:"center"}}>
-        <BannerAd unitId={TestIds.BANNER} size={BannerAdSize.BANNER} ref={bannerRef} />
-      </View>
     </Page>
   );
 };
@@ -81,3 +78,10 @@ const styles = StyleSheet.create({
     paddingVertical: 20
   },
 });
+
+/**
+ * 
+ *       <View style={{ justifyContent: "center", alignItems: "center" ,alignSelf:"center"}}>
+        <BannerAd unitId={TestIds.BANNER} size={BannerAdSize.BANNER} ref={bannerRef} />
+      </View>
+ */

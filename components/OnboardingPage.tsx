@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
         justifyContent:"center",
         alignItems:"center",
         width:"100%",
-        marginVertical:"2%",
+        marginVertical:10,
        // borderWidth:1,
     },
     topPortion:{

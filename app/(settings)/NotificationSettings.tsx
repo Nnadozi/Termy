@@ -102,15 +102,12 @@ const NotificationSettings = () => {
                 {/* Header */}
                 <View style={styles.topRow}>
                     <CustomIcon name="chevron-left" onPress={() => router.back()} />
-                    <CustomText  fontSize='large' bold >Notification Settings</CustomText>
+                    <CustomText  fontSize='large' bold >Notifications</CustomText>
                     <View/>
                 </View>
 
                 {/* Main Toggle Section */}
                 <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                    <CustomText  bold style={{ marginBottom: 15 }}>
-                        Daily Word Reminders
-                    </CustomText>
                     <View style={styles.toggleContainer}>
                         <View style={styles.toggleInfo}>
                             <CustomIcon name="notifications" size={24} primary />
@@ -133,9 +130,6 @@ const NotificationSettings = () => {
                 {/* Time Settings Section */}
                 {notificationsEnabled && (
                     <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                        <CustomText  bold style={{ marginBottom: 15 }}>
-                            Notification Time
-                        </CustomText>
                         <View style={styles.timeContainer}>
                             <View style={styles.timeInfo}>
                                 <CustomIcon name="timer" size={24} primary />
@@ -182,9 +176,6 @@ const NotificationSettings = () => {
                 {/* Test Notification Section */}
                 {notificationsEnabled && (
                     <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                        <CustomText  bold style={{ marginBottom: 15 }}>
-                            Test Notifications
-                        </CustomText>
                         <View style={styles.testContainer}>
                             <View style={styles.testInfo}>
                                 <CustomIcon name="send" size={24} primary />

@@ -8,6 +8,7 @@ import { cacheDailyWords, clearCachedWords, getCachedDailyWords, hasCachedWordsF
 import { getDailyWords } from '@/database/wordService'
 import useUserStore from '@/stores/userStore'
 import { Word } from '@/types/word'
+import { withInternetCheck } from '@/utils/networkUtils'
 import { useTheme } from '@react-navigation/native'
 import { router } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
@@ -89,11 +90,14 @@ const Daily = () => {
           setDailyVocab(cachedWords)
         } else {
           console.log('Daily: No cached words, fetching new ones')
-          const words = await getDailyWords(wordTopics, dailyWordGoal)
-          console.log('Daily: Fetched new words:', words.length, 'words')
-          console.log('Daily: Word categories:', words.map(w => w.category))
-          setDailyVocab(words)
-          await cacheDailyWords(words)
+          // Check internet connectivity before fetching from Supabase
+          await withInternetCheck(async () => {
+            const words = await getDailyWords(wordTopics, dailyWordGoal)
+            console.log('Daily: Fetched new words:', words.length, 'words')
+            console.log('Daily: Word categories:', words.map(w => w.category))
+            setDailyVocab(words)
+            await cacheDailyWords(words)
+          });
         }
       } catch (error) {
         console.error('Error loading words:', error) 
@@ -118,12 +122,15 @@ const Daily = () => {
       setError(null)
       console.log('Daily: Manually refreshing words')
       await clearCachedWords()
-      const words = await getDailyWords(wordTopics, dailyWordGoal)
-      console.log('Daily: Refreshed words:', words.length, 'words')
-      console.log('Daily: Word categories:', words.map(w => w.category))
-      setDailyVocab(words)
-      await cacheDailyWords(words)
-      lastPreferences.current = { topics: [...wordTopics], goal: dailyWordGoal }
+      // Check internet connectivity before fetching from Supabase
+      await withInternetCheck(async () => {
+        const words = await getDailyWords(wordTopics, dailyWordGoal)
+        console.log('Daily: Refreshed words:', words.length, 'words')
+        console.log('Daily: Word categories:', words.map(w => w.category))
+        setDailyVocab(words)
+        await cacheDailyWords(words)
+        lastPreferences.current = { topics: [...wordTopics], goal: dailyWordGoal }
+      });
     } catch (error) {
       console.error('Error refreshing words:', error)
       setError(error instanceof Error ? error.message : 'Failed to refresh words')

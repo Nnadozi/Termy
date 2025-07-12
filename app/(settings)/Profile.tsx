@@ -8,7 +8,7 @@ import Page from "@/components/Page";
 import useUserStore, { allWordTopics, resetUserStore } from "@/stores/userStore";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '@react-navigation/native';
-import { Avatar, Chip } from '@rneui/base';
+import { Avatar, Chip } from "@rneui/base";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
@@ -28,12 +28,15 @@ const Profile = () => {
   
   const { colors } = useTheme()
   
-  const [isEditing, setIsEditing] = useState(false)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [tempUserName, setTempUserName] = useState(userName)
   const [tempAvatarColor, setTempAvatarColor] = useState(avatarColor)
   const [tempDailyWordGoal, setTempDailyWordGoal] = useState(dailyWordGoal.toString())
   const [tempWordTopics, setTempWordTopics] = useState(wordTopics)
+  
+  // Field editing states
+  const [editingName, setEditingName] = useState(false)
+  const [editingGoal, setEditingGoal] = useState(false)
   
   // Secure deletion states
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
@@ -48,31 +51,39 @@ const Profile = () => {
     tempDailyWordGoal !== dailyWordGoal.toString() ||
     JSON.stringify(tempWordTopics) !== JSON.stringify(wordTopics)
 
-  const handleSave = () => {
+  const handleSaveName = () => {
     if (tempUserName.trim().length === 0) {
       Alert.alert('Error', 'Display name cannot be empty')
       return
     }
-    
+    setUserName(tempUserName.trim())
+    setEditingName(false)
+  }
+
+  const handleSaveGoal = () => {
     const goal = parseInt(tempDailyWordGoal)
     if (isNaN(goal) || goal < 1 || goal > 10) {
       Alert.alert('Error', 'Daily word goal must be between 1 and 10')
       return
     }
-    
-    setUserName(tempUserName.trim())
-    setAvatarColor(tempAvatarColor)
     setDailyWordGoal(goal)
-    setWordTopics(tempWordTopics)
-    setIsEditing(false)
+    setEditingGoal(false)
   }
 
-  const handleCancel = () => {
-    setTempUserName(userName)
-    setTempAvatarColor(avatarColor)
-    setTempDailyWordGoal(dailyWordGoal.toString())
-    setTempWordTopics(wordTopics)
-    setIsEditing(false)
+  const handleSaveTopics = () => {
+    setWordTopics(tempWordTopics)
+  }
+
+  const handleSaveAvatar = () => {
+    setAvatarColor(tempAvatarColor)
+  }
+
+  const toggleTopic = (topic: string) => {
+    setTempWordTopics(prev =>
+      prev.includes(topic)
+        ? prev.filter((t) => t !== topic)
+        : [...prev, topic]
+    )
   }
 
   // Secure deletion functions
@@ -97,13 +108,11 @@ const Profile = () => {
       return
     }
     
-    // Add null/undefined checks for userName
     if (!userName || !usernameConfirmation.trim() || usernameConfirmation.trim() !== userName.trim()) {
       Alert.alert('Error', 'Username does not match. Please enter your exact username.')
       return
     }
 
-    // Final confirmation with different wording
     Alert.alert(
       'Final Confirmation',
       'This is your last chance to cancel. Your profile and all data will be permanently deleted and cannot be recovered. The default "Learned" list will be preserved but emptied. Are you absolutely sure?',
@@ -146,7 +155,6 @@ const Profile = () => {
       // Step 3: Clear AsyncStorage (this can be problematic on iOS)
       console.log('Step 3: Clearing AsyncStorage...')
       try {
-        // Clear specific keys instead of all storage
         const keys = await AsyncStorage.getAllKeys()
         if (keys.length > 0) {
           await AsyncStorage.multiRemove(keys)
@@ -160,12 +168,10 @@ const Profile = () => {
       console.log('Step 4: Clearing database...')
       try {
         if (Platform.OS === 'ios') {
-          // Use iOS-safe approach
           const { clearUserDataIOSSafe } = await import('@/database/wordCache')
           await clearUserDataIOSSafe()
           console.log('Database cleared successfully (iOS-safe)')
         } else {
-          // Use regular approach for Android
           const { clearUserData } = await import('@/database/wordCache')
           await clearUserData()
           console.log('Database cleared successfully (Android)')
@@ -177,7 +183,6 @@ const Profile = () => {
       // Step 5: Navigate to onboarding
       console.log('Step 5: Navigating to onboarding...')
       
-      // Use a longer delay and try multiple navigation approaches
       setTimeout(() => {
         try {
           console.log('Attempting navigation with router.replace...')
@@ -192,7 +197,6 @@ const Profile = () => {
               router.navigate('/(onboarding)')
             } catch (navError3) {
               console.log('All navigation methods failed:', navError3)
-              // Last resort: show an alert and let user manually navigate
               Alert.alert(
                 'Profile Deleted',
                 'Your profile has been deleted successfully. Please restart the app to continue.',
@@ -201,7 +205,7 @@ const Profile = () => {
             }
           }
         }
-      }, 1000) // Increased delay to 1 second
+      }, 1000)
       
     } catch (error) {
       console.error('Critical error during profile deletion:', error)
@@ -221,16 +225,6 @@ const Profile = () => {
     setUsernameConfirmation('')
   }
 
-  const toggleTopic = (topic: string) => {
-    if (isEditing) {
-      setTempWordTopics(prev =>
-        prev.includes(topic)
-          ? prev.filter((t) => t !== topic)
-          : [...prev, topic]
-      )
-    }
-  }
-
   const formatJoinDate = (dateString: string) => {
     if (!dateString) return 'Not available'
     const date = new Date(dateString)
@@ -239,6 +233,16 @@ const Profile = () => {
       month: 'long', 
       day: 'numeric' 
     })
+  }
+
+  if (isDeleting) {
+    return (
+      <Page>
+        <View style={styles.loadingContainer}>
+          <LoadingSpinner text="Deleting profile..." />
+        </View>
+      </Page>
+    )
   }
 
   return (
@@ -257,13 +261,12 @@ const Profile = () => {
 
         {/* Avatar Section */}
         <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText textAlign="center"  bold style={{ marginBottom: 15, textAlign: 'center' }}>
+          <CustomText textAlign="center" bold style={{ marginBottom: 15 }}>
             Profile Picture
           </CustomText>
           <View style={styles.avatarContainer}>
             <TouchableOpacity 
-              onPress={() => isEditing && setShowColorPicker(true)}
-              disabled={!isEditing}
+              onPress={() => setShowColorPicker(true)}
             >
               <Avatar 
                 size={100} 
@@ -272,15 +275,12 @@ const Profile = () => {
                 containerStyle={{ 
                   alignSelf: "center", 
                   backgroundColor: tempAvatarColor,
-                  opacity: isEditing ? 1 : 0.8
                 }} 
               />
             </TouchableOpacity>
-            {isEditing && (
-              <CustomText fontSize='small' style={{ marginTop: 10, opacity: 0.7 }}>
-                Tap to change color
-              </CustomText>
-            )}
+            <CustomText primary bold fontSize='small' style={{ marginTop: 10, opacity: 0.7 }}>
+              Tap to change color
+            </CustomText>
           </View>
         </View>
 
@@ -289,17 +289,41 @@ const Profile = () => {
           <CustomText  bold style={{ marginBottom: 15 }}>
             Display Name
           </CustomText>
-          {isEditing ? (
-            <CustomInput
-              value={tempUserName}
-              onChangeText={setTempUserName}
-              placeholder="Enter display name"
-              maxLength={20}
-            />
+          {editingName ? (
+            <View>
+              <CustomInput
+                value={tempUserName}
+                onChangeText={setTempUserName}
+                placeholder="Enter display name"
+                maxLength={20}
+              />
+              <View style={styles.editButtons}>
+                <CustomButton
+                  title="Save"
+                  onPress={handleSaveName}
+                  style={styles.smallButton}
+                />
+                <CustomButton
+                  title="Cancel"
+                  onPress={() => {
+                    setTempUserName(userName)
+                    setEditingName(false)
+                  }}
+                  style={styles.smallButton}
+                />
+              </View>
+            </View>
           ) : (
-            <CustomText fontSize='normal' style={{ opacity: 0.8 }}>
-              {userName || 'Not set'}
-            </CustomText>
+            <View>
+              <TouchableOpacity onPress={() => setEditingName(true)}>
+                <CustomText fontSize='normal' style={{ opacity: 0.8 }}>
+                  {userName || 'Tap to set name'}
+                </CustomText>
+              </TouchableOpacity>
+              <CustomText fontSize='small' primary bold style={{ marginTop: 8, opacity: 0.6 }}>
+                Tap to edit display name
+              </CustomText>
+            </View>
           )}
         </View>
 
@@ -308,18 +332,42 @@ const Profile = () => {
           <CustomText  bold style={{ marginBottom: 15 }}>
             Daily Word Goal
           </CustomText>
-          {isEditing ? (
-            <CustomInput
-              value={tempDailyWordGoal}
-              onChangeText={setTempDailyWordGoal}
-              placeholder="Enter daily goal (1-10)"
-              keyboardType="number-pad"
-              maxLength={1}
-            />
+          {editingGoal ? (
+            <View>
+              <CustomInput
+                value={tempDailyWordGoal}
+                onChangeText={setTempDailyWordGoal}
+                placeholder="Enter daily goal (1-10)"
+                keyboardType="number-pad"
+                maxLength={1}
+              />
+              <View style={styles.editButtons}>
+                <CustomButton
+                  title="Save"
+                  onPress={handleSaveGoal}
+                  style={styles.smallButton}
+                />
+                <CustomButton
+                  title="Cancel"
+                  onPress={() => {
+                    setTempDailyWordGoal(dailyWordGoal.toString())
+                    setEditingGoal(false)
+                  }}
+                  style={styles.smallButton}
+                />
+              </View>
+            </View>
           ) : (
-            <CustomText fontSize='normal' style={{ opacity: 0.8 }}>
-              {dailyWordGoal} words per day
-            </CustomText>
+            <View>
+              <TouchableOpacity onPress={() => setEditingGoal(true)}>
+                <CustomText fontSize='normal' style={{ opacity: 0.8 }}>
+                  {dailyWordGoal} words per day
+                </CustomText>
+              </TouchableOpacity>
+              <CustomText fontSize='small' primary bold style={{ marginTop: 8, opacity: 0.6 }}>
+                Tap to edit daily word goal
+              </CustomText>
+            </View>
           )}
         </View>
 
@@ -335,7 +383,6 @@ const Profile = () => {
                 title={topic.charAt(0).toUpperCase() + topic.slice(1)}
                 type={tempWordTopics.includes(topic) ? 'solid' : 'outline'}
                 onPress={() => toggleTopic(topic)}
-                disabled={!isEditing}
                 containerStyle={{ marginVertical: 5, marginRight:10 }}
                 buttonStyle={{
                   backgroundColor: tempWordTopics.includes(topic)
@@ -353,11 +400,9 @@ const Profile = () => {
               />
             ))}
           </View>
-          {!isEditing && (
-            <CustomText fontSize='small' style={{ marginTop: 10, opacity: 0.7 }}>
-              Tap "Edit Profile" to change topics
-            </CustomText>
-          )}
+          <CustomText primary bold fontSize='small' style={{ marginTop: 10, opacity: 0.7 }}>
+            Tap topics to select/deselect
+          </CustomText>
         </View>
 
         {/* Join Date Section */}
@@ -394,52 +439,16 @@ const Profile = () => {
           />
         </View>
 
-        {/* Action Buttons */}
-        <View style={styles.buttonContainer}>
-          {isEditing ? (
-            <View style={styles.editButtons}>
-              <CustomButton
-                title="Save"
-                onPress={handleSave}
-                style={styles.button}
-              />
-              <CustomButton
-                title="Cancel"
-                onPress={handleCancel}
-                style={styles.button}
-              />
-            </View>
-          ) : (
-            <CustomButton
-              title="Edit Profile"
-              onPress={() => setIsEditing(true)}
-              style={styles.button}
-            />
-          )}
-        </View>
-
-        {/* Save Changes Button - Shows when there are unsaved changes */}
-        {!isEditing && hasUnsavedChanges && (
-          <View style={styles.buttonContainer}>
-            <CustomButton
-              title="Save Changes"
-              onPress={handleSave}
-              style={{ 
-                width: '100%', 
-                padding: 15, 
-                borderRadius: 8, 
-                backgroundColor: colors.primary 
-              }}
-            />
-          </View>
-        )}
-
         {/* Color Picker Modal */}
         <ColorPickerModal
           visible={showColorPicker}
-          onClose={() => setShowColorPicker(false)}
+          onClose={() => {
+            // Only save and update theme when user confirms by pressing Done
+            setAvatarColor(tempAvatarColor)
+            setShowColorPicker(false)
+          }}
           onColorSelect={setTempAvatarColor}
-          initialColor={tempAvatarColor}
+          initialColor={avatarColor}
         />
       </ScrollView>
 
@@ -557,6 +566,8 @@ const Profile = () => {
   )
 }
 
+export default Profile
+
 const styles = StyleSheet.create({
   topRow: {
     width: "100%",
@@ -584,22 +595,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  buttonContainer: {
-    width: '100%',
+  editButtons: {
+    flexDirection: 'column',
+    gap: 10,
     marginTop: 10,
   },
-  editButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  button: {
-    width: '48%',
-  },
-  deleteButton: {
+  smallButton: {
     width: '100%',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
   },
   modalOverlay: {
     position: 'absolute',
@@ -665,6 +667,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 })
 
-export default Profile
+
