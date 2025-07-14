@@ -2,7 +2,7 @@ import { getAllLists } from '@/database/wordCache';
 import { Word } from '@/types/word';
 import { useTheme } from '@react-navigation/native';
 import { CheckBox } from '@rneui/base';
-import React, { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import CustomButton from './CustomButton';
 import CustomInput from './CustomInput';
@@ -36,36 +36,18 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
   const [selectedWords, setSelectedWords] = useState<Word[]>([]);
   const [availableWords, setAvailableWords] = useState<Word[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'learned' | 'lists' | 'custom'>('learned');
+  const [activeTab, setActiveTab] = useState<'learned' | 'custom'>('learned');
   const [customWord, setCustomWord] = useState('');
   const [customDefinition, setCustomDefinition] = useState('');
   const [customExample, setCustomExample] = useState('');
   const [customPartOfSpeech, setCustomPartOfSpeech] = useState('');
 
-  // Use refs to track previous values and prevent unnecessary re-renders
+  // Refs to track previous values
   const prevVisibleRef = useRef(visible);
   const prevExcludeListNameRef = useRef(excludeListName);
   const prevTargetListNameRef = useRef(targetListName);
 
-  // Load available words when modal opens or when dependencies meaningfully change
-  useEffect(() => {
-    const shouldReload = visible && (
-      !prevVisibleRef.current || // Modal just opened
-      excludeListName !== prevExcludeListNameRef.current || // excludeListName changed
-      (targetListName && targetListName !== prevTargetListNameRef.current) // targetListName changed (only if not empty)
-    );
-
-    if (shouldReload) {
-      loadAvailableWords();
-    }
-
-    // Update refs
-    prevVisibleRef.current = visible;
-    prevExcludeListNameRef.current = excludeListName;
-    prevTargetListNameRef.current = targetListName;
-  }, [visible, excludeListName, targetListName]);
-
-  const loadAvailableWords = async () => {
+  const loadAvailableWords = useCallback(async () => {
     setLoading(true);
     try {
       const allLists = await getAllLists();
@@ -100,7 +82,29 @@ const WordSelectorModal: React.FC<WordSelectorModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [targetListName, excludeListName]);
+
+  // Load available words when modal opens or when dependencies meaningfully change
+  useEffect(() => {
+    if (visible && !prevVisibleRef.current) {
+      // Modal just opened
+      setSelectedWords([]);
+      setCustomWord('');
+      setCustomDefinition('');
+      setCustomExample('');
+      setCustomPartOfSpeech('');
+      setActiveTab('learned');
+      
+      if (allowCustomWords) {
+        loadAvailableWords();
+      }
+    }
+
+    // Update refs
+    prevVisibleRef.current = visible;
+    prevExcludeListNameRef.current = excludeListName;
+    prevTargetListNameRef.current = targetListName;
+  }, [visible, excludeListName, targetListName, loadAvailableWords, allowCustomWords]);
 
   const toggleWordSelection = (word: Word) => {
     setSelectedWords(prev => {

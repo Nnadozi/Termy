@@ -1,14 +1,11 @@
-During testing:
-- Update db (difficulty system?)
-- Switch to local db
-- Cursor through the codebase (last)
-
 Future:
 - rebuild for expo store review (add rate later)
-- Improve UI
 - Handle edge cases
+- Difficulty system (length, syllable count, frequency, WordNet, Google N-gram)
+- Migrate to local db if needed
 - add ads and get real ad ids (and add more)
 - Marketing URL for ads
+- Improve UI
 - inline word definitions
 - app tutorial
 - different voices

@@ -20,7 +20,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { isDark, colors } = useThemeStore(); 
-  const { notificationsEnabled, dailyWordNotificationTime, isOnboardingComplete, resetDailyCompletion } = useUserStore()
+  const { notificationsEnabled, isOnboardingComplete, resetDailyCompletion } = useUserStore()
   const [loaded, error] = useFonts({
     'DMSans-Regular': require('../assets/fonts/DMSans-Regular.ttf'),
     'DMSans-Bold': require('../assets/fonts/DMSans-Bold.ttf'),
@@ -29,7 +29,7 @@ export default function RootLayout() {
 
   useNotificationNavigation();
 
-
+  // Initialize notifications
   useEffect(() => {
     const initNotifications = async () => {
       if (isOnboardingComplete) {
@@ -48,9 +48,10 @@ export default function RootLayout() {
     initNotifications();
   }, [isOnboardingComplete]);
 
+  // Check daily reset
   useEffect(() => {
     const checkDailyReset = () => {
-      const { lastQuizDate, resetDailyCompletion } = useUserStore.getState();
+      const { lastQuizDate } = useUserStore.getState();
       const today = new Date().toISOString().split('T')[0];
       
       if (lastQuizDate && lastQuizDate !== today) {
@@ -62,16 +63,14 @@ export default function RootLayout() {
     checkDailyReset();
   }, [resetDailyCompletion]);
 
+  // Handle splash screen
   useEffect(() => {
     if (loaded || error) {
       SplashScreen.hideAsync();
     }
   }, [loaded, error]);
 
-  if (!loaded && !error) {
-    return null;
-  }
-
+  // Handle app state changes
   useEffect(() => {
     const handleAppStateChange = async (nextAppState: string) => {
       if (nextAppState === 'active') {
@@ -94,6 +93,7 @@ export default function RootLayout() {
     };
   }, [isOnboardingComplete, notificationsEnabled, resetDailyCompletion]);
 
+  // Initialize ads
   useEffect(() => {
     async function prepareAds() {
       if (Platform.OS !== 'ios') {
@@ -126,6 +126,10 @@ export default function RootLayout() {
   
     prepareAds();
   }, []);
+
+  if (!loaded && !error) {
+    return null;
+  }
 
   return (
     <>

@@ -12,7 +12,7 @@ import notificationService from '@/utils/notificationService'
 import { showToast } from '@/utils/ShowToast'
 import Constants from 'expo-constants'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Animated, Image, Platform, ScrollView, View } from 'react-native'
 import ConfettiCannon from 'react-native-confetti-cannon'
 
@@ -26,9 +26,8 @@ const Quiz = () => {
   const [score, setScore] = useState(0)
   const [quizCompleted, setQuizCompleted] = useState(false)
   const hasGenerated = useRef(false)
-  const {colors} = useThemeStore()
   const { isDark } = useThemeStore()
-  const { userName, updateQuizStats, dailyWordsCompletedToday } = useUserStore()
+  const { updateQuizStats, dailyWordsCompletedToday } = useUserStore()
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current
@@ -95,7 +94,7 @@ const Quiz = () => {
     }
   }
 
-  const handleQuizCompletion = async () => {
+  const handleQuizCompletion = useCallback(async () => {
     const percentage = Math.round((score / questions.length) * 100)
     const passed = percentage >= 80
     
@@ -118,13 +117,7 @@ const Quiz = () => {
     } else if (passed && dailyWordsCompletedToday) {
       showToast('Daily words already completed', 'info')
     }
-  }
-
-  const retakeQuiz = () => {
-    setCurrentQuestionIndex(0)
-    setScore(0)
-    setQuizCompleted(false)
-  }
+  }, [score, questions.length, dailyWordsCompletedToday, wordsArray, updateQuizStats])
 
   const retryQuizGeneration = () => {
     hasGenerated.current = false
@@ -161,7 +154,7 @@ const Quiz = () => {
         }),
       ]).start()
     }
-  }, [quizCompleted])
+  }, [quizCompleted, fadeAnim, scaleAnim, slideAnim, handleQuizCompletion])
 
   if (loading) {
     return (
@@ -185,7 +178,7 @@ const Quiz = () => {
           )}
           <CustomText fontSize='large' bold>Creating questions...</CustomText>
           <CustomText fontSize='normal' style={{opacity: 0.7 }}>
-            It's time to test your knowledge!
+            It&apos;s time to test your knowledge!
           </CustomText>
         </View>
       </Page>
@@ -266,7 +259,7 @@ const Quiz = () => {
             </CustomText>
             <CustomText fontSize="normal"  textAlign="center" style={{ marginBottom:"3%" }}>
               {passed 
-                ? 'Great job! You\'ve successfully learned these words.'
+                ? 'Great job! You&apos;ve successfully learned these words.'
                 : 'You need 80% to pass. Keep practicing!'
               }
             </CustomText>

@@ -17,7 +17,7 @@ import PagerView from 'react-native-pager-view'
 
 
 const Daily = () => {
-  const { userName, wordTopics, dailyWordGoal, dailyWordsCompletedToday, currentStreak, totalWordsLearned, dailyWordNotificationTime } = useUserStore()
+  const { userName, wordTopics, dailyWordGoal, dailyWordsCompletedToday, currentStreak, dailyWordNotificationTime } = useUserStore()
   const [dailyVocab, setDailyVocab] = useState<Word[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -116,29 +116,6 @@ const Daily = () => {
     }
   }, [wordTopics, dailyWordGoal])
 
-  const refreshWords = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      console.log('Daily: Manually refreshing words')
-      await clearCachedWords()
-      // Check internet connectivity before fetching from Supabase
-      await withInternetCheck(async () => {
-        const words = await getDailyWords(wordTopics, dailyWordGoal)
-        console.log('Daily: Refreshed words:', words.length, 'words')
-        console.log('Daily: Word categories:', words.map(w => w.category))
-        setDailyVocab(words)
-        await cacheDailyWords(words)
-        lastPreferences.current = { topics: [...wordTopics], goal: dailyWordGoal }
-      });
-    } catch (error) {
-      console.error('Error refreshing words:', error)
-      setError(error instanceof Error ? error.message : 'Failed to refresh words')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const retryLoadWords = () => {
     // Reset and retry loading
     setDailyVocab([])
@@ -159,7 +136,7 @@ const Daily = () => {
     <Page style={{ justifyContent: "flex-start", alignItems: "flex-start" }}>
       <View style={{ width: "100%", marginBottom: "3%" }}>
         <CustomText textAlign='center' fontSize='XL' bold>Hi, {userName}</CustomText>
-        <CustomText textAlign='center' primary >Here's your daily vocabulary</CustomText>
+        <CustomText textAlign='center' primary >Here&apos;s your daily vocabulary</CustomText>
         {currentStreak > 0 && (
           <CustomText textAlign='center' fontSize='small' style={{ marginTop: "1%" }}>
             🔥 {currentStreak} day streak 
@@ -179,7 +156,7 @@ const Daily = () => {
             Daily Words Completed!
           </CustomText>
           <CustomText style={{marginTop:"2%",marginBottom:"3%"}} textAlign='center' fontSize='normal'>
-            You've successfully learned all your daily words.
+            You&apos;ve successfully learned all your daily words.
             New words available in:
           </CustomText>
           <View style={{borderColor:colors.primary,backgroundColor:colors.background,padding:"5%",borderRadius:10,borderWidth:3}}>
@@ -198,7 +175,7 @@ const Daily = () => {
           ))}
           <View style={{ flex: 1, width:"100%", justifyContent:"center", alignItems: "center" }}>
             <CustomText fontSize='large' bold>Time for a Quiz!</CustomText>
-            <CustomText>You've learned all your words for today!</CustomText>
+            <CustomText>You&apos;ve learned all your words for today!</CustomText>
             <CustomButton marginVertical={10} width={"80%"} title='Start Quiz' 
             onPress={() => router.push({pathname:"/Quiz", params:{words:JSON.stringify(dailyVocab)}})} 
             />

@@ -211,7 +211,7 @@ const DailyWordCard = ({ word, index, total, scrollToNext, scrollToPrevious, cus
           <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
             <CustomText fontSize="large" bold>Add to Lists</CustomText>
             <CustomText style={{marginBottom:"2%"}}>
-              Select lists to add "{word.word}"
+              Select lists to add &quot;{word.word}&quot;
             </CustomText>
             <CustomText fontSize="small" style={{marginBottom:"5%", opacity: 0.7}}>
               {selectedLists.length} list{selectedLists.length !== 1 ? 's' : ''} selected

@@ -6,6 +6,7 @@ import CustomText from "@/components/CustomText";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Page from "@/components/Page";
 import useUserStore, { allWordTopics, resetUserStore } from "@/stores/userStore";
+import { showToast } from '@/utils/ShowToast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '@react-navigation/native';
 import { Avatar, Chip } from "@rneui/base";
@@ -72,6 +73,7 @@ const Profile = () => {
 
   const handleSaveTopics = () => {
     setWordTopics(tempWordTopics)
+    showToast('Topics saved!', 'success')
   }
 
   const handleSaveAvatar = () => {
@@ -373,9 +375,16 @@ const Profile = () => {
 
         {/* Topics Section */}
         <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <CustomText  bold style={{ marginBottom: 15 }}>
-            Learning Topics
-          </CustomText>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+            <CustomText bold>
+              Learning Topics
+            </CustomText>
+            {JSON.stringify(tempWordTopics) !== JSON.stringify(wordTopics) && (
+              <CustomText fontSize="small" primary bold>
+                • Modified
+              </CustomText>
+            )}
+          </View>
           <View style={styles.topicsContainer}>
             {allWordTopics.map((topic) => (
               <Chip
@@ -403,6 +412,24 @@ const Profile = () => {
           <CustomText primary bold fontSize='small' style={{ marginTop: 10, opacity: 0.7 }}>
             Tap topics to select/deselect
           </CustomText>
+          
+          {/* Save button for topics */}
+          {JSON.stringify(tempWordTopics) !== JSON.stringify(wordTopics) && (
+            <View style={styles.editButtons}>
+              <CustomButton
+                title="Save Topics"
+                onPress={handleSaveTopics}
+                style={styles.smallButton}
+              />
+              <CustomButton
+                title="Cancel"
+                onPress={() => {
+                  setTempWordTopics([...wordTopics])
+                }}
+                style={styles.smallButton}
+              />
+            </View>
+          )}
         </View>
 
         {/* Join Date Section */}
@@ -424,7 +451,7 @@ const Profile = () => {
             Danger Zone
           </CustomText>
           <CustomText fontSize='normal' style={{ marginBottom: 20, opacity: 0.8 }}>
-            This action will permanently delete your profile and all learning progress. Custom lists will be deleted, but the default "Learned" list will be preserved and emptied. This cannot be undone.
+            This action will permanently delete your profile and all learning progress. Custom lists will be deleted, but the default &quot;Learned&quot; list will be preserved and emptied. This cannot be undone.
           </CustomText>
           <CustomButton
             title="Delete Profile"
@@ -475,7 +502,7 @@ const Profile = () => {
                   <CustomText fontSize="small" bold style={{ color: colors.background }}>1</CustomText>
                 </View>
                 <CustomText fontSize='normal' bold style={{ marginLeft: 12 }}>
-                  Type "DELETE" to confirm
+                  Type &quot;DELETE&quot; to confirm
                 </CustomText>
               </View>
               <CustomInput
@@ -524,7 +551,7 @@ const Profile = () => {
               <View style={[styles.helpText, { borderTopColor: colors.border }]}>
                 <CustomIcon name="info" size={16} primary style={{ marginRight: 8 }} />
                 <CustomText fontSize='small' style={{ opacity: 0.7, flex: 1 }}>
-                  {deleteConfirmationText !== 'DELETE' && 'Please type "DELETE" exactly'}
+                  {deleteConfirmationText !== 'DELETE' && 'Please type &quot;DELETE&quot; exactly'}
                   {deleteConfirmationText === 'DELETE' && (!userName || usernameConfirmation.trim() !== userName.trim()) && 'Please enter your username correctly'}
                 </CustomText>
               </View>

@@ -10,7 +10,7 @@ import { addWordsToList, getList } from "@/database/wordCache"
 import { List } from "@/types/list"
 import { Word } from "@/types/word"
 import { router, useLocalSearchParams } from "expo-router"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { StyleSheet, View } from "react-native"
 import PagerView from "react-native-pager-view"
 
@@ -24,7 +24,7 @@ const ListScreen = () => {
     const [search, setSearch] = useState("")
     const [currentPage, setCurrentPage] = useState(0)
     
-    const fetchList = async () => {
+    const fetchList = useCallback(async () => {
         setLoading(true)
         setError(null)
         try {
@@ -40,11 +40,11 @@ const ListScreen = () => {
         } finally {
             setLoading(false)
         }
-    }
+    }, [id])
 
     useEffect(() => {
         fetchList()
-    }, [id])
+    }, [fetchList])
 
     const handleWordsAdded = async (words: Word[]) => {
         setAddingWords(true)
