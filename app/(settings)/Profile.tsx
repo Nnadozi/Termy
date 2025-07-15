@@ -456,13 +456,7 @@ const Profile = () => {
           <CustomButton
             title="Delete Profile"
             onPress={initiateDeleteProfile}
-            style={{ 
-              width: '100%', 
-              padding: 15, 
-              borderRadius: 8, 
-              marginBottom: 10, 
-              backgroundColor: '#FF4444' 
-            }}
+            width={"100%"}
           />
         </View>
 
@@ -562,17 +556,12 @@ const Profile = () => {
               <CustomButton
                 title="Cancel"
                 onPress={cancelDeleteProfile}
-                style={{
-                  ...styles.modalButton,
-                  backgroundColor: colors.border
-                }}
               />
               <CustomButton
                 title={isDeleting ? "Deleting..." : "Confirm Deletion"}
                 onPress={confirmDeleteProfile}
                 disabled={isDeleting || deleteConfirmationText.trim() !== 'DELETE' || !userName || usernameConfirmation.trim() !== userName.trim()}
                 style={{
-                  ...styles.modalButton,
                   backgroundColor: (deleteConfirmationText.trim() === 'DELETE' && userName && usernameConfirmation.trim() === userName.trim()) ? '#FF4444' : '#CCCCCC',
                   opacity: (deleteConfirmationText.trim() === 'DELETE' && userName && usernameConfirmation.trim() === userName.trim()) ? 1 : 0.6
                 }}

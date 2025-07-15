@@ -13,7 +13,7 @@ import { showToast } from '@/utils/ShowToast'
 import Constants from 'expo-constants'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Animated, Image, Platform, ScrollView, View } from 'react-native'
+import { ActivityIndicator, Alert, Animated, Image, Platform, ScrollView, View } from 'react-native'
 import ConfettiCannon from 'react-native-confetti-cannon'
 
 const Quiz = () => {
@@ -280,16 +280,54 @@ const Quiz = () => {
     )
   }
 
+  const handleExitQuiz = () => {
+    Alert.alert(
+      "Exit Quiz",
+      "Are you sure you want to exit? Your progress will be lost.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Exit",
+          style: "destructive",
+          onPress: () => router.replace('/(main)/Daily')
+        }
+      ]
+    )
+  }
+
   return (
     <Page>
-      {questions.length > 0 && (
-        <QuizQuestion
-          question={questions[currentQuestionIndex]}
-          questionNumber={currentQuestionIndex + 1}
-          totalQuestions={questions.length}
-          onAnswer={handleAnswer}
-        />
-      )}
+      <View style={{ flex: 1, width: '100%' }}>
+        {/* Header with exit button */}
+        <View style={{ 
+          flexDirection: 'row', 
+          justifyContent: 'flex-end', 
+          alignItems: 'center',
+          paddingHorizontal: 20,
+          paddingTop: 10
+        }}>
+          <CustomIcon 
+            name="x" 
+            type="feather" 
+            size={25} 
+            color={isDark ? '#FF6A00' : '#FF6A00'}
+            onPress={handleExitQuiz}
+          />
+        </View>
+
+        {/* Quiz content */}
+        {questions.length > 0 && (
+          <QuizQuestion
+            question={questions[currentQuestionIndex]}
+            questionNumber={currentQuestionIndex + 1}
+            totalQuestions={questions.length}
+            onAnswer={handleAnswer}
+          />
+        )}
+      </View>
     </Page>
   )
 }

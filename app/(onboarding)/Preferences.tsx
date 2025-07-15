@@ -18,7 +18,7 @@ const Preferences = () => {
   } = useUserStore()
   
   const [goalValue, setGoalValue] = useState((dailyWordGoal ?? 3).toString())
-  const { mode, setThemeMode, colors } = useThemeStore();
+  const { mode, setThemeMode, colors, isDark } = useThemeStore();
   const [selectedTopics, setSelectedTopics] = useState<string[]>(wordTopics || ["General"]);
   
   useEffect(() => {
@@ -62,7 +62,7 @@ const Preferences = () => {
               textStyle={{color: colors.colors.text, fontFamily: "DMSans-Regular"}}
               selectedButtonStyle={{backgroundColor: colors.colors.primary}}
               selectedTextStyle={{color: colors.colors.background}}
-              selectedIndex={mode === "dark" ? 1 : 0}
+              selectedIndex={mode === "dark" || (mode === "system" && isDark) ? 1 : 0}
               onPress={(index) => setThemeMode(index === 0 ? "light" : "dark")}
               containerStyle={{width: "40%", borderWidth: 1, borderColor: colors.colors.border, marginRight:"0%"}}
             />

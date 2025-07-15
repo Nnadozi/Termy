@@ -5,14 +5,11 @@ export const CustomLightTheme = {
   colors: {
     ...DefaultTheme.colors,
     primary: '#FF6A00',      
-    background: '#FFFFFF',
-    card: '#F2F2F7',
-    text: '#000000',
-    border: '#C6C6C8',
-    notification: '#FF3B30',
-    // Add custom colors
-    success: '#34C759',
-    warning: '#FF9500',
+    background: 'rgb(245, 247, 250)',
+    card: 'rgb(255, 255, 255)',
+    text: 'rgb(40, 44, 52)',
+    border: 'rgb(200, 205, 210)',
+    notification: 'rgb(255, 120, 80)'
   },
 };
 
@@ -21,10 +18,10 @@ export const CustomDarkTheme = {
   colors: {
     ...DarkTheme.colors,
     primary: '#FF6A00',
-    background: '#000000',
-    card: '#1C1C1E',
-    text: '#FFFFFF',
-    border: '#38383A',
-    notification: '#FF453A',
+    background: 'rgb(18, 22, 28)',
+    card: 'rgb(28, 32, 38)',
+    text: 'rgb(229, 229, 231)',
+    border: 'rgb(39, 45, 51)',
+    notification: 'rgb(255, 100, 70)'
   },
 };

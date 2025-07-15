@@ -21,7 +21,7 @@ const Settings = () => {
     { key: "user", value: "Profile", type: "antdesign", onPress: () => {router.push("/(settings)/Profile")} },
     { key: "palette", value: "Appearance", type: "ionicons", onPress: () => setAppearanceModalVisible(true) },
     { key: "notifications", value: "Notifications", type: "ionicon", onPress: () => router.push("/(settings)/NotificationSettings") },
-    { key: "email", value: "Feedback & Support", type: "fontiso", onPress: () => {Linking.openURL("mailto:chikaosro@gmail.com")} },
+    { key: "message-circle", value: "Feedback & Support", type: "feather", onPress: () => router.push("/(settings)/Feedback") },
     //{ key: "star", value: "Rate", type: "ionicons", onPress: () => { Linking.openURL("https://play.google.com/store/apps/details?id=com.nnadozi.termy&showAllReviews=true&hl=en-US&ah=iNJ77HDtA-O4MUoQipJkv3eDTP8&pli=1") } },
     { key: "shield", value: "Privacy Policy", type: "feather", onPress: () => { Linking.openURL("https://www.termsfeed.com/live/bfc3acad-1c4a-476e-8e39-6f0becf8e3ad") } },
     { key: "information-circle", value: "Version", type: "ionicon", onPress: () => {} },

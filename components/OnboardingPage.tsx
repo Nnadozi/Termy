@@ -41,6 +41,7 @@ const OnboardingPage = ({children, progress, title, subTitle, nextPage, style, d
         <View style={styles.bottomPortion}>
             <CustomButton 
               disabled={disableNext} 
+              width={"90%"}
               title={progress === 1 ? 'Lets Go' : 'Next'} 
               onPress={async () => {
                 if (customOnPress) {
