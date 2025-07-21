@@ -87,9 +87,8 @@ const ListScreen = () => {
             <View style={styles.topRow}>
                 <CustomIcon name="chevron-left"  onPress={() => router.back()}     />
                 <View style={styles.topRowText}>
-                    <CustomText  textAlign="center" fontSize="large" bold>{list?.name}</CustomText>
-                    {list?.description && <CustomText numberOfLines={2} fontSize="small" textAlign="center">{list?.description}</CustomText>}
-                </View>
+                    <CustomText numberOfLines={1}  textAlign="center" bold fontSize="large">{list?.name}</CustomText>
+                </View> 
                 {list?.name !== "Learned" && (
                     <AddWordButton
                         onWordsSelected={handleWordsAdded}

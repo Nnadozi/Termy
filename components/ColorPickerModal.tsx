@@ -1,4 +1,4 @@
-import React from 'react';
+import { useTheme } from '@react-navigation/native';
 import { Dimensions, Modal, StyleSheet, View } from 'react-native';
 import ColorPicker from 'react-native-wheel-color-picker';
 import CustomButton from './CustomButton';
@@ -12,11 +12,12 @@ interface ColorPickerModalProps {
 }
 
 const ColorPickerModal = ({ visible, onClose, onColorSelect, initialColor = '#000000' }: ColorPickerModalProps) => {
+    const {colors} = useTheme();
     return (
         <Modal visible={visible} animationType='fade' transparent>
             <View style={styles.modalContainer}>
-                <View style={styles.pickerContainer}>
-                    <CustomText bold fontSize="large" style={styles.title}>Choose Your Color</CustomText>
+                <View style={[styles.pickerContainer,{backgroundColor: colors.card, borderColor: colors.border}]}>
+                    <CustomText bold fontSize="large">Choose Your Color</CustomText>
                     <View style={styles.pickerWrapper}>
                         <ColorPicker 
                             color={initialColor}
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.65)',
     },
     pickerContainer: {
         backgroundColor: 'white',
@@ -54,6 +55,7 @@ const styles = StyleSheet.create({
         padding: 20,
         width: '90%',
         alignItems: 'center',
+        borderWidth: 1
     },
     title: {
         marginBottom: 20,

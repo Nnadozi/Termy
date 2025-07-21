@@ -545,7 +545,7 @@ const Profile = () => {
               <View style={[styles.helpText, { borderTopColor: colors.border }]}>
                 <CustomIcon name="info" size={16} primary style={{ marginRight: 8 }} />
                 <CustomText fontSize='small' style={{ opacity: 0.7, flex: 1 }}>
-                  {deleteConfirmationText !== 'DELETE' && 'Please type &quot;DELETE&quot; exactly'}
+                  {deleteConfirmationText !== 'DELETE' && 'Please type DELETE exactly'}
                   {deleteConfirmationText === 'DELETE' && (!userName || usernameConfirmation.trim() !== userName.trim()) && 'Please enter your username correctly'}
                 </CustomText>
               </View>

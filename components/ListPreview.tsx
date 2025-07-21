@@ -151,7 +151,6 @@ const styles = StyleSheet.create({
     bookTitle: {
         flex: 1,
         marginRight: 12,
-        lineHeight: 22,
     },
     deleteContainer: {
         marginTop: 2,
@@ -167,6 +166,7 @@ const styles = StyleSheet.create({
         opacity: 0.9,
         lineHeight: 16,
         marginBottom: 10,
+        marginTop: 5,
     },
     footerRow: {
         flexDirection: 'row',

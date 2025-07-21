@@ -85,26 +85,19 @@ const NotificationsSetup = () => {
             <>
               <CustomIcon name="notifications" style={{marginBottom: "3%"}} size={125} primary/>
               <CustomText primary fontSize="large" bold textAlign="center">Enable Notifications</CustomText>
-              <CustomText textAlign="center" opacity={0.5}>Know when your daily words are ready</CustomText>
+              <CustomText textAlign="center" gray>You can skip this and enable notifications later in Settings</CustomText>
               <CustomText 
                 textAlign="center" bold
                 primary fontSize="small" style={{marginTop: "3%"}}
                 onPress={handleEnableNotifications}>
                 Tap here to enable 
               </CustomText>
-              <CustomText 
-                textAlign="center" 
-                fontSize="small" 
-                opacity={0.7} 
-                style={{marginTop: "5%"}}>
-                You can skip this and enable notifications later in Settings
-              </CustomText>
             </>
           ) : (
             <>           
               {/* Time Picker */}
               <View style={styles.timePickerContainer}>
-                <CustomText bold style={styles.timePickerLabel}>Notification Time</CustomText>
+              
                 
                 <TouchableOpacity 
                   style={{
@@ -133,8 +126,8 @@ const NotificationsSetup = () => {
                   />
                 )}
 
-                <CustomText opacity={0.7} style={styles.currentTime}>
-                  Set for: <CustomText bold>{formatTimeForDisplay(dailyWordNotificationTime)}</CustomText>
+                <CustomText primary style={styles.currentTime}>
+                  Notification set for: <CustomText bold primary>{formatTimeForDisplay(dailyWordNotificationTime)}</CustomText>
                 </CustomText>
               </View>
 
@@ -173,7 +166,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   timePickerButton: {
-    padding:"8%",
+    padding:30,
     borderRadius: 15,
     borderWidth: 1,
     alignItems: "center",

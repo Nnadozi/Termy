@@ -5,15 +5,10 @@ import Page from '@/components/Page';
 import { useTheme } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { useRef, useState } from 'react';
-import { Linking, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { BannerAd, useForeground } from 'react-native-google-mobile-ads';
+import { useState } from 'react';
+import { Linking, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const Settings = () => {
-  const bannerRef = useRef<BannerAd>(null);
-  useForeground(() => {
-    Platform.OS === 'ios' && bannerRef.current?.load();
-  });
   const [appearanceModalVisible, setAppearanceModalVisible] = useState(false);
   const { colors } = useTheme();
 
@@ -78,10 +73,3 @@ const styles = StyleSheet.create({
     paddingVertical: 20
   },
 });
-
-/**
- * 
- *       <View style={{ justifyContent: "center", alignItems: "center" ,alignSelf:"center"}}>
-        <BannerAd unitId={TestIds.BANNER} size={BannerAdSize.BANNER} ref={bannerRef} />
-      </View>
- */

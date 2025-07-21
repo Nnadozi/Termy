@@ -22,19 +22,12 @@ export default {
         ? process.env.GOOGLE_SERVICES_DEV ??  './google-services-dev.json'
         : process.env.GOOGLE_SERVICES_PROD ??  './google-services-prod.json'
     },
-    plugins: [
-      ...appJson.expo.plugins.filter(plugin => 
-        Array.isArray(plugin) ? plugin[0] !== 'react-native-google-mobile-ads' : plugin !== 'react-native-google-mobile-ads'
-      ),
-      [
-        "react-native-google-mobile-ads",
-        {
-          "androidAppId": process.env.ADMOB_ANDROID_APP_ID,
-          "iosAppId": process.env.ADMOB_IOS_APP_ID,
-          "userTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
-        }
-      ]
-    ],
+    updates: {
+      url: "https://u.expo.dev/3f69e2d6-5620-4b05-a7c5-c9771c732a84"
+    },
+    runtimeVersion: {
+      policy: "appVersion"
+    },
     extra: {
       ...appJson.expo?.extra,
       router: {},

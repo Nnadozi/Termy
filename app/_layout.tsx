@@ -8,10 +8,8 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from "expo-status-bar";
-import { getTrackingPermissionsAsync, requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 import { useEffect } from "react";
-import { AppState, Platform } from "react-native";
-import mobileAds, { MaxAdContentRating } from 'react-native-google-mobile-ads';
+import { AppState } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from 'react-native-toast-message';
 import "../global.css";
@@ -92,40 +90,6 @@ export default function RootLayout() {
       subscription?.remove();
     };
   }, [isOnboardingComplete, notificationsEnabled, resetDailyCompletion]);
-
-  // Initialize ads
-  useEffect(() => {
-    async function prepareAds() {
-      if (Platform.OS !== 'ios') {
-        setupAds(); 
-        return;
-      }
-      const { status } = await getTrackingPermissionsAsync();
-      if (status === 'granted') {
-        console.log(`Tracking already granted: ${status}`);
-        setupAds();
-      } else {
-        const { status: newStatus } = await requestTrackingPermissionsAsync();
-        console.log(`Tracking permission status: ${newStatus}`);
-        if (newStatus === 'granted') {
-          setupAds();
-        }
-      }
-    }
-    function setupAds() {
-      mobileAds()
-        .setRequestConfiguration({
-          maxAdContentRating: MaxAdContentRating.T,
-          tagForUnderAgeOfConsent: true,
-        })
-        .then(() => {
-          console.log("Ad setup done!");
-          mobileAds().initialize();
-        });
-    }
-  
-    prepareAds();
-  }, []);
 
   if (!loaded && !error) {
     return null;

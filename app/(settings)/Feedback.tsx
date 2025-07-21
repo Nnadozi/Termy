@@ -127,7 +127,7 @@ const Feedback = () => {
             <CustomText fontSize="small" bold style={{ marginBottom: 5 }}>
               🐛 Bug Report
             </CustomText>
-            <CustomText fontSize="small" opacity={0.7}>
+            <CustomText fontSize="small" gray>
               Something not working as expected? Let us know!
             </CustomText>
           </View>
@@ -136,8 +136,8 @@ const Feedback = () => {
             <CustomText fontSize="small" bold style={{ marginBottom: 5 }}>
               💡 Feature Request
             </CustomText>
-            <CustomText fontSize="small" opacity={0.7}>
-              Have an idea for a new feature? We'd love to hear it!
+            <CustomText fontSize="small" gray>
+              Have an idea for a new feature? Let us hear it!
             </CustomText>
           </View>
           
@@ -145,7 +145,7 @@ const Feedback = () => {
             <CustomText fontSize="small" bold style={{ marginBottom: 5 }}>
               ⭐ General Feedback
             </CustomText>
-            <CustomText fontSize="small" opacity={0.7}>
+            <CustomText fontSize="small" gray>
               Share your experience and help us improve Termy
             </CustomText>
           </View>

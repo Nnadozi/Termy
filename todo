@@ -1,10 +1,12 @@
+Before Launch:
+- Migrate to local db?
+- Difficulty system (length, syllable count, frequency, WordNet, Google N-gram)
+- Handle edge cases
+
 Future:
 - rebuild for expo store review (add rate later)
-- Handle edge cases
-- Difficulty system (length, syllable count, frequency, WordNet, Google N-gram)
-- Migrate to local db if needed
-- add ads and get real ad ids (and add more)
-- Marketing URL for ads
+- expo in-app-updates: https://github.com/SohelIslamImran/expo-in-app-updates?tab=readme-ov-file#examples
+- try and make new play console account
 - Improve UI
 - inline word definitions
 - app tutorial
@@ -12,13 +14,9 @@ Future:
 - gamification
 - new word categories (tech)
 - word filter insde lists (pos, category, etc)
-- Get rid of env local (Don't use EXPO_PUBLIC)
 - animations
-- find co maintainer
-- fix adbmob thing by 7/28/25
-- update target api for old apps by 8/31/25 (more ads?)
-  - Sumitt: Add more ads, fix iPad tilt issue, fix styles, edge functions?, env
-  - CellWise: Fix iPad tilt issue, fix styles
-- try and make new play console account
-- Make repos public?
-- cleaner feedback HTML
+
+LENV
+- EXPO_PUBLIC_SUPABASE_URL
+- EXPO_PUBLIC_SUPABASE_ANON_KEY
+

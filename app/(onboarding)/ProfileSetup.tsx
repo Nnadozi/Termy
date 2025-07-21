@@ -79,8 +79,8 @@ const ProfileSetup = () => {
               containerStyle={{ alignSelf: "center", backgroundColor: avatarColor }} 
             />
           </TouchableOpacity>
-          <CustomText textAlign='center' style={{marginTop:10}}>Tap above to change your avatar color</CustomText>
-          <CustomText textAlign='center' fontSize='small'>Choose wisely!</CustomText>
+          <CustomText primary textAlign='center' style={{marginTop:5}}>Tap above to change your avatar color</CustomText>
+          <CustomText textAlign='center' fontSize='small'>Choose wisely</CustomText>
         </View>
         
         <CustomInput
@@ -92,9 +92,7 @@ const ProfileSetup = () => {
           editable={!isLoading}
         />
         <View style={styles.rulesContainer}>
-          <CustomText>• No special characters</CustomText>
-          <CustomText>• No emojis</CustomText>
-          <CustomText>• No profanity</CustomText>
+          <CustomText fontSize='small'>No special characters or emojis</CustomText>
         </View>
       </ScrollView>
       <ColorPickerModal
@@ -120,7 +118,7 @@ const styles = StyleSheet.create({
   },
   rulesContainer: {
     gap: 10,
-    marginTop: 10
+    margin: 5
   }
 })
 

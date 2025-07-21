@@ -9,16 +9,10 @@ import { addWordsToList, createList, getAllLists } from "@/database/wordCache"
 import { Word } from "@/types/word"
 import { useTheme } from "@react-navigation/native"
 import { router } from "expo-router"
-import { useEffect, useRef, useState } from "react"
-import { Platform, StyleSheet, TouchableOpacity, View } from "react-native"
-import { BannerAd, useForeground } from 'react-native-google-mobile-ads'
+import { useEffect, useState } from "react"
+import { StyleSheet, TouchableOpacity, View } from "react-native"
 
 const CreateList = () => {
-    const bannerRef = useRef<BannerAd>(null);
-    useForeground(() => {
-      Platform.OS === 'ios' && bannerRef.current?.load();
-    });
-
     const [listName, setListName] = useState("")
     const [listDescription, setListDescription] = useState("")
     const [selectedWords, setSelectedWords] = useState<Word[]>([])
@@ -188,10 +182,3 @@ const styles = StyleSheet.create({
         borderRadius: 5
     }
 })
-
-/**
- * 
- *             <View style={{marginTop: "10%",alignSelf:"center"}}>
-                <BannerAd unitId={TestIds.BANNER} size={BannerAdSize.BANNER} ref={bannerRef} />
-            </View>
- */
